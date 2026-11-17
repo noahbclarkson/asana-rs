@@ -1,0 +1,16 @@
+# `ProjectBase.current_status` and `current_status_update` are not marked `readOnly`, so every
+# project request inherits them as writable objects. They are the latest status posted to the
+# project, which Asana sets when a status update is created (`POST /status_updates`); a project
+# request cannot write them. Unmarked, they also drag a writable copy of the status update, its
+# author, its project and everything those reach into every project request type.
+overlay: 1.0.0
+info:
+  title: A project's current status is read-only
+  version: 1.0.0
+actions:
+  - target: $.components.schemas.ProjectBase.allOf[1].properties.current_status.allOf[1]
+    update:
+      readOnly: true
+  - target: $.components.schemas.ProjectBase.allOf[1].properties.current_status_update.allOf[1]
+    update:
+      readOnly: true

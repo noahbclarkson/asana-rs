@@ -1,0 +1,27 @@
+# Custom field values on create and update requests are typed `string` upstream
+# (`additionalProperties: {type: string}`), but Asana takes the JSON value that matches the
+# field: a string for text, a number for a number, an enum option's GID for an enum, an array of
+# GIDs for a multi-enum or people field, a `{"date": ...}` or `{"date_time": ...}` object for a
+# date, and `null` to clear it. The map's values are therefore any JSON value. Asana's own field
+# descriptions say the same ("can be text, a number, etc.").
+overlay: 1.0.0
+info:
+  title: Custom field values are any JSON value
+  version: 1.0.0
+actions:
+  - target: $.components.schemas.TaskRequestBase.allOf[1].properties.custom_fields.additionalProperties.type
+    remove: true
+  - target: $.components.schemas.GoalUpdateRequest.allOf[1].properties.custom_fields.additionalProperties.type
+    remove: true
+  - target: $.components.schemas.PortfolioUpdateRequest.allOf[1].properties.custom_fields.additionalProperties.type
+    remove: true
+  - target: $.components.schemas.ProjectRequest.allOf[1].properties.custom_fields.additionalProperties.type
+    remove: true
+  - target: $.components.schemas.ProjectUpdateRequest.allOf[1].properties.custom_fields.additionalProperties.type
+    remove: true
+  - target: $.components.schemas.RecordItemRequest.allOf[1].properties.custom_fields.additionalProperties.type
+    remove: true
+  - target: $.components.schemas.RecordItemUpdateRequest.properties.custom_fields.additionalProperties.type
+    remove: true
+  - target: $.components.schemas.UserUpdateRequest.allOf[1].properties.custom_fields.additionalProperties.type
+    remove: true

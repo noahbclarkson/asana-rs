@@ -1,0 +1,37 @@
+# The add and remove followers and members requests type `followers` and `members` as one
+# `string`, with a comma-separated example, while their own descriptions say "an array of
+# strings identifying users" and Asana takes a JSON array. Typing them as arrays of strings lets
+# a caller pass several users without joining them by hand.
+overlay: 1.0.0
+info:
+  title: Followers and members are arrays
+  version: 1.0.0
+actions:
+  - target: $.components.schemas.AddFollowersRequest.properties.followers.example
+    remove: true
+  - target: $.components.schemas.AddFollowersRequest.properties.followers
+    update:
+      type: array
+      items:
+        type: string
+  - target: $.components.schemas.RemoveFollowersRequest.properties.followers.example
+    remove: true
+  - target: $.components.schemas.RemoveFollowersRequest.properties.followers
+    update:
+      type: array
+      items:
+        type: string
+  - target: $.components.schemas.AddMembersRequest.properties.members.example
+    remove: true
+  - target: $.components.schemas.AddMembersRequest.properties.members
+    update:
+      type: array
+      items:
+        type: string
+  - target: $.components.schemas.RemoveMembersRequest.properties.members.example
+    remove: true
+  - target: $.components.schemas.RemoveMembersRequest.properties.members
+    update:
+      type: array
+      items:
+        type: string

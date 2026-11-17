@@ -46,11 +46,36 @@ const OVERRIDES: &[(&str, &str)] = &[
     ("ErrorResponse", "ApiErrorBody"),
 ];
 
+/// Read shapes whose family the suffix rule gets wrong. Keep it sorted; say why.
+const FAMILY_OVERRIDES: &[(&str, &str)] = &[
+    // Has no suffix, but is the family `EnumOptionBase` names.
+    ("EnumOption", "EnumOption"),
+    // Both are `ProjectMembership` shapes; the suffix rule would leave `Compact` or `Normal` on.
+    ("PortfolioMembershipCompactResponse", "PortfolioMembership"),
+    ("ProjectMembershipCompactResponse", "ProjectMembership"),
+    ("ProjectMembershipNormalResponse", "ProjectMembership"),
+    // `UserBase` plus `email` and `photo`: still a user, not a `UserBase`.
+    ("UserBaseResponse", "User"),
+];
+
+/// Request shapes the suffix rule would read as resource families, because they end in `Base`.
+const WRITE_OVERRIDES: &[&str] = &["GoalRequestBase", "TaskRequestBase"];
+
 /// What the component schema called `schema` (for example `TaskCompact`) becomes.
 pub fn role_of(schema: &str) -> SchemaRole {
     if let Some((_, renamed)) = OVERRIDES.iter().find(|(from, _)| *from == schema) {
         return SchemaRole::Other {
             type_name: (*renamed).to_owned(),
+        };
+    }
+    if let Some((_, family)) = FAMILY_OVERRIDES.iter().find(|(from, _)| *from == schema) {
+        return SchemaRole::Read {
+            family: (*family).to_owned(),
+        };
+    }
+    if WRITE_OVERRIDES.contains(&schema) {
+        return SchemaRole::Write {
+            type_name: schema.to_owned(),
         };
     }
     for suffix in ["Compact", "Base", "Response"] {

@@ -60,10 +60,8 @@ openapiv3 = "2.2"
 prettyplease = "0.2"
 proc-macro2 = "1"
 quote = "1"
-schemars = "0.8"
 serde_yaml_ng = "0.10"
 syn = { version = "2", features = ["full"] }
-typify = "0.10"
 
 # Tests
 insta = { version = "1", features = ["json"] }

@@ -42,6 +42,52 @@ pub enum GidError {
     NotDigits,
 }
 
+/// A user as a request names one: the token's own user, an email address, or a GID.
+///
+/// Asana accepts all three wherever a request names a user, for example in `/users/{user_gid}`
+/// and in a task's `assignee`.
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[non_exhaustive]
+pub enum UserRef {
+    /// The user the token belongs to (`me`).
+    Me,
+    /// A user by email address.
+    Email(String),
+    /// A user by GID.
+    Gid(UserGid),
+}
+
+impl UserRef {
+    /// A user by email address.
+    pub fn email(address: impl Into<String>) -> Self {
+        Self::Email(address.into())
+    }
+}
+
+impl From<UserGid> for UserRef {
+    fn from(gid: UserGid) -> Self {
+        Self::Gid(gid)
+    }
+}
+
+/// Writes `me`, the email address or the GID, exactly as Asana expects it in a JSON body. In a
+/// path or a query it must be percent-encoded by whoever places it there.
+impl fmt::Display for UserRef {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Me => f.write_str("me"),
+            Self::Email(address) => f.write_str(address),
+            Self::Gid(gid) => f.write_str(gid.as_str()),
+        }
+    }
+}
+
+impl serde::Serialize for UserRef {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        serializer.collect_str(self)
+    }
+}
+
 /// Checks the one rule every GID follows. Used by the types the [`gid!`](crate::gid) macro makes.
 #[doc(hidden)]
 pub fn validate(text: &str) -> Result<(), GidError> {

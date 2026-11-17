@@ -9,8 +9,8 @@
 //! - [`endpoints`]: one descriptor per operation in the specification.
 //! - [`models`]: one struct per resource, with every field optional because `opt_fields` decides
 //!   what Asana returns.
-//! - [`fields`]: one enum per resource of the `opt_fields` paths Asana accepts, and the
-//!   [`fields!`] macro that checks a selection when the code is compiled.
+//! - [`mod@fields`]: one enum per resource of the `opt_fields` paths Asana accepts, and the
+//!   [`fields!`](macro@fields) macro that checks a selection when the code is compiled.
 //! - [`scopes`]: the OAuth scopes, and which each operation needs.
 //!
 //! Everything under `generated/` is written by `cargo xtask gen` from `spec/asana_oas.yaml` and is

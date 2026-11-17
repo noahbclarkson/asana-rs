@@ -1,0 +1,12 @@
+# `PlaceholderCompact.resource_type` gives `user` as its example, copied from `UserCompact`; a
+# placeholder is not a user, and a rate's `resource` is told apart as a user or a placeholder by
+# exactly this field. The generator reads the example to name the placeholder's GID type and to
+# tell the two kinds of rate apart, so it must say `placeholder`.
+overlay: 1.0.0
+info:
+  title: A placeholder's resource type is placeholder
+  version: 1.0.0
+actions:
+  - target: $.components.schemas.PlaceholderCompact.properties.resource_type
+    update:
+      example: placeholder

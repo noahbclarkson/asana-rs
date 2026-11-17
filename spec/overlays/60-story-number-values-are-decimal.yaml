@@ -1,0 +1,14 @@
+# A story about a number custom field changing carries the old and new values in
+# `old_number_value` and `new_number_value`, typed `integer` upstream. A number custom field holds
+# any decimal (its `precision` says how many places), so `2.5` would fail to decode as an integer.
+overlay: 1.0.0
+info:
+  title: A story's number values are decimals
+  version: 1.0.0
+actions:
+  - target: $.components.schemas.StoryResponse.allOf[1].properties.old_number_value
+    update:
+      type: number
+  - target: $.components.schemas.StoryResponse.allOf[1].properties.new_number_value
+    update:
+      type: number

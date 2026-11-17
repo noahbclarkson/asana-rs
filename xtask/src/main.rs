@@ -15,8 +15,11 @@
 
 mod emit;
 mod endpoints;
+mod fields;
 mod models;
 mod naming;
+mod overlay;
+mod scopes;
 mod spec;
 
 use std::path::PathBuf;

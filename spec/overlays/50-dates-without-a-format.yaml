@@ -1,0 +1,39 @@
+# These properties hold dates (`YYYY-MM-DD`) or date-times (RFC 3339), as their examples and
+# descriptions show, but declare no `format`, unlike every other date in the specification. Without
+# one they would be plain strings, so a caller would parse each by hand and a mistyped date would
+# reach Asana instead of failing to compile.
+overlay: 1.0.0
+info:
+  title: Dates without a format
+  version: 1.0.0
+actions:
+  - target: $.components.schemas.CustomFieldCompact.properties.date_value.properties.date
+    update:
+      format: date
+  - target: $.components.schemas.CustomFieldCompact.properties.date_value.properties.date_time
+    update:
+      format: date-time
+  - target: $.components.schemas.GoalBase.properties.due_on
+    update:
+      format: date
+  - target: $.components.schemas.GoalBase.properties.start_on
+    update:
+      format: date
+  - target: $.components.schemas.ProjectDuplicateRequest.properties.schedule_dates.properties.due_on
+    update:
+      format: date
+  - target: $.components.schemas.ProjectDuplicateRequest.properties.schedule_dates.properties.start_on
+    update:
+      format: date
+  - target: $.components.schemas.TimePeriodCompact.properties.end_on
+    update:
+      format: date
+  - target: $.components.schemas.TimePeriodCompact.properties.start_on
+    update:
+      format: date
+  - target: $.components.schemas.WorkspaceMembershipResponse.allOf[1].properties.vacation_dates.properties.start_on
+    update:
+      format: date
+  - target: $.components.schemas.WorkspaceMembershipResponse.allOf[1].properties.vacation_dates.properties.end_on
+    update:
+      format: date

@@ -38,7 +38,11 @@ pub fn finish(
     for file in files {
         let parsed: syn::File = syn::parse2(file.tokens)
             .map_err(|error| format!("{} is not valid Rust: {error}", file.path.display()))?;
-        let text = format!("{HEADER}{}", prettyplease::unparse(&parsed));
+        let text = rustfmt(
+            directory,
+            &format!("{HEADER}{}", prettyplease::unparse(&parsed)),
+        )
+        .map_err(|error| format!("formatting {}: {error}", file.path.display()))?;
         if rendered.insert(file.path.clone(), text).is_some() {
             return Err(format!("{} was generated twice", file.path.display()));
         }
@@ -98,6 +102,46 @@ pub fn finish(
             Ok(format!("wrote {} generated files", rendered.len()))
         }
     }
+}
+
+/// Runs `rustfmt` over generated source with the repository's own configuration, so the
+/// checked-in files are exactly what `cargo fmt` would leave and `gen --check` and
+/// `cargo fmt --check` can never disagree. `prettyplease` first, because rustfmt alone gives up on
+/// very long token lines.
+fn rustfmt(directory: &Path, source: &str) -> GenResult<String> {
+    use std::io::Write;
+    use std::process::{Command, Stdio};
+
+    // `directory` is `<root>/crates/asana-openapi/src/generated`.
+    let root = directory.ancestors().nth(4).unwrap_or(directory);
+    let mut child = Command::new("rustfmt")
+        .arg("--edition")
+        .arg("2024")
+        .arg("--config-path")
+        .arg(root.join("rustfmt.toml"))
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .map_err(|error| format!("could not start rustfmt: {error}"))?;
+    let mut stdin = child.stdin.take().ok_or("rustfmt has no stdin")?;
+    let input = source.to_owned();
+    let writer = std::thread::spawn(move || stdin.write_all(input.as_bytes()));
+    let output = child
+        .wait_with_output()
+        .map_err(|error| format!("rustfmt did not finish: {error}"))?;
+    writer
+        .join()
+        .map_err(|_| "the thread feeding rustfmt panicked".to_owned())?
+        .map_err(|error| format!("writing to rustfmt: {error}"))?;
+    if !output.status.success() {
+        return Err(format!(
+            "rustfmt refused it: {}",
+            String::from_utf8_lossy(&output.stderr).trim()
+        ));
+    }
+    String::from_utf8(output.stdout)
+        .map_err(|error| format!("rustfmt wrote invalid UTF-8: {error}"))
 }
 
 /// Every `.rs` file under `directory`, relative to it.
