@@ -58,7 +58,8 @@ jobs:
         with:
           save-if: ${{ github.ref == 'refs/heads/main' }}
       # Fails when the checked-in code differs from what the vendored spec, the overlays and the
-      # generator produce, and when an overlay's target no longer exists in the spec.
+      # generator produce, and when an overlay is stale (its target is gone, its update changes
+      # nothing, or the target is not as its `x-expect` says; docs/generating.md).
       - run: cargo xtask gen --check
 
   clippy:

@@ -7,7 +7,10 @@ info:
   title: A new task can be created into sections
   version: 1.0.0
 actions:
+  # If upstream defines `memberships` itself, this overlay is stale.
   - target: $.components.schemas.TaskCreateRequest.allOf[1].properties
+    x-expect:
+      memberships: null
     update:
       memberships:
         type: array

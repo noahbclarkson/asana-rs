@@ -4,8 +4,15 @@
 //! Only the subset the overlays in `spec/overlays/` need is supported: a `target` is a path from the
 //! root, `$` followed by `.name`, `['name']` or `[index]` steps (no wildcards or filters), and an
 //! action either `remove`s the node it names or merges its `update` into it (objects merge key by
-//! key, recursively; anything else is replaced). A target that names nothing is an error, so an
-//! overlay that upstream has made stale is noticed instead of silently doing nothing.
+//! key, recursively; anything else is replaced).
+//!
+//! An overlay that upstream has made stale must fail rather than apply silently, so three things
+//! are errors: a target that names nothing; an `update` that changes nothing (upstream already
+//! says what the overlay says); and a node that does not match the action's `x-expect`, an object
+//! of keys the target must hold with those values (`null`: must not hold the key at all). An
+//! action states `x-expect` where upstream could fix or move the thing in a way that still names
+//! a node, such as defining a property the overlay adds, or reordering an `allOf` an `[index]`
+//! step walks.
 
 use serde_json::Value;
 
@@ -29,6 +36,11 @@ fn apply_action(document: &mut Value, action: &Value) -> GenResult<()> {
         .and_then(Value::as_str)
         .ok_or("an action needs a `target`")?;
     let steps = parse_target(target)?;
+    if let Some(expected) = action.get("x-expect") {
+        let node = resolve(document, &steps)
+            .ok_or_else(|| format!("`{target}` names nothing in the specification"))?;
+        check_expected(node, expected).map_err(|error| format!("`{target}`: {error}"))?;
+    }
     if action.get("remove").and_then(Value::as_bool) == Some(true) {
         let (last, parents) = steps
             .split_last()
@@ -53,7 +65,44 @@ fn apply_action(document: &mut Value, action: &Value) -> GenResult<()> {
         .ok_or_else(|| format!("the action on `{target}` has neither `update` nor `remove`"))?;
     let node = resolve(document, &steps)
         .ok_or_else(|| format!("`{target}` names nothing in the specification"))?;
+    let before = node.clone();
     merge(node, update);
+    if *node == before {
+        return Err(format!(
+            "the update to `{target}` changes nothing: upstream already says this, so the \
+             overlay may be stale"
+        ));
+    }
+    Ok(())
+}
+
+/// Checks `node` against an action's `x-expect`: each key holds the value given, or is absent
+/// where the value is `null`.
+fn check_expected(node: &Value, expected: &Value) -> Result<(), String> {
+    let expected = expected
+        .as_object()
+        .ok_or("`x-expect` must be an object of keys and the values they hold")?;
+    let object = node
+        .as_object()
+        .ok_or("the target is not an object, as `x-expect` expects")?;
+    for (key, value) in expected {
+        let actual = object.get(key);
+        let matches = match value {
+            Value::Null => actual.is_none(),
+            value => actual == Some(value),
+        };
+        if !matches {
+            return Err(format!(
+                "`{key}` is not as `x-expect` says ({}): upstream may have changed what the \
+                 overlay corrects",
+                if value.is_null() {
+                    "absent".to_owned()
+                } else {
+                    value.to_string()
+                }
+            ));
+        }
+    }
     Ok(())
 }
 
@@ -180,6 +229,47 @@ mod tests {
             document,
             json!({"s": {"p": {"type": "array", "items": {"type": "string"}}, "q": [2]}})
         );
+    }
+
+    #[test]
+    fn an_update_upstream_already_made_is_an_error() {
+        let mut document = json!({"s": {"p": {"type": "string", "format": "date"}}});
+        let overlay = json!({"actions": [{"target": "$.s.p", "update": {"format": "date"}}]});
+        let error = apply(&mut document, &overlay).unwrap_err();
+        assert!(error.to_string().contains("changes nothing"), "{error}");
+    }
+
+    #[test]
+    fn a_node_that_is_not_as_expected_is_an_error() {
+        // Upstream now defines the property the overlay would add.
+        let mut document = json!({"s": {"properties": {"memberships": {"type": "object"}}}});
+        let overlay = json!({"actions": [{
+            "target": "$.s.properties",
+            "x-expect": {"memberships": null},
+            "update": {"memberships": {"type": "array"}}
+        }]});
+        let error = apply(&mut document, &overlay).unwrap_err();
+        assert!(error.to_string().contains("memberships"), "{error}");
+
+        // An `allOf` reordered so that `[1]` is the reference, not the inline part.
+        let mut document = json!({"p": {"allOf": [
+            {"type": "object", "nullable": true},
+            {"$ref": "#/components/schemas/Status"}
+        ]}});
+        let overlay = json!({"actions": [{
+            "target": "$.p.allOf[1]",
+            "x-expect": {"type": "object", "readOnly": null},
+            "update": {"readOnly": true}
+        }]});
+        assert!(apply(&mut document, &overlay).is_err());
+
+        // As expected, it applies.
+        let mut document = json!({"p": {"allOf": [
+            {"$ref": "#/components/schemas/Status"},
+            {"type": "object", "nullable": true}
+        ]}});
+        apply(&mut document, &overlay).unwrap();
+        assert_eq!(document["p"]["allOf"][1]["readOnly"], json!(true));
     }
 
     #[test]

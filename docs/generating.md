@@ -84,9 +84,22 @@ actions:
 The generator supports the subset of the Overlay specification these files need: a `target` is a
 path from the root made of `.name`, `['name']` and `[index]` steps (no wildcards or filters), and
 an action either has `remove: true` or an `update` that is merged in (objects key by key,
-anything else replaced). **A target that names nothing is an error**, so when Asana fixes or moves
-something an overlay corrected, the next generation fails and says which overlay and action,
-instead of silently doing nothing. Delete or update that overlay then.
+anything else replaced). When Asana fixes or moves something an overlay corrected, the next
+generation should fail and say which overlay and action, instead of applying it silently. Three
+things make it fail:
+
+- **A target that names nothing.**
+- **An `update` that changes nothing**: upstream already says what the overlay says.
+- **A node that is not as the action's `x-expect` says.** `x-expect` is an object of keys the
+  target must hold with those values, `null` meaning the key must be absent. An overlay states it
+  where upstream could change things and still leave the target naming a node: defining a
+  property the overlay adds (`70-…` expects no `memberships`), or reordering an `allOf` that an
+  `[index]` step walks (`40-…` expects `allOf[1]` to be the inline `type: object` part, not the
+  `$ref`).
+
+An upstream change that none of these sees (a new value for a key the overlay replaces, say) still
+applies the overlay; prefer targets without `[index]` steps, and an `x-expect` where they cannot be
+avoided. Delete or update a failing overlay.
 
 The overlays in place:
 

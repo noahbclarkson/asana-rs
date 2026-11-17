@@ -3,7 +3,8 @@
 # of what Asana changed (`cargo xtask spec-diff`).
 #
 # - Nothing changes when upstream has not moved past the commit in spec/UPSTREAM.
-# - An overlay whose target is gone fails `cargo xtask gen`, and so this run, with the overlay's
+# - A stale overlay (its target is gone, its update changes nothing, or the target is not as its
+#   `x-expect` says) fails `cargo xtask gen`, and so this run, with the overlay's
 #   file name and target in the log and the run summary. Nothing is proposed until it is fixed.
 # - A failing check does not stop the pull request (its body says which checks failed), but the
 #   run itself then fails, so the failure is noticed.

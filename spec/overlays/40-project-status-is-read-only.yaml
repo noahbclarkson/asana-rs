@@ -8,9 +8,16 @@ info:
   title: A project's current status is read-only
   version: 1.0.0
 actions:
+  # `allOf[1]` must be the inline part (`type: object`), not the `$ref`.
   - target: $.components.schemas.ProjectBase.allOf[1].properties.current_status.allOf[1]
+    x-expect:
+      type: object
+      readOnly: null
     update:
       readOnly: true
   - target: $.components.schemas.ProjectBase.allOf[1].properties.current_status_update.allOf[1]
+    x-expect:
+      type: object
+      readOnly: null
     update:
       readOnly: true
