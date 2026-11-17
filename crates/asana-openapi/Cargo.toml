@@ -1,0 +1,23 @@
+[package]
+name = "asana-openapi"
+description = "Typed models, endpoint descriptors, field selectors and OAuth scopes generated from Asana's OpenAPI specification. No HTTP client."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+keywords.workspace = true
+categories.workspace = true
+readme = "README.md"
+
+[dependencies]
+bon.workspace = true
+bytes.workspace = true
+rust_decimal.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+time.workspace = true
+
+[lints]
+workspace = true

@@ -1,0 +1,4 @@
+source: https://github.com/Asana/openapi  (defs/asana_oas.yaml)
+commit: 65bd6e77a6692a62c03fefa6a340dd401795e5bc
+committed: 2026-11-09
+fetched: 2026-11-17

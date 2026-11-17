@@ -1,0 +1,28 @@
+[package]
+name = "asana-webhooks"
+description = "Receive Asana webhooks: the handshake, signature verification and typed events. No HTTP client and no web framework."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+keywords.workspace = true
+categories.workspace = true
+readme = "README.md"
+
+[dependencies]
+asana-openapi.workspace = true
+hex.workspace = true
+hmac.workspace = true
+secrecy.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+subtle.workspace = true
+thiserror.workspace = true
+time.workspace = true
+base64.workspace = true
+rand.workspace = true
+
+[lints]
+workspace = true

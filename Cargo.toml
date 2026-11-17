@@ -1,0 +1,85 @@
+[workspace]
+resolver = "3"
+members = [
+    "crates/asana-openapi",
+    "crates/asana-webhooks",
+    "crates/asana-client",
+    "crates/asana-fake",
+    "crates/asana-webhooks-axum",
+    "crates/asana-webhooks-actix",
+    "xtask",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.88"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/noahbclarkson/asana-rs"
+keywords = ["asana", "api", "client", "webhooks"]
+categories = ["api-bindings", "web-programming::http-client"]
+
+# Every dependency is chosen once, here. A crate asks for it with `workspace = true`.
+[workspace.dependencies]
+asana-openapi = { path = "crates/asana-openapi", version = "0.1.0" }
+asana-webhooks = { path = "crates/asana-webhooks", version = "0.1.0" }
+asana-client = { path = "crates/asana-client", version = "0.1.0" }
+asana-fake = { path = "crates/asana-fake", version = "0.1.0" }
+
+base64 = "0.22"
+bon = "3.10"
+bytes = "1"
+derive_more = { version = "2.1", features = ["display"] }
+futures-util = { version = "0.3", default-features = false, features = ["std"] }
+hex = "0.4"
+hmac = "0.13"
+http = "1"
+rand = "0.9"
+reqwest = { version = "0.13", default-features = false, features = ["rustls"] }
+rust_decimal = { version = "1.43", default-features = false, features = ["serde-with-arbitrary-precision", "std"] }
+secrecy = "0.10"
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["arbitrary_precision"] }
+serde_path_to_error = "0.1"
+serde_urlencoded = "0.7"
+sha2 = "0.11"
+subtle = "2.6"
+thiserror = "2"
+time = { version = "0.3", features = ["serde", "formatting", "parsing", "macros"] }
+tokio = { version = "1", default-features = false, features = ["sync", "time"] }
+tracing = { version = "0.1", default-features = false, features = ["std", "attributes"] }
+url = "2"
+
+# Adapters
+actix-web = { version = "4", default-features = false }
+axum = { version = "0.8", default-features = false }
+
+# The generator only (xtask is never published)
+heck = "0.5"
+openapiv3 = "2.2"
+prettyplease = "0.2"
+proc-macro2 = "1"
+quote = "1"
+schemars = "0.8"
+serde_yaml_ng = "0.10"
+syn = { version = "2", features = ["full"] }
+typify = "0.10"
+
+# Tests
+insta = { version = "1", features = ["json"] }
+wiremock = "0.6"
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+unreachable_pub = "warn"
+
+[workspace.lints.clippy]
+unwrap_used = "deny"
+expect_used = "deny"
+dbg_macro = "deny"
+todo = "warn"
+too_many_lines = "warn"
+
+[profile.dev]
+debug = "line-tables-only"

@@ -1,0 +1,40 @@
+[package]
+name = "asana-client"
+description = "An ergonomic async client for Asana's REST API: typed requests, paging as a stream, rate limits, retries, OAuth and webhooks."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+keywords.workspace = true
+categories.workspace = true
+readme = "README.md"
+
+[dependencies]
+asana-openapi.workspace = true
+asana-webhooks.workspace = true
+bon.workspace = true
+bytes.workspace = true
+futures-util.workspace = true
+http.workspace = true
+reqwest.workspace = true
+rust_decimal.workspace = true
+secrecy.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+serde_path_to_error.workspace = true
+serde_urlencoded.workspace = true
+thiserror.workspace = true
+time.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+url.workspace = true
+rand.workspace = true
+
+[lints]
+workspace = true
+
+[dev-dependencies]
+insta.workspace = true
+tokio = { workspace = true, features = ["macros", "rt-multi-thread", "test-util"] }
+wiremock.workspace = true

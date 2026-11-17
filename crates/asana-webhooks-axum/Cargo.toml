@@ -1,0 +1,20 @@
+[package]
+name = "asana-webhooks-axum"
+description = "An axum handler for Asana webhooks, built on asana-webhooks."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+keywords.workspace = true
+categories.workspace = true
+readme = "README.md"
+
+[dependencies]
+asana-webhooks.workspace = true
+axum.workspace = true
+bytes.workspace = true
+http.workspace = true
+
+[lints]
+workspace = true
