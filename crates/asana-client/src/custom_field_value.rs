@@ -24,7 +24,7 @@
 //! ]);
 //! assert_eq!(
 //!     serde_json::to_string(&map)?,
-//!     r#"{"1201234567890001":"1201234567890002","1201234567890003":1250.50}"#
+//!     r#"{"1201234567890001":"1201234567890002","1201234567890003":1250.5}"#
 //! );
 //! # Ok(())
 //! # }
@@ -33,7 +33,6 @@
 mod read;
 
 use std::collections::BTreeMap;
-use std::str::FromStr;
 
 use asana_openapi::ids::{CustomFieldGid, EnumOptionGid, Gid, UserGid};
 use rust_decimal::Decimal;
@@ -53,7 +52,9 @@ pub enum CustomFieldValue {
     Empty,
     /// A `text` field's value.
     Text(String),
-    /// A `number` field's value, with the digits Asana sent. Never a floating-point number.
+    /// A `number` field's value, as a decimal rather than a floating-point number. Asana sends
+    /// and stores numbers as doubles, so it is read through the shortest text of the double Asana
+    /// sent (`1250.5`, never `1250.4999999999999`); see [`asana_openapi::number`].
     Number(Decimal),
     /// An `enum` field's chosen option.
     Enum(EnumOptionRef),
@@ -202,7 +203,9 @@ impl CustomFieldValue {
         Self::Text(text.into())
     }
 
-    /// A `number` field's value. Written with exactly the decimal's digits.
+    /// A `number` field's value. Written as a JSON number: an integer when it is one, otherwise
+    /// the nearest double, which carries about 15 significant digits (Asana stores numbers as
+    /// doubles). [`asana_openapi::number::fits_a_double`] says whether a value survives whole.
     pub fn number(number: impl Into<Decimal>) -> Self {
         Self::Number(number.into())
     }
@@ -309,12 +312,17 @@ impl CustomFieldValue {
     /// |---|---|
     /// | [`Empty`](Self::Empty) | `null` |
     /// | [`Text`](Self::Text) | `"text"` |
-    /// | [`Number`](Self::Number) | a JSON number with the decimal's digits, `1250.50` |
+    /// | [`Number`](Self::Number) | a JSON number: `1250.50` is written `1250.5`, see below |
     /// | [`Enum`](Self::Enum) | the option's GID, `"1201234567890002"` |
     /// | [`MultiEnum`](Self::MultiEnum), [`People`](Self::People), [`Reference`](Self::Reference) | an array of GIDs |
     /// | [`Date`](Self::Date) without a time | `{"date": "2026-12-17"}` |
     /// | [`Date`](Self::Date) with a time | `{"date_time": "2026-12-17T02:30:00.000Z"}`, in UTC |
     /// | [`Unknown`](Self::Unknown) | `raw`, as it is |
+    ///
+    /// A number that is an integer fitting `i64` or `u64` is written as that integer; any other
+    /// is written as the nearest double, which prints the decimal's own digits whenever a double
+    /// can carry them (about 15 significant digits) and is still sent, rounded, when it cannot.
+    /// Trailing zeros are not part of a JSON number. This never fails.
     pub fn to_request_json(&self) -> Value {
         match self {
             Self::Empty => Value::Null,
@@ -342,11 +350,9 @@ pub fn custom_fields_map(
         .collect()
 }
 
-/// A decimal as a JSON number with exactly its digits (`serde_json`'s `arbitrary_precision`).
+/// A decimal as a JSON number, as [`asana_openapi::number::to_json_number`] writes it.
 fn number_json(number: Decimal) -> Value {
-    let text = number.to_string();
-    // A decimal's text is always a valid JSON number; the string is a fallback that cannot arise.
-    serde_json::Number::from_str(&text).map_or(Value::String(text), Value::Number)
+    Value::Number(asana_openapi::number::to_json_number(number))
 }
 
 fn gids<'a>(gids: impl Iterator<Item = &'a str>) -> Value {

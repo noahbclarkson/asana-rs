@@ -10,7 +10,7 @@ pub struct BudgetActual {
     /// The units of the actual value. * When `budget_type` is `time`, units are `"minutes"`.
     pub units: Option<String>,
     /// The aggregated actual value for the budget. * When `budget_type` is `time`, represents the total actual minutes from time tracking entries.
-    #[serde(default, with = "rust_decimal::serde::arbitrary_precision_option")]
+    #[serde(default, with = "crate::number::option")]
     pub value: Option<rust_decimal::Decimal>,
 }
 /// A value of `billable_status_filter` on `BudgetActualRequest`.

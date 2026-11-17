@@ -159,7 +159,7 @@ impl std::fmt::Display for GoalPrivacySetting {
 pub struct GoalAddSupportingRelationshipRequest {
     /// Defines how much the supporting goal’s progress contributes to the parent goal’s overall progress. When used with automatically calculated Goal Metrics (such as `progress_source = subgoal_progress`), this value must be greater than 0 for the subgoal to count toward the parent goal’s progress.
     #[serde(
-        with = "rust_decimal::serde::arbitrary_precision_option",
+        with = "crate::number::option",
         skip_serializing_if = "Option::is_none"
     )]
     pub contribution_weight: Option<rust_decimal::Decimal>,

@@ -36,7 +36,7 @@ pub struct AllocationEffort {
     /// The units used for tracking effort on an allocation, either "hours" or "percent".
     pub r#type: Option<crate::models::AllocationType>,
     /// The numeric effort value on the allocation.
-    #[serde(default, with = "rust_decimal::serde::arbitrary_precision_option")]
+    #[serde(default, with = "crate::number::option")]
     pub value: Option<rust_decimal::Decimal>,
 }
 /// A value of `type` on `AllocationEffort`.
@@ -121,7 +121,7 @@ pub struct AllocationRequestEffort {
     pub r#type: Option<crate::models::AllocationType>,
     /// The numeric effort value on the allocation.
     #[serde(
-        with = "rust_decimal::serde::arbitrary_precision_option",
+        with = "crate::number::option",
         skip_serializing_if = "Option::is_none"
     )]
     pub value: Option<rust_decimal::Decimal>,

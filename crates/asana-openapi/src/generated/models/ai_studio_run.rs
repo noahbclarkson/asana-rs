@@ -14,7 +14,7 @@ pub struct AiStudioRun {
     /// Whether the credits were drawn from a paid or free balance.
     pub credit_source: Option<crate::models::AiStudioRunCreditSource>,
     /// The number of credits consumed by the run.
-    #[serde(default, with = "rust_decimal::serde::arbitrary_precision_option")]
+    #[serde(default, with = "crate::number::option")]
     pub credits_used: Option<rust_decimal::Decimal>,
     /// The division the actor belonged to at the time of the run, as a compact reference. `null` when division metering is not enabled for the domain.
     pub division: Option<Box<crate::models::AiStudioRunDivision>>,

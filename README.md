@@ -86,7 +86,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .send()
         .await?;
 
-    // Set a custom field, typed by its kind: here a number, sent with its exact digits.
+    // Set a custom field, typed by its kind: here a number, a decimal sent as a JSON number.
     client
         .tasks()
         .update(created.clone())
@@ -159,7 +159,8 @@ adapter, if you use axum or actix-web) yourself.
   `PremiumRequired`, `Decode` with the JSON path that failed, …). Its `Display` never includes a
   response body, a query value, a header or a token.
 - **Asana's data is treated as loose.** Unknown enum values and unknown resource types are kept,
-  not errors. Numbers in custom fields are decimals, never floating point.
+  not errors. Numbers in custom fields are `rust_decimal::Decimal`, read through the shortest
+  text of the double Asana sends, so `1250.5` is never `1250.4999999999999`.
 
 [`docs/guide.md`](docs/guide.md) walks through the common work; [`docs/design.md`](docs/design.md)
 records the decisions and what was rejected.

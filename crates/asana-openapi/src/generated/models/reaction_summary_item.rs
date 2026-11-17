@@ -6,7 +6,7 @@
 #[non_exhaustive]
 pub struct ReactionSummaryItem {
     /// The number of reactions with the emoji variant on the object.
-    #[serde(default, with = "rust_decimal::serde::arbitrary_precision_option")]
+    #[serde(default, with = "crate::number::option")]
     pub count: Option<rust_decimal::Decimal>,
     /// The emoji base character used in the reaction.
     pub emoji_base: Option<String>,

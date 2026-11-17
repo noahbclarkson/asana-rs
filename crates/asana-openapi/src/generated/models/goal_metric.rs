@@ -14,10 +14,10 @@ pub struct GoalMetric {
     /// This string is the current value of a goal metric of type string.
     pub current_display_value: Option<String>,
     /// This number is the current value of a goal metric of type number.
-    #[serde(default, with = "rust_decimal::serde::arbitrary_precision_option")]
+    #[serde(default, with = "crate::number::option")]
     pub current_number_value: Option<rust_decimal::Decimal>,
     /// This number is the start value of a goal metric of type number.
-    #[serde(default, with = "rust_decimal::serde::arbitrary_precision_option")]
+    #[serde(default, with = "crate::number::option")]
     pub initial_number_value: Option<rust_decimal::Decimal>,
     /// *Conditional*. Only relevant if `metric.progress_source` is one of `subgoal_progress`, `project_task_completion`, `project_milestone_completion`, or `task_completion`.
     pub is_custom_weight: Option<bool>,
@@ -28,7 +28,7 @@ pub struct GoalMetric {
     /// The subtype of this resource. Different subtypes retain many of the same fields and behavior, but may render differently in Asana or represent resources with different semantic meaning.
     pub resource_subtype: Option<crate::models::GoalMetricResourceSubtype>,
     /// This number is the end value of a goal metric of type number. This number cannot equal `initial_number_value`.
-    #[serde(default, with = "rust_decimal::serde::arbitrary_precision_option")]
+    #[serde(default, with = "crate::number::option")]
     pub target_number_value: Option<rust_decimal::Decimal>,
     /// A supported unit of measure for the goal metric, or none.
     pub unit: Option<crate::models::GoalMetricUnit>,
@@ -189,7 +189,7 @@ impl std::fmt::Display for GoalMetricUnit {
 pub struct GoalMetricCurrentValueRequest {
     /// *Conditional*. This number is the current value of a goal metric of type number.
     #[serde(
-        with = "rust_decimal::serde::arbitrary_precision_option",
+        with = "crate::number::option",
         skip_serializing_if = "Option::is_none"
     )]
     pub current_number_value: Option<rust_decimal::Decimal>,
@@ -204,13 +204,13 @@ pub struct GoalMetricRequest {
     pub currency_code: Option<crate::models::Clearable<String>>,
     /// This number is the current value of a goal metric of type number.
     #[serde(
-        with = "rust_decimal::serde::arbitrary_precision_option",
+        with = "crate::number::option",
         skip_serializing_if = "Option::is_none"
     )]
     pub current_number_value: Option<rust_decimal::Decimal>,
     /// This number is the start value of a goal metric of type number.
     #[serde(
-        with = "rust_decimal::serde::arbitrary_precision_option",
+        with = "crate::number::option",
         skip_serializing_if = "Option::is_none"
     )]
     pub initial_number_value: Option<rust_decimal::Decimal>,
@@ -225,7 +225,7 @@ pub struct GoalMetricRequest {
     pub progress_source: Option<crate::models::GoalMetricProgressSource>,
     /// This number is the end value of a goal metric of type number. This number cannot equal `initial_number_value`.
     #[serde(
-        with = "rust_decimal::serde::arbitrary_precision_option",
+        with = "crate::number::option",
         skip_serializing_if = "Option::is_none"
     )]
     pub target_number_value: Option<rust_decimal::Decimal>,

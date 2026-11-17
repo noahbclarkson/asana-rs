@@ -48,6 +48,11 @@ The first release. Generated from Asana's OpenAPI document at upstream commit `6
   actix-web 4. Each caps the body size, captures the handshake secret, verifies deliveries and
   hands each verified batch to a sink. They answer `404` for an unknown route and `410` only for
   a retired one.
+- Numbers (`rust_decimal::Decimal`) are read from and written to plain JSON numbers through
+  `asana_openapi::number`, without `serde_json`'s `arbitrary_precision`, which a library must not
+  switch on for its users' whole build. A number reads as the shortest text of the double Asana
+  sends; it is written as an integer when it is one, otherwise as the nearest double (about 15
+  significant digits, which is what Asana stores), so `1250.50` goes out as `1250.5`.
 - The minimum supported Rust version is 1.89 (the actix-web releases with current security fixes
   need it).
 - Repository: `cargo xtask gen` to regenerate (`--check` in CI), and `cargo xtask spec-diff` to

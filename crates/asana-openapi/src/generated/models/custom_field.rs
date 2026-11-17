@@ -32,7 +32,7 @@ pub struct CustomField {
     /// The name of the custom field.
     pub name: Option<String>,
     /// *Conditional*. This number is the value of a `number` custom field.
-    #[serde(default, with = "rust_decimal::serde::arbitrary_precision_option")]
+    #[serde(default, with = "crate::number::option")]
     pub number_value: Option<rust_decimal::Decimal>,
     /// This field tells the type of the custom field.
     pub representation_type: Option<crate::models::CustomFieldRepresentationType>,

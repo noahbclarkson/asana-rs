@@ -65,7 +65,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .tasks()
         .update(task.clone())
         .custom_field(text, CustomFieldValue::text("Acme Ltd"))
-        .custom_field(number, CustomFieldValue::number(Decimal::new(125_050, 2))) // 1250.50
+        .custom_field(number, CustomFieldValue::number(Decimal::new(125_050, 2))) // sent as 1250.5
         .custom_field(stage, CustomFieldValue::enum_option(approved))
         .custom_field(due.clone(), CustomFieldValue::date(date!(2026 - 12 - 17)))
         .send()

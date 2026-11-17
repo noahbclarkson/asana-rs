@@ -14,7 +14,7 @@ pub struct BudgetEstimate {
     /// The units of the estimate value. When `budget_type` is `time`, units are `"minutes"`.
     pub units: Option<String>,
     /// The aggregated estimate value for the budget. This value is computed based on the selected `source` and, when `source` is `tasks`, the specified `billable_status_filter`.
-    #[serde(default, with = "rust_decimal::serde::arbitrary_precision_option")]
+    #[serde(default, with = "crate::number::option")]
     pub value: Option<rust_decimal::Decimal>,
 }
 /// A value of `billable_status_filter` on `BudgetEstimate`.

@@ -16,7 +16,7 @@ pub struct Task {
     /// The subtype of this resource. Different subtypes retain many of the same fields and behavior, but may render differently in Asana or represent resources with different semantic meaning.
     pub resource_subtype: Option<crate::models::TaskResourceSubtype>,
     /// Full object requires scope: time_tracking_entries:read This value represents the sum of all the Time Tracking entries in the Actual Time field on a given Task. It is represented as a nullable long value.
-    #[serde(default, with = "rust_decimal::serde::arbitrary_precision_option")]
+    #[serde(default, with = "crate::number::option")]
     pub actual_time_minutes: Option<rust_decimal::Decimal>,
     /// *Conditional* Reflects the approval status of this task. This field is kept in sync with `completed`, meaning `pending` translates to false while `approved`, `rejected`, and `changes_requested` translate to true.
     pub approval_status: Option<crate::models::TaskApprovalStatus>,

@@ -12,6 +12,8 @@
 //! - [`mod@fields`]: one enum per resource of the `opt_fields` paths Asana accepts, and the
 //!   [`fields!`](macro@fields) macro that checks a selection when the code is compiled.
 //! - [`scopes`]: the OAuth scopes, and which each operation needs.
+//! - [`number`]: Asana's numbers as `rust_decimal::Decimal`, read from and written to plain JSON
+//!   numbers.
 //!
 //! Everything under `generated/` is written by `cargo xtask gen` from `spec/asana_oas.yaml` and is
 //! never edited by hand.
@@ -39,6 +41,7 @@
 pub mod endpoint;
 pub mod fields;
 pub mod ids;
+pub mod number;
 
 mod generated;
 

@@ -16,7 +16,7 @@ pub struct Rate {
     /// The `parent` field.
     pub parent: Option<Box<crate::models::Project>>,
     /// The monetary value of the rate.
-    #[serde(default, with = "rust_decimal::serde::arbitrary_precision_option")]
+    #[serde(default, with = "crate::number::option")]
     pub rate: Option<rust_decimal::Decimal>,
     /// The `resource` field.
     pub resource: Option<Box<crate::models::User>>,
@@ -34,7 +34,7 @@ pub struct RateRequest {
     pub parent: Option<String>,
     /// The monetary value of the rate.
     #[serde(
-        with = "rust_decimal::serde::arbitrary_precision_option",
+        with = "crate::number::option",
         skip_serializing_if = "Option::is_none"
     )]
     pub rate: Option<rust_decimal::Decimal>,
@@ -49,7 +49,7 @@ pub struct RateRequest {
 pub struct RateUpdateRequest {
     /// The monetary value of the rate.
     #[serde(
-        with = "rust_decimal::serde::arbitrary_precision_option",
+        with = "crate::number::option",
         skip_serializing_if = "Option::is_none"
     )]
     pub rate: Option<rust_decimal::Decimal>,

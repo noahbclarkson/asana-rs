@@ -8,7 +8,7 @@ pub struct BudgetTotal {
     /// Indicates whether the total value is active and should be displayed in the budget. This flag primarily affects UI presentation and the response payload.
     pub enabled: Option<bool>,
     /// The user-set value for the total budget. When `budget_type` is `time`, represents minutes.
-    #[serde(default, with = "rust_decimal::serde::arbitrary_precision_option")]
+    #[serde(default, with = "crate::number::option")]
     pub value: Option<rust_decimal::Decimal>,
     /// The units of the total value. When `budget_type` is `time`, units are `"minutes"`.
     pub units: Option<String>,
@@ -22,7 +22,7 @@ pub struct BudgetTotalRequest {
     pub enabled: Option<bool>,
     /// The user-set value for the total budget. When `budget_type` is `time`, represents minutes.
     #[serde(
-        with = "rust_decimal::serde::arbitrary_precision_option",
+        with = "crate::number::option",
         skip_serializing_if = "Option::is_none"
     )]
     pub value: Option<rust_decimal::Decimal>,

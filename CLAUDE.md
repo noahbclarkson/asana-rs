@@ -32,6 +32,10 @@ and what was rejected. Read the second before proposing a structural change.
   with `workspace = true`.
 - **No cargo features** in the library crates: the whole API is generated, so coverage is never a
   feature decision, and a consumer's build never differs from ours.
+- **Never switch on a dependency feature that changes a consumer's other crates**, above all
+  `serde_json`'s `arbitrary_precision`: Cargo unifies features across a build, so it would change
+  how every JSON number is held in an application that uses us. Decimals go through
+  `asana_openapi::number`; CI and a test in `asana-client` fail if the feature comes back.
 - **Asana's data is opaque.** A GID is never parsed as a number; an offset or a token is passed back
   exactly as it came. Enums read from Asana keep unknown values instead of failing.
 - **Nothing secret is printed.** Tokens and webhook secrets are `secrecy` types; `Display` and

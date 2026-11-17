@@ -213,8 +213,11 @@ The same methods are on `Client` for any generated descriptor that pages: `clien
 
 A custom field's value comes back in a member named after its kind (`text_value`, `number_value`,
 `enum_value`, …) and is written back as one JSON value per field GID. `CustomFieldValue` is that
-value as one enum, for reading and for writing. Numbers are `rust_decimal::Decimal`, so a value
-written is exactly the digits given. From `custom_fields.rs`:
+value as one enum, for reading and for writing. Numbers are `rust_decimal::Decimal`. Asana sends
+and stores them as doubles, so a number reads as the shortest text of the double Asana sent
+(`1250.5`, not `1250.4999999999999`), and is written as an integer when it is one and otherwise as
+the nearest double: about 15 significant digits survive, and
+`asana_client::openapi::number::fits_a_double` says whether a value does. From `custom_fields.rs`:
 
 ```rust
 // `custom_fields` brings every value member; `TaskCustomFields` reads them by the field's
@@ -253,7 +256,7 @@ client
     .tasks()
     .update(task.clone())
     .custom_field(text, CustomFieldValue::text("Acme Ltd"))
-    .custom_field(number, CustomFieldValue::number(Decimal::new(125_050, 2))) // 1250.50
+    .custom_field(number, CustomFieldValue::number(Decimal::new(125_050, 2))) // sent as 1250.5
     .custom_field(stage, CustomFieldValue::enum_option(approved))
     .custom_field(due.clone(), CustomFieldValue::date(date!(2026 - 12 - 17)))
     .send()
@@ -266,7 +269,7 @@ What each value is written as:
 |---|---|
 | `CustomFieldValue::clear()` (`Empty`) | `null`, which clears a field of any kind |
 | `text("…")` | a string |
-| `number(..)` | a JSON number with the decimal's digits, `1250.50` |
+| `number(..)` | a JSON number: an integer when it is one, otherwise the nearest double (`1250.50` is sent as `1250.5`) |
 | `enum_option(gid)` | the option's GID |
 | `multi_enum([..])`, `people([..])`, `reference([..])` | an array of GIDs; an empty one clears |
 | `date(day)` | `{"date": "2026-12-17"}` |

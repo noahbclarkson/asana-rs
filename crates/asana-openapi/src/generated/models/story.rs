@@ -65,7 +65,7 @@ pub struct Story {
     /// *Conditional* The updated name of the task after a name change.
     pub new_name: Option<String>,
     /// *Conditional* The new value of a number-type custom field after the update.
-    #[serde(default, with = "rust_decimal::serde::arbitrary_precision_option")]
+    #[serde(default, with = "crate::number::option")]
     pub new_number_value: Option<rust_decimal::Decimal>,
     /// *Conditional*. The new value of a people custom field story.
     pub new_people_value: Option<Vec<crate::models::User>>,
@@ -92,7 +92,7 @@ pub struct Story {
     /// *Conditional* The previous name of the task before a name change.
     pub old_name: Option<String>,
     /// *Conditional* The previous value of a number-type custom field before the update.
-    #[serde(default, with = "rust_decimal::serde::arbitrary_precision_option")]
+    #[serde(default, with = "crate::number::option")]
     pub old_number_value: Option<rust_decimal::Decimal>,
     /// *Conditional*. The old value of a people custom field story.
     pub old_people_value: Option<Vec<crate::models::User>>,

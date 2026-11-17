@@ -72,7 +72,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .send()
         .await?;
 
-    // Set a custom field, typed by its kind: here a number, sent with its exact digits.
+    // Set a custom field, typed by its kind: here a number, a decimal sent as a JSON number.
     client
         .tasks()
         .update(created.clone())

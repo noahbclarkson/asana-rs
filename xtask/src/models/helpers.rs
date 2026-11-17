@@ -18,7 +18,7 @@ pub enum Helper {
     DateWrite,
     /// `Option<time::OffsetDateTime>`, either way: `time`'s own RFC 3339 module.
     DateTime,
-    /// `Option<rust_decimal::Decimal>`, either way: `rust_decimal`'s exact-number module.
+    /// `Option<rust_decimal::Decimal>`, either way: the hand-written `crate::number::option`.
     Decimal,
     /// `Option<Clearable<time::Date>>` in a request.
     ClearableDate,
@@ -48,7 +48,7 @@ impl Helper {
         match self {
             Self::DateRead | Self::DateWrite => "crate::models::serde_helpers::date_option",
             Self::DateTime => "time::serde::rfc3339::option",
-            Self::Decimal => "rust_decimal::serde::arbitrary_precision_option",
+            Self::Decimal => "crate::number::option",
             Self::ClearableDate => "crate::models::serde_helpers::clearable_date",
             Self::ClearableDateTime => "crate::models::serde_helpers::clearable_date_time",
             Self::ClearableDecimal => "crate::models::serde_helpers::clearable_decimal",
@@ -151,9 +151,7 @@ pub fn module(used: &BTreeSet<Helper>) -> Option<TokenStream> {
         Helper::ClearableDecimal,
         "clearable_decimal",
         quote!(rust_decimal::Decimal),
-        quote!(rust_decimal::serde::arbitrary_precision::serialize(
-            inner, serializer
-        )),
+        quote!(crate::number::serialize(inner, serializer)),
     );
     let needs_format = used.iter().any(|helper| {
         matches!(

@@ -33,7 +33,8 @@ name order, and runs two halves that agree on names through `xtask/src/naming.rs
   **one** struct (`Task`) holding the union of its shapes' properties, every one an `Option`.
   Request shapes (`TaskRequest`, `TaskUpdateRequest`) stay types of their own, without their
   read-only properties, with `bon` builders. Dates become `time::Date`, date-times
-  `time::OffsetDateTime`, numbers that can be fractional `rust_decimal::Decimal`, GIDs the family's
+  `time::OffsetDateTime`, numbers that can be fractional `rust_decimal::Decimal` (read and written
+  through the hand-written `asana_openapi::number`), GIDs the family's
   typed GID. String enums keep values they do not know (`Unknown(String)`), and unions are told
   apart by `resource_type`. The step is classify (which family each schema belongs to), build
   (an intermediate form), then render and lay out one file per family.

@@ -16,7 +16,7 @@ pub struct PlaceholderRate {
     /// The `parent` field.
     pub parent: Option<Box<crate::models::Project>>,
     /// The monetary value of the rate.
-    #[serde(default, with = "rust_decimal::serde::arbitrary_precision_option")]
+    #[serde(default, with = "crate::number::option")]
     pub rate: Option<rust_decimal::Decimal>,
     /// The `resource` field.
     pub resource: Option<Box<crate::models::Placeholder>>,

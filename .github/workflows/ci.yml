@@ -77,6 +77,14 @@ jobs:
         with:
           save-if: ${{ github.ref == 'refs/heads/main' }}
       - run: cargo clippy --workspace --all-targets --locked -- -D warnings
+      # Cargo unifies features across a build, so a library that switched on serde_json's
+      # `arbitrary_precision` would change how every JSON number is held in its users' programs.
+      - name: serde_json's arbitrary_precision is not switched on
+        run: |
+          if cargo tree --workspace --locked -e features -i serde_json | grep arbitrary_precision; then
+            echo "::error file=Cargo.toml::a dependency switches on serde_json's arbitrary_precision"
+            exit 1
+          fi
 
   test:
     name: tests, doctests and examples

@@ -94,8 +94,12 @@ are `secrecy` types whose `Debug` is redacted.
 ## Custom field values
 
 `CustomFieldValue` is one enum for reading and writing, chosen by the field's kind. Numbers are
-`rust_decimal::Decimal`, never `f64`, and are written with exactly their digits
-(`serde_json`'s `arbitrary_precision`). `Empty` is the one way to say "no value": unset when read,
+`rust_decimal::Decimal`, never `f64`. On the wire they are plain JSON numbers, which Asana stores
+as doubles: a number is read through the shortest text of its double and written as an integer
+when it is one, otherwise as the nearest double (`asana_openapi::number`). `serde_json`'s
+`arbitrary_precision` was rejected: Cargo unifies features across a build, so a library that
+enabled it would change how every JSON number is held in every application that depends on it,
+and Asana's doubles could not carry the extra digits anyway. CI fails if it comes back. `Empty` is the one way to say "no value": unset when read,
 `null` when written. Unknown kinds are kept with their raw JSON.
 
 ## Webhooks: protocol apart from transport

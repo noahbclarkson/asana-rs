@@ -59,14 +59,17 @@ fn every_kind_is_written_as_asana_takes_it() {
 }
 
 #[test]
-fn a_number_keeps_every_digit_it_was_given() {
+fn a_number_is_written_as_an_integer_or_its_nearest_double() {
     let cases = [
-        (Decimal::new(125_050, 2), "1250.50"),
+        (Decimal::new(125_050, 2), "1250.5"),
+        (Decimal::new(125_000, 2), "1250"),
         (Decimal::new(-5, 1), "-0.5"),
-        (Decimal::new(1, 28), "0.0000000000000000000000000001"),
+        (Decimal::from(i64::MIN), "-9223372036854775808"),
+        (Decimal::from(u64::MAX), "18446744073709551615"),
+        // Beyond what a double carries: sent, rounded to the nearest double, never refused.
         (
-            "79228162514264337593543950335".parse().unwrap(),
-            "79228162514264337593543950335",
+            "1234567890.123456789".parse().unwrap(),
+            "1234567890.1234567",
         ),
     ];
     for (number, written) in cases {
@@ -111,5 +114,18 @@ fn the_map_sits_in_a_task_update_body() {
     assert_eq!(
         serde_json::to_string(&body).unwrap(),
         r#"{"custom_fields":{"1201234567890002":19.99,"1201234567890009":null}}"#
+    );
+}
+
+/// Cargo unifies features across a build, so if anything in the workspace switched on
+/// `serde_json`'s `arbitrary_precision`, every application using this crate would hold JSON
+/// numbers differently. With the feature, `1.50` would keep its trailing zero.
+#[test]
+fn serde_json_holds_numbers_as_plain_doubles() {
+    let number: serde_json::Value = serde_json::from_str("1.50").unwrap();
+    assert_eq!(
+        serde_json::to_string(&number).unwrap(),
+        "1.5",
+        "serde_json's arbitrary_precision is switched on somewhere in the build"
     );
 }

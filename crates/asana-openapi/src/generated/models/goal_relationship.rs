@@ -10,7 +10,7 @@ pub struct GoalRelationship {
     /// The base type of this resource.
     pub resource_type: Option<String>,
     /// The weight that the supporting resource's progress contributes to the supported goal's progress. This can be 0, 1, or any value in between.
-    #[serde(default, with = "rust_decimal::serde::arbitrary_precision_option")]
+    #[serde(default, with = "crate::number::option")]
     pub contribution_weight: Option<rust_decimal::Decimal>,
     /// The subtype of this resource. Different subtypes retain many of the same fields and behavior, but may render differently in Asana or represent resources with different semantic meaning.
     pub resource_subtype: Option<crate::models::GoalRelationshipResourceSubtype>,
@@ -72,7 +72,7 @@ impl std::fmt::Display for GoalRelationshipResourceSubtype {
 pub struct GoalRelationshipRequest {
     /// The weight that the supporting resource's progress contributes to the supported goal's progress. This can be 0, 1, or any value in between.
     #[serde(
-        with = "rust_decimal::serde::arbitrary_precision_option",
+        with = "crate::number::option",
         skip_serializing_if = "Option::is_none"
     )]
     pub contribution_weight: Option<rust_decimal::Decimal>,

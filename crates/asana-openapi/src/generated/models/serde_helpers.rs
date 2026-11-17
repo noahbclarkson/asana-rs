@@ -70,9 +70,7 @@ pub(crate) mod clearable_decimal {
         serializer: S,
     ) -> Result<S::Ok, S::Error> {
         match value {
-            Some(Clearable::Set(inner)) => {
-                rust_decimal::serde::arbitrary_precision::serialize(inner, serializer)
-            }
+            Some(Clearable::Set(inner)) => crate::number::serialize(inner, serializer),
             Some(Clearable::Clear) | None => serializer.serialize_none(),
         }
     }

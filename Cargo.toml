@@ -35,10 +35,10 @@ hmac = "0.13"
 http = "1"
 rand = "0.9"
 reqwest = { version = "0.13", default-features = false, features = ["rustls"] }
-rust_decimal = { version = "1.43", default-features = false, features = ["serde-with-arbitrary-precision", "std"] }
+rust_decimal = { version = "1.43", default-features = false, features = ["std"] }
 secrecy = "0.10"
 serde = { version = "1", features = ["derive"] }
-serde_json = { version = "1", features = ["arbitrary_precision"] }
+serde_json = "1"
 serde_path_to_error = "0.1"
 serde_urlencoded = "0.7"
 sha2 = "0.11"

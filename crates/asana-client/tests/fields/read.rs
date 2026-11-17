@@ -70,13 +70,14 @@ fn value(gid_text: &str) -> CustomFieldValue {
 }
 
 #[test]
-fn text_and_number_read_their_values_and_the_number_keeps_its_digits() {
+fn text_and_number_read_their_values_and_the_number_reads_as_its_shortest_text() {
     assert_eq!(
         value("1201234567890001").as_text(),
         Some("Call before Friday")
     );
     let fee = value("1201234567890002").as_number().unwrap();
-    assert_eq!(fee.to_string(), "1250.50");
+    // A JSON number has no trailing zeros, so `1250.50` reads as `1250.5`, the same value.
+    assert_eq!(fee.to_string(), "1250.5");
     assert_eq!(fee, Decimal::new(125_050, 2));
 }
 

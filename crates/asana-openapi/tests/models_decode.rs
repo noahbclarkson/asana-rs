@@ -158,23 +158,31 @@ fn a_full_task_with_memberships_custom_fields_and_nulls() {
 }
 
 #[test]
-fn a_number_keeps_every_digit() {
-    // From the bytes, as a response arrives: a `json!` literal would pass through `f64` first.
+fn a_number_reads_as_the_shortest_text_of_its_double() {
+    // Asana sends and stores numbers as doubles, so a number reads as the shortest text that
+    // turns back into the same double: what Asana holds, without binary noise.
+    let body = r#"{"number_value": 1250.1, "precision": 1}"#;
+    let field: CustomField = serde_json::from_str(body).unwrap();
+    assert_eq!(
+        field.number_value,
+        Some(Decimal::from_str("1250.1").unwrap())
+    );
+    // More digits than a double carries come back as the double's own digits.
     let body = r#"{"number_value": 1234567890.123456789, "precision": 9}"#;
     let field: CustomField = serde_json::from_str(body).unwrap();
     assert_eq!(
         field.number_value,
-        Some(Decimal::from_str("1234567890.123456789").unwrap())
+        Some(Decimal::from_str("1234567890.1234567").unwrap())
     );
-    // Inside a union, which decodes through `serde_json::Value` first, too.
-    let body = r#"{"resource_type": "rate", "rate": 12345678901234.56789,
+    // Inside a union, which decodes through `serde_json::Value` first, the same holds.
+    let body = r#"{"resource_type": "rate", "rate": 12345678901234.56,
                    "resource": {"resource_type": "user"}}"#;
     let RateOrPlaceholder::Rate(rate) = serde_json::from_str(body).unwrap() else {
         panic!("a user's rate");
     };
     assert_eq!(
         rate.rate,
-        Some(Decimal::from_str("12345678901234.56789").unwrap())
+        Some(Decimal::from_str("12345678901234.56").unwrap())
     );
 }
 
