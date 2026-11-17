@@ -10,7 +10,7 @@ use std::fmt;
 
 use base64::Engine as _;
 use base64::engine::general_purpose::URL_SAFE_NO_PAD;
-use rand::RngCore as _;
+use rand::Rng as _;
 use secrecy::{ExposeSecret, SecretString};
 use sha2::{Digest as _, Sha256};
 use subtle::ConstantTimeEq as _;

@@ -11,7 +11,7 @@
 use std::time::Duration;
 
 use asana_openapi::endpoint::Method;
-use rand::Rng;
+use rand::RngExt as _;
 use time::OffsetDateTime;
 use time::macros::format_description;
 

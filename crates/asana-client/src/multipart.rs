@@ -6,7 +6,7 @@
 
 use asana_openapi::endpoint::{Part, PartValue};
 use bytes::{BufMut, Bytes, BytesMut};
-use rand::Rng;
+use rand::RngExt as _;
 use rand::distr::Alphanumeric;
 
 /// A form's body and the `Content-Type` header that names its boundary.
