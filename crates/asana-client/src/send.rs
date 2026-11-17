@@ -32,10 +32,15 @@ struct Answer {
 struct Attempts {
     /// Whether sending the request twice is safe.
     repeatable: bool,
+    /// Whether the request is a `DELETE`.
+    deletes: bool,
     /// How many times it has been sent.
     made: u32,
     /// Whether a rejected OAuth token has already been replaced once.
     refreshed: bool,
+    /// Whether an earlier attempt may have been carried out without its answer arriving (a
+    /// `5xx`, or a transport failure after the request may have reached Asana).
+    maybe_applied: bool,
 }
 
 /// What happens after an attempt.
@@ -57,6 +62,11 @@ struct Prepared {
 
 impl Client {
     /// Sends one operation and returns its result.
+    ///
+    /// A request is sent again only as the [`RetryPolicy`](crate::RetryPolicy) and the operation
+    /// allow: a request that creates something is never sent again once Asana may have carried it
+    /// out ([`Error::outcome`] is then [`Outcome::Unknown`](crate::Outcome::Unknown)). A `DELETE`
+    /// sent again after such an attempt and answered `404` counts as deleted.
     ///
     /// # Errors
     ///
@@ -130,8 +140,10 @@ impl Client {
         let prepared = self.prepare(endpoint)?;
         let mut state = Attempts {
             repeatable: safe_to_repeat(E::METHOD, E::IDEMPOTENT),
+            deletes: E::METHOD == Method::Delete,
             made: 0,
             refreshed: false,
+            maybe_applied: false,
         };
         let mut waited = Duration::ZERO;
         let outcome = loop {
@@ -170,7 +182,7 @@ impl Client {
                     span.record("status", response.status().as_u16());
                     self.judge(response, &token, &mut state).await
                 }
-                Err(error) => self.judge_failure(error, &state),
+                Err(error) => self.judge_failure(error, &mut state),
             };
             match step {
                 Step::Done(outcome) => break outcome,
@@ -188,6 +200,9 @@ impl Client {
 
     /// What to do after a response: finish, or send again after a wait. A `429`'s wait is the
     /// shared cooldown, which the next admission waits out, so it is not returned here.
+    ///
+    /// A `DELETE` answered `404` after an earlier attempt that may have been carried out is a
+    /// success: the object is gone, most likely deleted by that attempt.
     async fn judge(
         &self,
         response: http::Response<Bytes>,
@@ -231,7 +246,15 @@ impl Client {
             );
             return Step::Again(Duration::ZERO);
         }
+        if status == StatusCode::NOT_FOUND && state.deletes && state.maybe_applied {
+            tracing::debug!(
+                attempt = state.made,
+                "a repeated delete found nothing to delete; an earlier attempt deleted it"
+            );
+            return Step::Done(Ok(Answer { body: Bytes::new() }));
+        }
         if retryable_status(status) && state.repeatable && inner.retry.allows_another(state.made) {
+            state.maybe_applied = true;
             let wait = inner.retry.backoff(state.made);
             tracing::debug!(
                 attempt = state.made,
@@ -240,11 +263,16 @@ impl Client {
             );
             return Step::Again(wait);
         }
-        Step::Done(Err(Error::from_status(status, response.body(), state.made)))
+        Step::Done(Err(Error::from_status(
+            status,
+            response.body(),
+            state.made,
+            state.repeatable,
+        )))
     }
 
     /// What to do when no response came back.
-    fn judge_failure(&self, error: TransportError, state: &Attempts) -> Step {
+    fn judge_failure(&self, error: TransportError, state: &mut Attempts) -> Step {
         let retry = &self.inner.retry;
         let may_retry = error.is_transient()
             && (state.repeatable || !error.may_have_reached_asana())
@@ -253,8 +281,10 @@ impl Client {
             return Step::Done(Err(Error::Transport {
                 source: error,
                 attempts: state.made,
+                safe_to_repeat: state.repeatable,
             }));
         }
+        state.maybe_applied |= error.may_have_reached_asana();
         let wait = retry.backoff(state.made);
         tracing::debug!(attempt = state.made, wait_ms = millis(wait), kind = %error.kind(), "retrying after a transport failure");
         Step::Again(wait)
@@ -363,7 +393,12 @@ pub fn decode_response<E: Endpoint>(status: StatusCode, body: &[u8]) -> Result<E
     if status.is_success() {
         decode_output::<E>(body)
     } else {
-        Err(Error::from_status(status, body, 1))
+        Err(Error::from_status(
+            status,
+            body,
+            1,
+            safe_to_repeat(E::METHOD, E::IDEMPOTENT),
+        ))
     }
 }
 

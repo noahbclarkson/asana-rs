@@ -35,7 +35,7 @@ fn every_error() -> Vec<Error> {
     let body = body();
     let mut errors: Vec<Error> = [400, 401, 402, 403, 404, 412, 418, 451, 500, 503]
         .into_iter()
-        .map(|status| Error::from_status(StatusCode::from_u16(status).unwrap(), &body, 1))
+        .map(|status| Error::from_status(StatusCode::from_u16(status).unwrap(), &body, 1, false))
         .collect();
     let decode = serde_json::from_slice::<u32>(&body).unwrap_err();
     let encode =
@@ -62,6 +62,7 @@ fn every_error() -> Vec<Error> {
         Error::Transport {
             source: TransportError::timeout("operation timed out"),
             attempts: 1,
+            safe_to_repeat: false,
         },
         Error::Auth(AuthError::Revoked),
         Error::Auth(AuthError::Malformed),
@@ -138,7 +139,7 @@ fn no_error_prints_a_body_a_message_or_a_query_value() {
 
 #[test]
 fn asanas_messages_stay_readable_on_purpose() {
-    let error = Error::from_status(StatusCode::NOT_FOUND, &body(), 1);
+    let error = Error::from_status(StatusCode::NOT_FOUND, &body(), 1, true);
     let messages: Vec<&str> = error.api_errors().unwrap().messages().collect();
     assert_eq!(messages.len(), 2);
     assert!(messages[0].contains(MARKER));
@@ -148,7 +149,7 @@ fn asanas_messages_stay_readable_on_purpose() {
     assert!(debug.contains("6 sad squid snuggle softly"), "{debug}");
 
     let Error::SyncTokenExpired { sync } =
-        Error::from_status(StatusCode::PRECONDITION_FAILED, &body(), 1)
+        Error::from_status(StatusCode::PRECONDITION_FAILED, &body(), 1, true)
     else {
         panic!("expected SyncTokenExpired");
     };

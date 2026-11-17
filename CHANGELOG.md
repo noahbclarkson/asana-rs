@@ -86,5 +86,13 @@ These change what code built against an earlier revision of `main` sees or compi
   was never sent) instead of waiting out the whole cooldown while holding a permit.
   `RetryPolicy::never()` therefore never waits for a cooldown. A `Retry-After` over a day is read
   as a day; before, a value too large for the clock panicked the calling task.
+- `asana-client`: `Error::Server` and `Error::Transport` gain a field, `safe_to_repeat: bool`
+  (a pattern that lists every field needs `..` or the new one). `Error::is_retryable()` is no
+  longer true for a request that creates something when Asana may have carried it out (a `5xx`,
+  a timeout or a connection lost after it was made); before, a caller retrying on it made the
+  duplicate the client itself refuses to make. New: `Error::outcome()` and the `Outcome` enum
+  (`NotSent`, `Refused`, `Unknown`, `Applied`). A `DELETE` resent after an attempt whose answer
+  was lost, and answered `404`, now succeeds instead of returning `Error::NotFound` for a delete
+  that worked.
 
 [0.1.0]: https://github.com/noahbclarkson/asana-rs/releases/tag/v0.1.0

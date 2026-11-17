@@ -2,10 +2,11 @@
 
 use std::time::Duration;
 
-use asana_client::{Error, Limits, RetryPolicy, TransportError};
+use asana_client::{Error, Limits, Outcome, RetryPolicy, TransportError};
 
 use crate::support::{
-    AddTag, CreateThing, Scripted, client, client_with, get_task, reply, reply_with, task_body,
+    AddTag, CreateThing, DeleteThing, Scripted, client, client_with, get_task, reply, reply_with,
+    task_body,
 };
 
 fn too_many(seconds: &str) -> http::Response<bytes::Bytes> {
@@ -268,4 +269,95 @@ async fn a_retry_after_too_large_for_the_clock_does_not_panic() {
         "{error:?}"
     );
     assert_eq!(transport.count(), 1);
+}
+
+fn create() -> CreateThing {
+    CreateThing {
+        name: "Acme".into(),
+    }
+}
+
+#[tokio::test(start_paused = true)]
+async fn a_create_whose_outcome_is_unknown_is_never_called_retryable() {
+    for failure in [
+        Err(TransportError::timeout("slow")),
+        Err(TransportError::other("connection reset")),
+        Ok(reply(503, "{}")),
+        Ok(reply(500, "{}")),
+    ] {
+        let transport = Scripted::replies(vec![failure]);
+        let error = client(transport.clone()).send(create()).await.unwrap_err();
+        assert_eq!(error.outcome(), Outcome::Unknown, "{error:?}");
+        assert!(!error.is_retryable(), "{error:?}");
+        assert!(
+            matches!(
+                error,
+                Error::Transport {
+                    safe_to_repeat: false,
+                    ..
+                } | Error::Server {
+                    safe_to_repeat: false,
+                    ..
+                }
+            ),
+            "{error:?}"
+        );
+        assert_eq!(transport.count(), 1);
+    }
+}
+
+#[tokio::test(start_paused = true)]
+async fn not_sent_refused_and_unknown_are_told_apart() {
+    // Never reached Asana: safe to send again, whatever it does.
+    let policy = RetryPolicy::builder().max_attempts(1).build();
+    let transport = Scripted::replies(vec![Err(TransportError::connect("refused"))]);
+    let error = client_with(transport, policy, Limits::default())
+        .send(create())
+        .await
+        .unwrap_err();
+    assert_eq!(error.outcome(), Outcome::NotSent);
+    assert!(error.is_retryable());
+
+    // Refused: Asana did nothing.
+    let transport = Scripted::replies(vec![Ok(reply(400, "{}"))]);
+    let error = client(transport).send(create()).await.unwrap_err();
+    assert_eq!(error.outcome(), Outcome::Refused);
+    assert!(!error.is_retryable());
+
+    // A read whose outcome is unknown is still worth trying again: reading twice is harmless.
+    let transport = Scripted::new(|_, _| Err(TransportError::timeout("slow")));
+    let error = client(transport.clone())
+        .send(get_task())
+        .await
+        .unwrap_err();
+    assert_eq!(transport.count(), 5);
+    assert_eq!(error.outcome(), Outcome::Unknown);
+    assert!(error.is_retryable());
+
+    // Applied: the answer came but could not be read.
+    let transport = Scripted::replies(vec![Ok(reply(201, r#"{"data":{"gid":7}}"#))]);
+    let error = client(transport).send(create()).await.unwrap_err();
+    assert_eq!(error.outcome(), Outcome::Applied, "{error:?}");
+}
+
+#[tokio::test(start_paused = true)]
+async fn a_delete_sent_again_after_a_lost_answer_and_answered_404_counts_as_deleted() {
+    for lost in [Err(TransportError::timeout("slow")), Ok(reply(503, "{}"))] {
+        let transport = Scripted::replies(vec![lost, Ok(reply(404, "{}"))]);
+        client(transport.clone()).send(DeleteThing).await.unwrap();
+        assert_eq!(transport.count(), 2);
+    }
+
+    // A 404 on the first attempt is still the caller's to see.
+    let transport = Scripted::replies(vec![Ok(reply(404, "{}"))]);
+    let error = client(transport).send(DeleteThing).await.unwrap_err();
+    assert!(error.is_not_found(), "{error:?}");
+
+    // And so is one after an attempt that never reached Asana.
+    let transport = Scripted::replies(vec![
+        Err(TransportError::connect("refused")),
+        Ok(reply(404, "{}")),
+    ]);
+    let error = client(transport).send(DeleteThing).await.unwrap_err();
+    assert!(error.is_not_found(), "{error:?}");
 }

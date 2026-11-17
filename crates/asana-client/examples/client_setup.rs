@@ -69,6 +69,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }) => {
             println!("still limited after {attempts} sends; Asana asks for {retry_after:?}");
         }
+        // Never true for a create that may have been carried out: look for it before sending again.
         Err(other) if other.is_retryable() => println!("worth trying later: {other}"),
         Err(other) => return Err(other.into()),
     }

@@ -62,7 +62,7 @@ pub use custom_field_value::{
     CustomDate, CustomFieldValue, EnumOptionRef, PersonRef, ResourceRef, TaskCustomField,
     TaskCustomFields, custom_fields_map,
 };
-pub use error::{ApiError, ApiErrors, DecodeError, DecodeErrorKind, Error, SyncToken};
+pub use error::{ApiError, ApiErrors, DecodeError, DecodeErrorKind, Error, Outcome, SyncToken};
 pub use html::Html;
 pub use limits::Limits;
 pub use page::{Items, Page, Pages};

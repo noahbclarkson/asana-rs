@@ -14,7 +14,7 @@ use http::StatusCode;
 use serde::{Deserialize, Serialize};
 
 use crate::auth::AuthError;
-use crate::transport::TransportError;
+use crate::transport::{TransportError, TransportErrorKind};
 
 /// Everything that can go wrong sending an operation to Asana.
 ///
@@ -50,7 +50,8 @@ pub enum Error {
         /// How many times the request was sent.
         attempts: u32,
     },
-    /// A `5xx` answer, after any retries the method allows.
+    /// A `5xx` answer, after any retries the method allows. Asana may have carried the request
+    /// out ([`Outcome::Unknown`]).
     #[error("Asana failed with {status} (attempts: {attempts})")]
     Server {
         /// The status code.
@@ -59,6 +60,10 @@ pub enum Error {
         phrase: Option<String>,
         /// How many times the request was sent.
         attempts: u32,
+        /// Whether sending the request again is safe (a `GET`, `PUT`, `DELETE` or an idempotent
+        /// `POST`). When false, the request creates something that may now exist: look for it
+        /// before sending it again.
+        safe_to_repeat: bool,
     },
     /// `451`: Asana will not serve requests from where this one came from.
     #[error("Asana refuses requests from this location (451)")]
@@ -99,13 +104,18 @@ pub enum Error {
         /// What was wrong, in words that hold no value from the request.
         reason: &'static str,
     },
-    /// No response came back, after any retries the method allows.
+    /// No response came back, after any retries the method allows. Unless no connection was
+    /// made, Asana may have carried the request out ([`Outcome::Unknown`]).
     #[error("no response came back from Asana (attempts: {attempts})")]
     Transport {
         /// What went wrong.
         source: TransportError,
         /// How many times the request was sent.
         attempts: u32,
+        /// Whether sending the request again is safe (a `GET`, `PUT`, `DELETE` or an idempotent
+        /// `POST`). When false and the request may have reached Asana, it creates something that
+        /// may now exist: look for it before sending it again.
+        safe_to_repeat: bool,
     },
     /// No usable token could be had.
     #[error(transparent)]
@@ -165,14 +175,55 @@ impl Error {
         })
     }
 
-    /// Whether the same request could succeed later: a rate limit, a server failure or a
-    /// transport failure. The client has already retried what its policy allows.
+    /// Whether sending the same request again later could succeed without risk: a rate limit, a
+    /// token that could not be had for now, or a server or transport failure of a request that is
+    /// safe to repeat or never reached Asana. The client has already retried what its policy
+    /// allows.
+    ///
+    /// Never true when the request creates something and its [`outcome`](Self::outcome) is
+    /// [`Outcome::Unknown`]: Asana may have created it, and sending it again could make a second
+    /// one. Look for it first.
     pub fn is_retryable(&self) -> bool {
         match self {
-            Self::RateLimited { .. } | Self::Server { .. } => true,
-            Self::Transport { source, .. } => source.is_transient(),
+            Self::RateLimited { .. } => true,
+            Self::Server { safe_to_repeat, .. } => *safe_to_repeat,
+            Self::Transport {
+                source,
+                safe_to_repeat,
+                ..
+            } => source.is_transient() && (*safe_to_repeat || !source.may_have_reached_asana()),
             Self::Auth(AuthError::Unavailable { .. }) => true,
             _ => false,
+        }
+    }
+
+    /// What became of the request at Asana, as far as the client knows.
+    pub fn outcome(&self) -> Outcome {
+        match self {
+            Self::BadRequest(_)
+            | Self::Unauthorized(_)
+            | Self::PremiumRequired(_)
+            | Self::Forbidden(_)
+            | Self::NotFound(_)
+            | Self::LegalBlock(_)
+            | Self::SyncTokenExpired { .. }
+            | Self::UnexpectedStatus { .. } => Outcome::Refused,
+            Self::RateLimited { attempts: 0, .. } => Outcome::NotSent,
+            Self::RateLimited { .. } => Outcome::Refused,
+            Self::Server { .. } => Outcome::Unknown,
+            Self::Transport { source, .. } => match source.kind() {
+                TransportErrorKind::Connect => Outcome::NotSent,
+                TransportErrorKind::BodyTooLarge { .. } => Outcome::Applied,
+                _ => Outcome::Unknown,
+            },
+            Self::MissingField(_)
+            | Self::Decode { .. }
+            | Self::JobFailed { .. }
+            | Self::JobTimedOut { .. } => Outcome::Applied,
+            Self::Encode { .. }
+            | Self::InvalidRequest { .. }
+            | Self::Auth(_)
+            | Self::BatchFull { .. } => Outcome::NotSent,
         }
     }
 
@@ -198,8 +249,14 @@ impl Error {
         }
     }
 
-    /// The error for a final, non-success answer. `attempts` is how many times it was sent.
-    pub(crate) fn from_status(status: StatusCode, body: &[u8], attempts: u32) -> Self {
+    /// The error for a final, non-success answer. `attempts` is how many times it was sent, and
+    /// `safe_to_repeat` whether sending it again is safe.
+    pub(crate) fn from_status(
+        status: StatusCode,
+        body: &[u8],
+        attempts: u32,
+        safe_to_repeat: bool,
+    ) -> Self {
         let errors = ApiErrors::parse(body);
         match status.as_u16() {
             400 => Self::BadRequest(errors),
@@ -216,10 +273,32 @@ impl Error {
                 status,
                 phrase: errors.errors.iter().find_map(|error| error.phrase.clone()),
                 attempts,
+                safe_to_repeat,
             },
             _ => Self::UnexpectedStatus { status, errors },
         }
     }
+}
+
+/// What became of a request at Asana when it failed, from [`Error::outcome`].
+///
+/// The client never sends a request that creates something again once its outcome is
+/// [`Unknown`](Self::Unknown); a caller retrying on their own should not either, without first
+/// looking for what it would have created.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+#[non_exhaustive]
+pub enum Outcome {
+    /// The request never reached Asana: it could not be built, no token could be had, the
+    /// client's own rate limit refused it, or no connection was made. Nothing happened there.
+    NotSent,
+    /// Asana answered and did not carry the request out: a `4xx`, including a `429`.
+    Refused,
+    /// The request reached Asana, or may have, and no answer says what it did: a `5xx`, a
+    /// timeout, a connection lost after it was made. Asana may have carried it out.
+    Unknown,
+    /// Asana carried the request out, and what failed came after: its answer could not be read
+    /// or lacked a field, or a job it started failed or was still running.
+    Applied,
 }
 
 /// The body of the events endpoint's `412`, which carries a fresh sync token.

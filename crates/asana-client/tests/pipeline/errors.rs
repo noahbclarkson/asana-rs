@@ -22,7 +22,7 @@ fn each_status_maps_to_its_error() {
     assert!(matches!(status(418), Error::UnexpectedStatus { status, .. } if status == 418));
     assert!(matches!(status(412), Error::UnexpectedStatus { status, .. } if status == 412));
     assert!(
-        matches!(status(503), Error::Server { status, phrase: None, attempts: 1 } if status == 503)
+        matches!(status(503), Error::Server { status, phrase: None, attempts: 1, .. } if status == 503)
     );
     for code in [400, 401, 402, 403, 404, 418, 451, 500] {
         let error = status(code);

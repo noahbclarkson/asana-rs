@@ -161,7 +161,8 @@ impl<'a> Attachments<'a> {
     /// Deletes an attachment.
     ///
     /// Sends `deleteAttachment` (`DELETE /attachments/{attachment_gid}`); scope
-    /// `attachments:delete`; retried on a server failure.
+    /// `attachments:delete`; retried on a server failure, and a `404` to a retry after an attempt
+    /// whose answer was lost counts as deleted.
     pub fn delete(&self, attachment: AttachmentGid) -> Request<'a, DeleteAttachment> {
         Request::new(self.client, DeleteAttachment::builder(attachment).build())
     }
@@ -266,6 +267,7 @@ async fn fetch(client: &Client, url: &str, max_bytes: usize) -> Result<Bytes, Er
             .map_err(|source| Error::Transport {
                 source,
                 attempts: 1,
+                safe_to_repeat: true,
             })?;
         let status = response.status();
         if status.is_redirection() {
@@ -278,7 +280,7 @@ async fn fetch(client: &Client, url: &str, max_bytes: usize) -> Result<Bytes, Er
             continue;
         }
         if !status.is_success() {
-            return Err(Error::from_status(status, response.body(), 1));
+            return Err(Error::from_status(status, response.body(), 1, true));
         }
         let declared = response
             .headers()
@@ -290,6 +292,7 @@ async fn fetch(client: &Client, url: &str, max_bytes: usize) -> Result<Bytes, Er
             return Err(Error::Transport {
                 source: TransportError::body_too_large(max_bytes),
                 attempts: 1,
+                safe_to_repeat: true,
             });
         }
         return Ok(body);

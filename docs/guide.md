@@ -115,7 +115,7 @@ When a request fails, the client decides whether to send it again:
 | `429 Too Many Requests` | Yes, for any operation, after exactly `Retry-After` (seconds, fractional seconds or an HTTP date). If `Retry-After` is longer than `RetryPolicy::max_wait`, the call ends with `Error::RateLimited` at once, and so does every other call on the client until less than `max_wait` of the cooldown is left. |
 | `500`, `502`, `503`, `504` | Only when sending twice is safe: `GET`, `PUT`, `DELETE`, and the `POST`s the generator marks idempotent (adding or removing tags, followers, projects, dependencies and members, `addTaskForSection`, `setParentForTask`). Jittered back-off from half a second, doubling, at most 30 seconds and `max_wait`. |
 | No connection was made | Yes, for any operation: the request never reached Asana. |
-| A timeout or other transport failure | Only when sending twice is safe, as for a `5xx`: Asana may have acted. |
+| A timeout or other transport failure | Only when sending twice is safe, as for a `5xx`: Asana may have acted. A `DELETE` resent after one and answered `404` counts as deleted. |
 | A response body over the transport's cap | Never. |
 | `401` with `Auth::oauth` | Once, at once, after telling the token source the token was rejected; this retry happens even with `RetryPolicy::never()`. |
 | Anything else (`400`, `402`, `403`, `404`, `451`) | Never. |
@@ -614,6 +614,7 @@ match client
     }) => {
         println!("still limited after {attempts} sends; Asana asks for {retry_after:?}");
     }
+    // Never true for a create that may have been carried out: look for it before sending again.
     Err(other) if other.is_retryable() => println!("worth trying later: {other}"),
     Err(other) => return Err(other.into()),
 }
@@ -623,8 +624,8 @@ match client
 |---|---|
 | `BadRequest`, `Unauthorized`, `PremiumRequired`, `Forbidden`, `NotFound`, `LegalBlock` | Asana answered `400`, `401` (after the one OAuth refresh), `402`, `403`, `404`, `451`. Each holds `ApiErrors`, Asana's messages. |
 | `RateLimited { retry_after, attempts }` | Still `429` after the retry policy, a `Retry-After` longer than `max_wait`, or more than `max_wait` left of the client's cooldown from an earlier `429` (`attempts: 0` when it was never sent). |
-| `Server { status, phrase, attempts }` | A `5xx` after the retries the operation allows. `phrase` is what Asana's support asks for. |
-| `Transport { source, attempts }` | No response came back. `source.kind()` says whether a connection was made. |
+| `Server { status, phrase, attempts, safe_to_repeat }` | A `5xx` after the retries the operation allows. `phrase` is what Asana's support asks for. |
+| `Transport { source, attempts, safe_to_repeat }` | No response came back. `source.kind()` says whether a connection was made. |
 | `Auth(AuthError)` | No usable token: `Revoked` means the person must connect again. |
 | `SyncTokenExpired { sync }` | The events API's `412`; start again from `sync`. |
 | `Decode { operation, path, .. }` | A response did not have the shape the specification describes; `path` is the JSON path that failed, such as `data.memberships[0].section`. |
@@ -633,9 +634,15 @@ match client
 | `BatchFull`, `InvalidRequest`, `Encode` | The request could not be made: an eleventh batch action, a list with no filter, a body that would not serialise. Nothing was sent. |
 | `UnexpectedStatus { status, errors }` | Any other status. |
 
-`status()` gives the HTTP status when there was one, `is_not_found()` tests for `404`,
-`api_errors()` gives Asana's messages, and `is_retryable()` says whether the same request could
-succeed later. `Error` is `#[non_exhaustive]`, so a `match` needs a catch-all arm.
+`status()` gives the HTTP status when there was one, `is_not_found()` tests for `404`, and
+`api_errors()` gives Asana's messages. `outcome()` says what became of the request at Asana:
+`NotSent` (it never got there), `Refused` (Asana answered and did nothing), `Unknown` (a `5xx`, a
+timeout or a lost connection: Asana may have carried it out) or `Applied` (it was carried out and
+what came after failed, such as reading the answer). `is_retryable()` says whether sending the same
+request again later could succeed without risk; it is never true for a request that creates
+something when its outcome is `Unknown`, because a second send could create a second one, so look
+for what it would have made first. `safe_to_repeat` on `Server` and `Transport` says which kind of
+request it was. `Error` is `#[non_exhaustive]`, so a `match` needs a catch-all arm.
 
 No `Display` or `Debug` of an error in this crate includes a response body, Asana's messages, a
 query value, a header or a token, because those carry customer data and `Debug` is what

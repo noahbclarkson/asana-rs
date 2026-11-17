@@ -123,7 +123,8 @@ impl<'a> Tasks<'a> {
 
     /// Deletes a task (to the trash, from which it can be restored for 30 days).
     ///
-    /// Sends `deleteTask` (`DELETE /tasks/{task_gid}`), scope `tasks:delete`. Retried.
+    /// Sends `deleteTask` (`DELETE /tasks/{task_gid}`), scope `tasks:delete`. Retried; a `404`
+    /// to a retry after an attempt whose answer was lost counts as deleted.
     pub fn delete(&self, task: TaskGid) -> Request<'a, DeleteTask> {
         Request::new(self.client, DeleteTask::builder(task).build())
     }

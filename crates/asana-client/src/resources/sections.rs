@@ -91,7 +91,7 @@ impl<'a> Sections<'a> {
     /// Deletes a section. Asana refuses unless the section is empty and not the project's last.
     ///
     /// Sends `deleteSection` (`DELETE /sections/{section_gid}`), scope `projects:write`.
-    /// Retried.
+    /// Retried; a `404` to a retry after an attempt whose answer was lost counts as deleted.
     pub fn delete(&self, section: SectionGid) -> Request<'a, DeleteSection> {
         Request::new(self.client, DeleteSection::builder(section).build())
     }

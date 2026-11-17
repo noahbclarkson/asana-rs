@@ -155,7 +155,8 @@ impl<'a> Stories<'a> {
     /// Deletes a comment the token's user wrote.
     ///
     /// Sends `deleteStory` (`DELETE /stories/{story_gid}`); scope `stories:delete`; retried on a
-    /// server failure.
+    /// server failure, and a `404` to a retry after an attempt whose answer was lost counts as
+    /// deleted.
     pub fn delete(&self, story: StoryGid) -> Request<'a, DeleteStory> {
         Request::new(self.client, DeleteStory::builder(story).build())
     }
