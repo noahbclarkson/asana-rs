@@ -26,7 +26,7 @@ asana-webhooks = { path = "crates/asana-webhooks", version = "0.1.0" }
 asana-client = { path = "crates/asana-client", version = "0.1.0" }
 asana-fake = { path = "crates/asana-fake", version = "0.1.0" }
 
-base64 = "0.22"
+base64 = "0.23"
 bon = "3.10"
 bytes = "1"
 futures-util = { version = "0.3", default-features = false, features = ["std"] }
