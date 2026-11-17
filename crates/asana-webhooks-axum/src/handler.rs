@@ -1,6 +1,8 @@
 //! The axum side: the route, reading the raw body with a cap, and turning the [`Reply`] into a
 //! response. Every protocol rule is in [`Receiver::receive`].
 
+use std::collections::HashMap;
+
 use asana_webhooks::{FnHeaders, HandshakeStore, Receiver, Reply, SecretLookup, Sink};
 use axum::Router;
 use axum::body::Body;
@@ -13,9 +15,11 @@ use futures_util::StreamExt as _;
 
 /// A router answering `POST {path}/{route_key}` with [`handle`], with `receiver` as its state.
 ///
-/// `path` is the base the webhooks' targets were made from, without a trailing slash (for example
-/// `/webhooks/asana` for targets `https://example.com/webhooks/asana/{route_key}`). The result fits
-/// any application's router, whatever its state: `.merge` it, or `.nest` it with an empty `path`.
+/// `path` is the base the webhooks' targets were made from (for example `/webhooks/asana` for
+/// targets `https://example.com/webhooks/asana/{route_key}`); a trailing `/` is ignored, as the
+/// actix adapter ignores it. The result fits any application's router, whatever its state:
+/// `.merge` it, or `.nest` it with an empty `path`, under a prefix that may have path parameters
+/// of its own (`/tenants/{tenant}/hooks`), as long as none is called `route_key`.
 pub fn router<H, L, S, T>(receiver: &Receiver<H, L, S>, path: &str) -> Router<T>
 where
     H: HandshakeStore + 'static,
@@ -24,12 +28,19 @@ where
     T: Clone + Send + Sync + 'static,
 {
     Router::new()
-        .route(&format!("{path}/{{route_key}}"), post(handle::<H, L, S>))
+        .route(
+            &format!("{}/{{{ROUTE_KEY}}}", path.trim_end_matches('/')),
+            post(handle::<H, L, S>),
+        )
         .with_state(receiver.clone())
 }
 
-/// The axum handler for a webhook target: mount it on a path whose last segment is
-/// `{route_key}`, with a [`Receiver`] as state. [`router`] does both.
+/// The name of the path parameter that holds the route key.
+const ROUTE_KEY: &str = "route_key";
+
+/// The axum handler for a webhook target: mount it on a path with a `{route_key}` parameter
+/// (other parameters, from a prefix it is nested under, are ignored), with a [`Receiver`] as
+/// state. [`router`] does both.
 ///
 /// It refuses a body longer than the receiver's
 /// [`max_body_bytes`](asana_webhooks::Limits::max_body_bytes) with `413`, from its declared
@@ -39,7 +50,7 @@ where
 /// sensitive, so it stays out of any debug output of the response.
 pub async fn handle<H, L, S>(
     State(receiver): State<Receiver<H, L, S>>,
-    Path(route_key): Path<String>,
+    Path(params): Path<HashMap<String, String>>,
     headers: HeaderMap,
     body: Body,
 ) -> Response
@@ -48,6 +59,10 @@ where
     L: SecretLookup + 'static,
     S: Sink + 'static,
 {
+    let Some(route_key) = params.get(ROUTE_KEY) else {
+        // Mounted without a `{route_key}`: no route can be found.
+        return StatusCode::NOT_FOUND.into_response();
+    };
     let cap = receiver.current_limits().max_body_bytes;
     if declared_length(&headers).is_some_and(|length| length > cap) {
         return StatusCode::PAYLOAD_TOO_LARGE.into_response();
@@ -58,7 +73,7 @@ where
     };
     let lookup =
         FnHeaders::new(|name: &str| headers.get(name).and_then(|value| value.to_str().ok()));
-    into_response(&receiver.receive(&route_key, &lookup, &bytes).await)
+    into_response(&receiver.receive(route_key, &lookup, &bytes).await)
 }
 
 /// The `Content-Length` the request declares, when it declares a readable one.

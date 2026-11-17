@@ -415,3 +415,54 @@ async fn the_router_nests_under_an_application_with_its_own_state() {
     assert_eq!(response.status(), StatusCode::OK);
     assert!(!harness.nothing_delivered());
 }
+
+#[tokio::test]
+async fn nested_under_a_prefix_with_its_own_parameter_it_still_answers() {
+    let harness = Harness::new();
+    let app: Router = Router::new().nest("/tenants/{tenant}/hooks", router(&harness.receiver, ""));
+    let route = RouteKey::generate();
+    harness
+        .receiver
+        .handshakes()
+        .expect(&route, Duration::from_secs(60))
+        .await
+        .unwrap();
+
+    let request = Request::builder()
+        .method("POST")
+        .uri(format!("/tenants/acme/hooks/{route}"))
+        .header("X-Hook-Secret", "fresh-secret-from-asana")
+        .body(Body::empty())
+        .unwrap();
+    let response = match app.oneshot(request).await {
+        Ok(response) => response,
+        Err(infallible) => match infallible {},
+    };
+
+    assert_eq!(response.status(), StatusCode::OK);
+    assert_eq!(
+        response.headers()["x-hook-secret"].as_bytes(),
+        b"fresh-secret-from-asana"
+    );
+}
+
+#[tokio::test]
+async fn a_trailing_slash_on_the_base_path_is_ignored() {
+    let mut harness = Harness::new();
+    let app: Router = router(&harness.receiver, "/webhooks/asana/");
+    let body = SECTION_ENTERED.as_bytes();
+    let signature = sign(&harness.secret, body).to_hex();
+    let request = Request::builder()
+        .method("POST")
+        .uri(harness.uri())
+        .header("X-Hook-Signature", signature)
+        .body(Body::from(body.to_vec()))
+        .unwrap();
+    let response = match app.oneshot(request).await {
+        Ok(response) => response,
+        Err(infallible) => match infallible {},
+    };
+
+    assert_eq!(response.status(), StatusCode::OK);
+    assert!(!harness.nothing_delivered());
+}

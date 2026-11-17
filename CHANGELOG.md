@@ -146,5 +146,8 @@ These change what code built against an earlier revision of `main` sees or compi
   not `400`. `asana-openapi`: `Endpoint` has a new provided constant, `OPT_FIELDS`, which every
   generated descriptor that takes `opt_fields` sets to its resource's `lists` function, and each
   field enum has a new `const fn lists(path) -> bool`.
+- `asana-webhooks-axum`: `router` works nested under a prefix with path parameters of its own
+  (`/tenants/{tenant}/hooks`); it answered every handshake and delivery `500` there, so webhook
+  creation failed. A trailing `/` on its base path is ignored, as in the actix adapter.
 
 [0.1.0]: https://github.com/noahbclarkson/asana-rs/releases/tag/v0.1.0
