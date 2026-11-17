@@ -12,7 +12,7 @@ use std::time::Duration;
 
 use time::OffsetDateTime;
 
-use crate::clock::{Clock, system_clock};
+use crate::clock::{Clock, deadline_after, system_clock};
 use crate::events::EventKey;
 use crate::handshake::StoreError;
 
@@ -84,7 +84,7 @@ impl MemoryDedupe {
         match state.seen.get(key) {
             Some(deadline) if *deadline > now => Sighting::Repeat,
             _ => {
-                state.seen.insert(*key, now + ttl);
+                state.seen.insert(*key, deadline_after(now, ttl));
                 Sighting::First
             }
         }

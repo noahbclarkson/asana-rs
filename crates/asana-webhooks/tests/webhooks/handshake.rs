@@ -185,3 +185,31 @@ fn dedupe_sweeps_expired_keys() {
     .unwrap();
     assert_eq!(format!("{dedupe:?}"), "MemoryDedupe { keys: 1, .. }");
 }
+
+#[test]
+fn a_time_to_live_of_duration_max_never_expires_and_never_panics() {
+    let (store, clock) = store();
+    let route = RouteKey::generate();
+    block_on(store.expect(&route, Duration::MAX)).unwrap();
+    clock.advance(Duration::from_secs(10 * 365 * 24 * 3600));
+    block_on(store.capture(&route, secret("abc"))).unwrap();
+
+    let dedupe = MemoryDedupe::with_clock(clock.clock());
+    let event = crate::receive(
+        r#"{"events":[{"created_at":"2026-03-02T09:00:00Z","action":"deleted",
+           "resource":{"gid":"1201234567890123","resource_type":"task"}}]}"#,
+    )
+    .events
+    .remove(0);
+    assert_eq!(
+        block_on(dedupe.observe(&event.key(), Duration::MAX)).unwrap(),
+        Sighting::First
+    );
+    assert_eq!(
+        block_on(dedupe.observe(&event.key(), Duration::MAX)).unwrap(),
+        Sighting::Repeat
+    );
+    // Even a clock moved by `Duration::MAX` stops at the latest time there is.
+    clock.advance(Duration::MAX);
+    assert_eq!(clock.now(), time::PrimitiveDateTime::MAX.assume_utc());
+}

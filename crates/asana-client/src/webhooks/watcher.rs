@@ -63,7 +63,7 @@ impl SeenTasks {
         if entries.contains_key(&key) {
             return false;
         }
-        entries.insert(key, now + self.ttl);
+        entries.insert(key, deadline_after(now, self.ttl));
         true
     }
 
@@ -92,6 +92,15 @@ impl SeenTasks {
     pub fn is_empty(&self) -> bool {
         self.entries().is_empty()
     }
+}
+
+/// `now` plus `ttl`, or the latest time there is when that is past it, so that a time to live of
+/// `Duration::MAX` ("never forget") never panics.
+fn deadline_after(now: OffsetDateTime, ttl: Duration) -> OffsetDateTime {
+    time::Duration::try_from(ttl)
+        .ok()
+        .and_then(|ttl| now.checked_add(ttl))
+        .unwrap_or_else(|| time::PrimitiveDateTime::MAX.assume_utc())
 }
 
 impl fmt::Debug for SeenTasks {

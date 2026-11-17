@@ -27,7 +27,7 @@ use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 use sha2::{Digest, Sha256};
 use time::OffsetDateTime;
 
-use crate::clock::{Clock, system_clock};
+use crate::clock::{Clock, deadline_after, system_clock};
 use crate::signing::{HandshakeReply, WebhookSecret, handshake_reply};
 
 /// The random part of a webhook's target path: 32 random bytes, written as 43 base64url characters.
@@ -317,7 +317,7 @@ impl MemoryHandshakeStore {
         entries.insert(
             digest,
             Entry {
-                deadline: now + ttl,
+                deadline: deadline_after(now, ttl),
                 secret: None,
             },
         );

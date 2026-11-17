@@ -168,3 +168,13 @@ async fn a_failed_poll_leaves_the_watcher_as_it_was() {
     // Compared with the last successful poll: task A is not new, task B is.
     assert_eq!(gids(&watcher.poll(&client).await.unwrap()), [TASK_B]);
 }
+
+#[test]
+fn a_seen_set_that_never_forgets_does_not_panic() {
+    let seen = SeenTasks::new(Duration::MAX);
+    let task: TaskGid = "1201234567890123".parse().unwrap();
+    let section: SectionGid = "1201234567890401".parse().unwrap();
+    assert!(seen.first_sighting(&task, &section));
+    assert!(!seen.first_sighting(&task, &section));
+    assert!(seen.contains(&task, &section));
+}

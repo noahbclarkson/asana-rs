@@ -122,5 +122,8 @@ These change what code built against an earlier revision of `main` sees or compi
   - `asana-openapi`: the struct `Part` (new: `Part::new(name, value)`) and the enums `Method`,
     `Envelope` and `PartValue`. The client refuses, before sending, a method the `http` crate
     cannot carry and a multipart part of a kind it cannot write.
+- `asana-webhooks` and `asana-client`: a time to live too long for the clock (`Duration::MAX`
+  for "never forget") in `MemoryDedupe`, `MemoryHandshakeStore`, `SeenTasks` and
+  `ManualClock::advance` now runs to the latest time there is instead of panicking.
 
 [0.1.0]: https://github.com/noahbclarkson/asana-rs/releases/tag/v0.1.0
