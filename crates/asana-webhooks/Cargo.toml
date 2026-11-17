@@ -6,9 +6,10 @@ edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
-keywords.workspace = true
-categories.workspace = true
+keywords = ["asana", "webhooks", "hmac", "signature"]
+categories = ["api-bindings", "web-programming"]
 readme = "README.md"
+documentation = "https://docs.rs/asana-webhooks"
 
 [dependencies]
 asana-openapi.workspace = true
@@ -23,6 +24,14 @@ thiserror.workspace = true
 time.workspace = true
 base64.workspace = true
 rand.workspace = true
+# The receiver: `Sink` for `mpsc::Sender<Delivery>`, and a span around each call.
+tokio.workspace = true
+tracing.workspace = true
+
+[package.metadata.docs.rs]
+# No cargo features and no platform-specific API: one target is the whole documentation.
+all-features = true
+targets = ["x86_64-unknown-linux-gnu"]
 
 [lints]
 workspace = true

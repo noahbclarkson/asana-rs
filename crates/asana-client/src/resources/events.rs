@@ -122,8 +122,8 @@ impl Events<'_> {
     /// Without a token, Asana's first-sync `412` is handled here: the answer is an empty page
     /// carrying the token Asana issued. With a token, an expired one is an error.
     ///
-    /// Sends `getEvents` (`GET /events?resource=…&sync=…`); no granular scope (reading the
-    /// resource is enough); retried like every read.
+    /// Sends `getEvents` (`GET /events?resource=…&sync=…`); it names no granular scope, so an OAuth
+    /// token needs the `default` scope (full permissions); retried like every read.
     ///
     /// # Errors
     ///

@@ -6,15 +6,32 @@ edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
-keywords.workspace = true
-categories.workspace = true
+keywords = ["asana", "webhooks", "axum"]
+categories = ["web-programming::http-server"]
 readme = "README.md"
+documentation = "https://docs.rs/asana-webhooks-axum"
 
 [dependencies]
 asana-webhooks.workspace = true
 axum.workspace = true
-bytes.workspace = true
-http.workspace = true
+# Reading the body frame by frame, to stop at the size cap.
+futures-util.workspace = true
+
+[dev-dependencies]
+asana-client.workspace = true
+# An in-memory Asana that handshakes and delivers signed events to the router.
+asana-fake.workspace = true
+# The example serves the router.
+axum = { workspace = true, features = ["tokio", "http1"] }
+time.workspace = true
+tokio = { workspace = true, features = ["macros", "rt-multi-thread", "net", "signal"] }
+# `ServiceExt::oneshot`, to call the router in tests.
+tower.workspace = true
+
+[package.metadata.docs.rs]
+# No cargo features and no platform-specific API: one target is the whole documentation.
+all-features = true
+targets = ["x86_64-unknown-linux-gnu"]
 
 [lints]
 workspace = true

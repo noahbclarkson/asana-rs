@@ -15,6 +15,26 @@
 //!
 //! Everything under `generated/` is written by `cargo xtask gen` from `spec/asana_oas.yaml` and is
 //! never edited by hand.
+//!
+//! A descriptor is data: its path, query, scope and output type, and nothing that sends it
+//! (`asana-client` does that).
+//!
+//! ```
+//! use asana_openapi::endpoint::Endpoint;
+//! use asana_openapi::endpoints::GetTask;
+//! use asana_openapi::fields;
+//! use asana_openapi::scopes::Scope;
+//!
+//! # fn main() -> Result<(), asana_openapi::ids::GidError> {
+//! let get = GetTask::builder("1200000000000001".parse()?)
+//!     .opt_fields(fields![Task: name, due_on])
+//!     .build();
+//! assert_eq!(get.path(), "/tasks/1200000000000001");
+//! assert!(get.query().iter().any(|(name, value)| name == "opt_fields" && value == "name,due_on"));
+//! assert_eq!(GetTask::SCOPE, Some(Scope::TasksRead));
+//! # Ok(())
+//! # }
+//! ```
 
 pub mod endpoint;
 pub mod fields;

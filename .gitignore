@@ -5,3 +5,6 @@
 *.swp
 .DS_Store
 /.claude/
+# insta writes these while a snapshot awaits review (`cargo insta review`)
+*.snap.new
+*.pending-snap

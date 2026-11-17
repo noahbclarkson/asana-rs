@@ -158,6 +158,14 @@
 //! assert_eq!(forged.status, 401);
 //! ```
 //!
+//! # A whole receiver
+//!
+//! [`Receiver`] is the steps above put together, with every status rule in one place, for a
+//! framework adapter to wrap: it takes the consumer's [`HandshakeStore`], a [`SecretLookup`] and a
+//! [`Sink`] (a `tokio::sync::mpsc::Sender<Delivery>` is one), and [`Receiver::receive`] turns a
+//! path segment, headers and raw body into a [`Reply`]. `asana-webhooks-axum` and
+//! `asana-webhooks-actix` are that wrapping for their frameworks.
+//!
 //! # Creating webhooks
 //!
 //! [`Filter`] builds the `filters` sent with `POST /webhooks`, and [`validate_filters`] checks them
@@ -171,6 +179,7 @@ mod filter;
 mod handshake;
 mod headers;
 mod inbound;
+mod receive;
 mod signing;
 
 pub use clock::{Clock, ManualClock, system_clock};
@@ -186,6 +195,9 @@ pub use handshake::{
 };
 pub use headers::{FnHeaders, HOOK_SECRET, HOOK_SIGNATURE, HeaderLookup};
 pub use inbound::{Inbound, InboundError, classify, classify_with};
+pub use receive::{
+    Busy, Delivery, MemorySecrets, Receiver, Reply, RouteSecret, SecretLookup, Sink,
+};
 pub use signing::{
     HandshakeReply, Signature, VerifiedBody, VerifyError, WebhookSecret, handshake_reply, sign,
     verify,

@@ -3,6 +3,8 @@
 //! Repository tasks. `cargo xtask gen` regenerates `crates/asana-openapi/src/generated/` from
 //! `spec/asana_oas.yaml` and the overlays; `cargo xtask gen --check` fails when the checked-in
 //! code differs from what the specification and this generator produce.
+//! `cargo xtask spec-diff <old.yaml> <new.yaml>` summarises what changed between two versions of
+//! the specification, for the scheduled spec-update pull request.
 //!
 //! The generator has two halves that meet at [`naming`]:
 //!
@@ -21,6 +23,7 @@ mod naming;
 mod overlay;
 mod scopes;
 mod spec;
+mod spec_diff;
 
 use std::path::PathBuf;
 use std::process::ExitCode;
@@ -37,8 +40,12 @@ fn main() -> ExitCode {
         ["gen", "--check"] => run(emit::Mode::Check, Half::Both),
         ["gen", "--only", "models"] => run(emit::Mode::Write, Half::Models),
         ["gen", "--only", "endpoints"] => run(emit::Mode::Write, Half::Endpoints),
+        ["spec-diff", old, new] => spec_diff::run(old, new),
         _ => {
-            eprintln!("usage: cargo xtask gen [--check | --only models | --only endpoints]");
+            eprintln!(
+                "usage: cargo xtask gen [--check | --only models | --only endpoints]\n       \
+                 cargo xtask spec-diff <old.yaml> <new.yaml>"
+            );
             ExitCode::from(2)
         }
     }

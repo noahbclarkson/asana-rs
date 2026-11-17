@@ -6,9 +6,10 @@ edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
-keywords.workspace = true
-categories.workspace = true
+keywords = ["asana", "fake", "testing", "mock"]
+categories = ["development-tools::testing", "api-bindings"]
 readme = "README.md"
+documentation = "https://docs.rs/asana-fake"
 
 [dependencies]
 asana-openapi.workspace = true
@@ -17,10 +18,20 @@ asana-client.workspace = true
 bytes.workspace = true
 futures-util.workspace = true
 http.workspace = true
-serde.workspace = true
 serde_json.workspace = true
+thiserror.workspace = true
 time.workspace = true
 tokio.workspace = true
+# Splitting a request's URL into its path and decoded query pairs.
+url.workspace = true
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["macros", "rt-multi-thread", "test-util"] }
+
+[package.metadata.docs.rs]
+# No cargo features and no platform-specific API: one target is the whole documentation.
+all-features = true
+targets = ["x86_64-unknown-linux-gnu"]
 
 [lints]
 workspace = true

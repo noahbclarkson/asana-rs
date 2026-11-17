@@ -6,14 +6,36 @@ edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
-keywords.workspace = true
-categories.workspace = true
+keywords = ["asana", "webhooks", "actix", "actix-web"]
+categories = ["web-programming::http-server"]
 readme = "README.md"
+documentation = "https://docs.rs/asana-webhooks-actix"
 
 [dependencies]
 asana-webhooks.workspace = true
 actix-web.workspace = true
+
+[dev-dependencies]
+# `#[actix_web::main]` and `#[actix_web::test]` in the tests and the example.
+actix-web = { workspace = true, features = ["macros"] }
+# The example establishes a webhook and re-reads tasks with the client.
+asana-client.workspace = true
+# The example's clock for the resolver.
+time.workspace = true
+# The queue the tests, doctest and example use as their sink.
+tokio.workspace = true
+# `tests/with_fake.rs`: the in-memory Asana, and the request type its receiver is called with.
+asana-fake.workspace = true
 bytes.workspace = true
+http.workspace = true
+
+[[example]]
+name = "receiver"
+
+[package.metadata.docs.rs]
+# No cargo features and no platform-specific API: one target is the whole documentation.
+all-features = true
+targets = ["x86_64-unknown-linux-gnu"]
 
 [lints]
 workspace = true

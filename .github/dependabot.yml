@@ -1,0 +1,34 @@
+# Weekly dependency updates, grouped so one pull request carries a week's compatible changes.
+# A new major version comes on its own, because it can need code changes.
+# A release must be a week old before it is proposed (`cooldown`), so a compromised or broken
+# release has time to be noticed and yanked.
+
+version: 2
+updates:
+  - package-ecosystem: cargo
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(deps)"
+    groups:
+      cargo-compatible:
+        patterns: ["*"]
+        update-types: [minor, patch]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: "ci"
+    groups:
+      actions:
+        patterns: ["*"]

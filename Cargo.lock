@@ -21,9 +21,9 @@ dependencies = [
 
 [[package]]
 name = "actix-http"
-version = "3.19.0"
+version = "3.21.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b796ba3c974e5133f6ca1a2c4e97c5941ea1a46d202df83344afaa18219f1a62"
+checksum = "b90352ea64d82226a82060c41dc5fe3925696076f55998ec1bd44ae54611e593"
 dependencies = [
  "actix-codec",
  "actix-service",
@@ -47,6 +47,17 @@ dependencies = [
  "tokio",
  "tokio-util",
  "tracing",
+]
+
+[[package]]
+name = "actix-macros"
+version = "0.2.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "367f814ad4afbac74f07df5001214da65f65e185c90ef56c4dd8df23f8695b9b"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 3.0.10",
 ]
 
 [[package]]
@@ -111,17 +122,19 @@ dependencies = [
 
 [[package]]
 name = "actix-web"
-version = "4.17.0"
+version = "4.19.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "67756b0fc99e07b8702b9a856e3d6ec036387243c2ce6310070d1e8f02680bb0"
+checksum = "acd6966acfcc7b66b37bdeea7d11665d5accac89333767e1784d2cecd33984e7"
 dependencies = [
  "actix-codec",
  "actix-http",
+ "actix-macros",
  "actix-router",
  "actix-rt",
  "actix-server",
  "actix-service",
  "actix-utils",
+ "actix-web-codegen",
  "bytes",
  "bytestring",
  "cfg-if",
@@ -147,6 +160,18 @@ dependencies = [
  "tokio",
  "tracing",
  "url",
+]
+
+[[package]]
+name = "actix-web-codegen"
+version = "4.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f7c9f4c52b954a73c76757a3952d3437fca00a2fbcb49704f8a6ea9f767e73f0"
+dependencies = [
+ "actix-router",
+ "proc-macro2",
+ "quote",
+ "syn 3.0.10",
 ]
 
 [[package]]
@@ -204,10 +229,11 @@ dependencies = [
  "bytes",
  "futures-util",
  "http 1.5.0",
- "serde",
  "serde_json",
+ "thiserror",
  "time",
  "tokio",
+ "url",
 ]
 
 [[package]]
@@ -240,6 +266,8 @@ dependencies = [
  "subtle",
  "thiserror",
  "time",
+ "tokio",
+ "tracing",
 ]
 
 [[package]]
@@ -247,18 +275,27 @@ name = "asana-webhooks-actix"
 version = "0.1.0"
 dependencies = [
  "actix-web",
+ "asana-client",
+ "asana-fake",
  "asana-webhooks",
  "bytes",
+ "http 1.5.0",
+ "time",
+ "tokio",
 ]
 
 [[package]]
 name = "asana-webhooks-axum"
 version = "0.1.0"
 dependencies = [
+ "asana-client",
+ "asana-fake",
  "asana-webhooks",
  "axum",
- "bytes",
- "http 1.5.0",
+ "futures-util",
+ "time",
+ "tokio",
+ "tower",
 ]
 
 [[package]]
@@ -318,6 +355,8 @@ dependencies = [
  "http 1.5.0",
  "http-body",
  "http-body-util",
+ "hyper",
+ "hyper-util",
  "itoa",
  "matchit",
  "memchr",
@@ -326,6 +365,7 @@ dependencies = [
  "pin-project-lite",
  "serde_core",
  "sync_wrapper",
+ "tokio",
  "tower",
  "tower-layer",
  "tower-service",

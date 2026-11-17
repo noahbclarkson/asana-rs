@@ -13,7 +13,7 @@ members = [
 [workspace.package]
 version = "0.1.0"
 edition = "2024"
-rust-version = "1.88"
+rust-version = "1.89"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/noahbclarkson/asana-rs"
 keywords = ["asana", "api", "client", "webhooks"]
@@ -29,7 +29,6 @@ asana-fake = { path = "crates/asana-fake", version = "0.1.0" }
 base64 = "0.22"
 bon = "3.10"
 bytes = "1"
-derive_more = { version = "2.1", features = ["display"] }
 futures-util = { version = "0.3", default-features = false, features = ["std"] }
 hex = "0.4"
 hmac = "0.13"
@@ -47,11 +46,12 @@ subtle = "2.6"
 thiserror = "2"
 time = { version = "0.3", features = ["serde", "formatting", "parsing", "macros"] }
 tokio = { version = "1", default-features = false, features = ["sync", "time"] }
+tower = { version = "0.5", default-features = false, features = ["util"] }
 tracing = { version = "0.1", default-features = false, features = ["std", "attributes"] }
 url = "2"
 
 # Adapters
-actix-web = { version = "4", default-features = false }
+actix-web = { version = "4.18.2", default-features = false }
 axum = { version = "0.8", default-features = false }
 
 # The generator only (xtask is never published)
