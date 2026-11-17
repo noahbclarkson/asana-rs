@@ -80,5 +80,11 @@ These change what code built against an earlier revision of `main` sees or compi
   code that does not look like one, as its `Display` already did. Read them on purpose with
   `Error::api_errors`, `ApiErrors::messages`, `SyncToken::as_str` and the new
   `OAuthError::description`.
+- `asana-client`: `RetryPolicy::max_wait` bounds every wait for a rate limit. A call that finds
+  more than `max_wait` left of the client's shared cooldown from an earlier `429` now fails at
+  once with `Error::RateLimited { retry_after: <what is left>, attempts }` (`attempts: 0` when it
+  was never sent) instead of waiting out the whole cooldown while holding a permit.
+  `RetryPolicy::never()` therefore never waits for a cooldown. A `Retry-After` over a day is read
+  as a day; before, a value too large for the clock panicked the calling task.
 
 [0.1.0]: https://github.com/noahbclarkson/asana-rs/releases/tag/v0.1.0

@@ -136,8 +136,20 @@ impl Client {
         let mut waited = Duration::ZERO;
         let outcome = loop {
             let queued_at = Instant::now();
-            let permit = inner.governor.admit(E::METHOD, E::OPERATION_ID).await;
+            let admitted = inner
+                .governor
+                .admit(E::METHOD, E::OPERATION_ID, inner.retry.max_wait)
+                .await;
             waited += queued_at.elapsed();
+            let permit = match admitted {
+                Ok(permit) => permit,
+                Err(retry_after) => {
+                    break Err(Error::RateLimited {
+                        retry_after,
+                        attempts: state.made,
+                    });
+                }
+            };
             let token = match inner.auth.token().await {
                 Ok(token) => token,
                 Err(error) => break Err(Error::Auth(error)),

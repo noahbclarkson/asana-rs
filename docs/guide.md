@@ -99,7 +99,11 @@ search ceilings, so most of the time requests wait on the client side instead of
   as long as it runs.
 - **Search.** `searchTasksForWorkspace` takes a token from a bucket of `searches_per_minute`.
 - **Cooldown.** When any request gets a `429`, no request from that client (or any clone of it)
-  starts before the time Asana gave.
+  starts before the time Asana gave. A request that would have to wait more than
+  `RetryPolicy::max_wait` of it is not sent: it fails at once with `Error::RateLimited`, whose
+  `retry_after` is how much is left and whose `attempts` is `0` when it was never sent. So
+  `max_wait` bounds every wait for a rate limit, not only the call that saw the `429`.
+  `RetryPolicy::never()` waits for none. A `Retry-After` over a day is read as a day.
 
 The limits are per `Client`. Two clients on one token, or two processes, each think they have the
 whole allowance; lower `Limits` when a token is shared.
@@ -108,7 +112,7 @@ When a request fails, the client decides whether to send it again:
 
 | What happened | Retried? |
 |---|---|
-| `429 Too Many Requests` | Yes, for any operation, after exactly `Retry-After` (seconds, fractional seconds or an HTTP date). If `Retry-After` is longer than `RetryPolicy::max_wait`, the call ends with `Error::RateLimited` at once. |
+| `429 Too Many Requests` | Yes, for any operation, after exactly `Retry-After` (seconds, fractional seconds or an HTTP date). If `Retry-After` is longer than `RetryPolicy::max_wait`, the call ends with `Error::RateLimited` at once, and so does every other call on the client until less than `max_wait` of the cooldown is left. |
 | `500`, `502`, `503`, `504` | Only when sending twice is safe: `GET`, `PUT`, `DELETE`, and the `POST`s the generator marks idempotent (adding or removing tags, followers, projects, dependencies and members, `addTaskForSection`, `setParentForTask`). Jittered back-off from half a second, doubling, at most 30 seconds and `max_wait`. |
 | No connection was made | Yes, for any operation: the request never reached Asana. |
 | A timeout or other transport failure | Only when sending twice is safe, as for a `5xx`: Asana may have acted. |
@@ -618,7 +622,7 @@ match client
 | Variant | When |
 |---|---|
 | `BadRequest`, `Unauthorized`, `PremiumRequired`, `Forbidden`, `NotFound`, `LegalBlock` | Asana answered `400`, `401` (after the one OAuth refresh), `402`, `403`, `404`, `451`. Each holds `ApiErrors`, Asana's messages. |
-| `RateLimited { retry_after, attempts }` | Still `429` after the retry policy, or a `Retry-After` longer than `max_wait`. |
+| `RateLimited { retry_after, attempts }` | Still `429` after the retry policy, a `Retry-After` longer than `max_wait`, or more than `max_wait` left of the client's cooldown from an earlier `429` (`attempts: 0` when it was never sent). |
 | `Server { status, phrase, attempts }` | A `5xx` after the retries the operation allows. `phrase` is what Asana's support asks for. |
 | `Transport { source, attempts }` | No response came back. `source.kind()` says whether a connection was made. |
 | `Auth(AuthError)` | No usable token: `Revoked` means the person must connect again. |

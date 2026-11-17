@@ -157,7 +157,7 @@ async fn exhausted_retries_say_how_many_attempts_were_made() {
 }
 
 #[tokio::test(start_paused = true)]
-async fn a_retry_after_longer_than_the_policy_waits_fails_at_once_but_still_cools_the_client() {
+async fn a_retry_after_longer_than_the_policy_waits_fails_at_once_and_so_do_other_calls() {
     let transport = Scripted::new(|_, index| {
         Ok(if index == 0 {
             too_many("120")
@@ -172,6 +172,100 @@ async fn a_retry_after_longer_than_the_policy_waits_fails_at_once_but_still_cool
         matches!(error, Error::RateLimited { attempts: 1, .. }),
         "{error:?}"
     );
+
+    // Another call meets the client's cooldown: two minutes is over `max_wait` (a minute), so it
+    // fails at once, unsent, with how long is left.
+    tokio::time::sleep(Duration::from_secs(10)).await;
+    let error = client.send(get_task()).await.unwrap_err();
+    assert!(
+        matches!(error, Error::RateLimited { attempts: 0, retry_after } if retry_after == Duration::from_secs(110)),
+        "{error:?}"
+    );
+    assert_eq!(tokio::time::Instant::now() - start, Duration::from_secs(10));
+    assert_eq!(transport.count(), 1);
+
+    // Once less than `max_wait` is left, a call waits it out.
+    tokio::time::sleep(Duration::from_secs(70)).await;
     client.send(get_task()).await.unwrap();
     assert_eq!(transport.times()[1] - start, Duration::from_secs(120));
+}
+
+#[tokio::test(start_paused = true)]
+async fn max_wait_bounds_every_wait_for_a_rate_limit() {
+    // With the guide's 30 seconds, a `Retry-After: 45` fails the call that saw it, and every call
+    // started during the cooldown fails at once instead of hanging for 45 seconds.
+    let transport = Scripted::new(|_, index| {
+        Ok(if index == 0 {
+            too_many("45")
+        } else {
+            reply(200, task_body())
+        })
+    });
+    let policy = RetryPolicy::builder()
+        .max_wait(Duration::from_secs(30))
+        .build();
+    let client = client_with(transport.clone(), policy, Limits::default());
+    let start = tokio::time::Instant::now();
+    assert!(client.send(get_task()).await.is_err());
+
+    let waiting: Vec<_> = (0..3)
+        .map(|_| {
+            let client = client.clone();
+            tokio::spawn(async move { client.send(get_task()).await })
+        })
+        .collect();
+    for call in waiting {
+        let error = call.await.unwrap().unwrap_err();
+        assert!(
+            matches!(error, Error::RateLimited { attempts: 0, .. }),
+            "{error:?}"
+        );
+        // The caller is invited to try again later; doing so at once fails at once again.
+        assert!(error.is_retryable());
+    }
+    assert_eq!(tokio::time::Instant::now(), start);
+    assert_eq!(transport.count(), 1);
+}
+
+#[tokio::test(start_paused = true)]
+async fn a_policy_that_never_retries_never_waits_for_a_rate_limit_either() {
+    let transport = Scripted::new(|_, index| {
+        Ok(if index == 0 {
+            too_many("5")
+        } else {
+            reply(200, task_body())
+        })
+    });
+    let client = client_with(transport.clone(), RetryPolicy::never(), Limits::default());
+    let start = tokio::time::Instant::now();
+    assert!(matches!(
+        client.send(get_task()).await,
+        Err(Error::RateLimited { attempts: 1, .. })
+    ));
+    assert!(matches!(
+        client.send(get_task()).await,
+        Err(Error::RateLimited { attempts: 0, .. })
+    ));
+    assert_eq!(tokio::time::Instant::now(), start);
+
+    tokio::time::sleep(Duration::from_secs(5)).await;
+    client.send(get_task()).await.unwrap();
+}
+
+#[tokio::test(start_paused = true)]
+async fn a_retry_after_too_large_for_the_clock_does_not_panic() {
+    let transport = Scripted::replies(vec![Ok(too_many("18446744073709551615"))]);
+    let client = client(transport.clone());
+    let error = client.send(get_task()).await.unwrap_err();
+    assert!(
+        matches!(error, Error::RateLimited { attempts: 1, retry_after } if retry_after == Duration::from_secs(24 * 60 * 60)),
+        "{error:?}"
+    );
+    // The client is cooled down for a day, not for ever, and says so without sending.
+    let error = client.send(get_task()).await.unwrap_err();
+    assert!(
+        matches!(error, Error::RateLimited { attempts: 0, .. }),
+        "{error:?}"
+    );
+    assert_eq!(transport.count(), 1);
 }

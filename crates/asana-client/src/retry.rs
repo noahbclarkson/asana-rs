@@ -22,8 +22,12 @@ pub struct RetryPolicy {
     /// The most times one request is sent, the first included. At least 1. Default 5.
     #[builder(default = 5)]
     pub max_attempts: u32,
-    /// The longest single wait before a retry. A `Retry-After` longer than this ends the call with
-    /// [`Error::RateLimited`](crate::Error::RateLimited) instead of waiting. Default 60 seconds.
+    /// The longest the client waits for a rate limit, and the longest single back-off before a
+    /// retry. A `Retry-After` longer than this ends the call with
+    /// [`Error::RateLimited`](crate::Error::RateLimited) instead of waiting, and so does the
+    /// client's shared cooldown from an earlier `429` (another call's included) when more than this
+    /// of it is left: such a call is not sent, and its error says `attempts: 0` when nothing was.
+    /// Waiting for a read or write permit is not bounded by it. Default 60 seconds.
     #[builder(default = Duration::from_secs(60))]
     pub max_wait: Duration,
 }
@@ -35,7 +39,9 @@ impl Default for RetryPolicy {
 }
 
 impl RetryPolicy {
-    /// Sends every request once and never retries.
+    /// Sends every request once and never retries or waits for a rate limit: while the client's
+    /// cooldown from a `429` is in force, a call fails at once with
+    /// [`Error::RateLimited`](crate::Error::RateLimited).
     pub const fn never() -> Self {
         Self {
             max_attempts: 1,
@@ -78,14 +84,19 @@ pub(crate) fn retryable_status(status: http::StatusCode) -> bool {
     matches!(status.as_u16(), 500 | 502 | 503 | 504)
 }
 
-/// Reads a `Retry-After` header: whole (or fractional) seconds, or an HTTP date.
+/// The longest `Retry-After` taken as given: a day. A longer one (from a misbehaving proxy, say)
+/// is read as a day, so no arithmetic on it can overflow.
+pub(crate) const MAX_RETRY_AFTER: Duration = Duration::from_secs(24 * 60 * 60);
+
+/// Reads a `Retry-After` header: whole (or fractional) seconds, or an HTTP date, at most
+/// [`MAX_RETRY_AFTER`].
 pub(crate) fn retry_after(headers: &http::HeaderMap) -> Option<Duration> {
     let value = headers
         .get(http::header::RETRY_AFTER)?
         .to_str()
         .ok()?
         .trim();
-    parse_retry_after(value, OffsetDateTime::now_utc())
+    parse_retry_after(value, OffsetDateTime::now_utc()).map(|wait| wait.min(MAX_RETRY_AFTER))
 }
 
 fn parse_retry_after(value: &str, now: OffsetDateTime) -> Option<Duration> {
@@ -127,6 +138,29 @@ mod tests {
         );
         assert_eq!(parse_retry_after("soon", now), None);
         assert_eq!(parse_retry_after("-3", now), None);
+    }
+
+    #[test]
+    fn a_huge_retry_after_is_read_as_a_day() {
+        for value in [
+            "18446744073709551615",
+            "1e300",
+            "86401",
+            "Fri, 31 Dec 9999 23:59:59 GMT",
+        ] {
+            let mut headers = http::HeaderMap::new();
+            headers.insert(http::header::RETRY_AFTER, value.parse().unwrap());
+            let wait = retry_after(&headers);
+            assert!(
+                wait.is_none() || wait == Some(MAX_RETRY_AFTER),
+                "{value}: {wait:?}"
+            );
+        }
+        for value in ["18446744073709551615", "86401"] {
+            let mut headers = http::HeaderMap::new();
+            headers.insert(http::header::RETRY_AFTER, value.parse().unwrap());
+            assert_eq!(retry_after(&headers), Some(MAX_RETRY_AFTER), "{value}");
+        }
     }
 
     #[test]

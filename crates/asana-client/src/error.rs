@@ -38,7 +38,9 @@ pub enum Error {
     /// `404`: the object does not exist, or the token cannot see it.
     #[error("Asana found no such object (404)")]
     NotFound(ApiErrors),
-    /// `429` on every attempt, or a `Retry-After` longer than the retry policy waits.
+    /// `429` on every attempt, or a `Retry-After` longer than the retry policy's `max_wait`. A
+    /// call that finds more than `max_wait` of the client's cooldown (from an earlier `429`) left
+    /// fails with this too, without being sent again; `attempts: 0` means it was never sent.
     #[error(
         "Asana's rate limit was still in force (attempts: {attempts}, retry after {retry_after:?})"
     )]

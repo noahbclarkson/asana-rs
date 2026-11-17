@@ -4,6 +4,8 @@
 //! search to 60 a minute, and counts a refused request against the quota. So each client (which
 //! holds one token) has a read semaphore, a write semaphore, a search bucket, and a cooldown: when
 //! any request is answered `429`, no request from this client starts before the time Asana gave.
+//! A request that would have to wait out more of the cooldown than the retry policy's `max_wait`
+//! fails at once with [`Error::RateLimited`](crate::Error::RateLimited) instead.
 
 use std::sync::Mutex;
 use std::time::Duration;
@@ -33,6 +35,10 @@ impl Default for Limits {
     }
 }
 
+/// The longest cooldown when a wait overflows the clock. `Retry-After` is already capped at
+/// [`MAX_RETRY_AFTER`](crate::retry::MAX_RETRY_AFTER), so this is only a backstop.
+const MAX_COOLDOWN: Duration = Duration::from_secs(24 * 60 * 60);
+
 /// The operations that count against the search limit.
 const SEARCH_OPERATIONS: &[&str] = &["searchTasksForWorkspace"];
 
@@ -55,12 +61,20 @@ impl Governor {
     }
 
     /// Waits until a request of this kind may start, and returns the permit it holds while it
-    /// runs. The search bucket and the cooldown are waited out as well.
+    /// runs. The search bucket and the cooldown are waited out as well, the cooldown for at most
+    /// `max_wait`.
+    ///
+    /// # Errors
+    ///
+    /// How much of the cooldown is left, when that is longer than `max_wait`: the request is not
+    /// sent. It is checked before queueing for a permit and again after.
     pub(crate) async fn admit(
         &self,
         method: Method,
         operation: &str,
-    ) -> Option<SemaphorePermit<'_>> {
+        max_wait: Duration,
+    ) -> Result<Option<SemaphorePermit<'_>>, Duration> {
+        self.refuse_a_long_cooldown(max_wait)?;
         if SEARCH_OPERATIONS.contains(&operation) {
             self.search.take().await;
         }
@@ -70,18 +84,36 @@ impl Governor {
         };
         // The semaphores are never closed, so this is always a permit.
         let permit = semaphore.acquire().await.ok();
-        self.wait_out_cooldown().await;
-        permit
+        self.wait_out_cooldown(max_wait).await?;
+        Ok(permit)
     }
 
-    /// Sleeps until no cooldown is in force. A `429` arriving while asleep extends the wait.
-    async fn wait_out_cooldown(&self) {
+    /// The cooldown left, when it is longer than `max_wait`.
+    fn refuse_a_long_cooldown(&self, max_wait: Duration) -> Result<(), Duration> {
+        let now = Instant::now();
+        match self.cooldown_until() {
+            Some(until) if until.saturating_duration_since(now) > max_wait => {
+                Err(until.saturating_duration_since(now))
+            }
+            _ => Ok(()),
+        }
+    }
+
+    /// Sleeps until no cooldown is in force, for at most `max_wait` in all. A `429` arriving
+    /// while asleep extends the cooldown; past `max_wait` from the start, the rest is refused.
+    async fn wait_out_cooldown(&self, max_wait: Duration) -> Result<(), Duration> {
+        let deadline = Instant::now().checked_add(max_wait);
         while let Some(until) = self.cooldown_until() {
-            if until <= Instant::now() {
-                return;
+            let now = Instant::now();
+            if until <= now {
+                return Ok(());
+            }
+            if deadline.is_some_and(|deadline| until > deadline) {
+                return Err(until.saturating_duration_since(now));
             }
             tokio::time::sleep_until(until).await;
         }
+        Ok(())
     }
 
     fn cooldown_until(&self) -> Option<Instant> {
@@ -91,9 +123,14 @@ impl Governor {
             .unwrap_or_else(std::sync::PoisonError::into_inner)
     }
 
-    /// Asana answered `429`: nothing from this client starts for `wait`.
+    /// Asana answered `429`: nothing from this client starts for `wait`. A wait too long for the
+    /// clock to represent ends at the furthest instant it can.
     pub(crate) fn cool_down(&self, wait: Duration) {
-        let until = Instant::now() + wait;
+        let now = Instant::now();
+        let until = now
+            .checked_add(wait)
+            .or_else(|| now.checked_add(MAX_COOLDOWN))
+            .unwrap_or(now);
         let mut cooldown = self
             .cooldown
             .lock()
