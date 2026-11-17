@@ -1,8 +1,11 @@
 //! The one error every call returns, and how a response's status becomes one.
 //!
 //! Asana answers a failed request with `{"errors": [{"message", "help", "phrase"}]}`. Those
-//! messages are kept in [`ApiErrors`] for a developer to read, but no `Display` here prints them,
-//! a response body, a query value or a header value: bodies and messages can carry customer data.
+//! messages are kept in [`ApiErrors`] for a developer to read on purpose
+//! ([`Error::api_errors`], then [`ApiErrors::messages`]), but no `Display` or `Debug` here prints
+//! them, a response body, a query value or a header value: bodies and messages can carry customer
+//! data, and errors end up in logs (`{error:?}`, `tracing`'s `?error`, and what a `main` returning
+//! `Result` prints on failure are all `Debug`).
 
 use std::fmt;
 use std::time::Duration;
@@ -14,6 +17,9 @@ use crate::auth::AuthError;
 use crate::transport::TransportError;
 
 /// Everything that can go wrong sending an operation to Asana.
+///
+/// Neither `Display` nor `Debug` includes a response body, Asana's messages, a query value or a
+/// header value. Read Asana's messages on purpose with [`api_errors`](Self::api_errors).
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
 pub enum Error {
@@ -174,6 +180,9 @@ impl Error {
     }
 
     /// Asana's messages, when the error came from a response that carried them.
+    ///
+    /// This is the deliberate way to read them: they can echo values from the request (a GID, a
+    /// name, an email address), so neither `Display` nor `Debug` of the error prints them.
     pub fn api_errors(&self) -> Option<&ApiErrors> {
         match self {
             Self::BadRequest(errors)
@@ -218,7 +227,10 @@ struct SyncBody {
 }
 
 /// The messages in Asana's error body.
-#[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize)]
+///
+/// `Debug` shows how many errors there are and each one's `phrase`, never a `message` or `help`;
+/// read those on purpose through [`messages`](Self::messages) or the fields.
+#[derive(Clone, Default, PartialEq, Eq, Deserialize)]
 #[non_exhaustive]
 pub struct ApiErrors {
     /// Each error Asana reported.
@@ -241,7 +253,9 @@ impl ApiErrors {
 }
 
 /// One error Asana reported.
-#[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize)]
+///
+/// `Debug` writes `<redacted>` in place of `message` and `help`, which can echo request values.
+#[derive(Clone, Default, PartialEq, Eq, Deserialize)]
 #[non_exhaustive]
 pub struct ApiError {
     /// What went wrong, for a developer.
@@ -252,11 +266,46 @@ pub struct ApiError {
     pub phrase: Option<String>,
 }
 
+impl fmt::Debug for ApiErrors {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("ApiErrors")
+            .field("errors", &self.errors)
+            .finish()
+    }
+}
+
+impl fmt::Debug for ApiError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("ApiError")
+            .field("message", &self.message.as_ref().map(|_| Redacted))
+            .field("help", &self.help.as_ref().map(|_| Redacted))
+            .field("phrase", &self.phrase)
+            .finish()
+    }
+}
+
+/// Stands in for a value that may hold customer data in a `Debug`.
+pub(crate) struct Redacted;
+
+impl fmt::Debug for Redacted {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str("<redacted>")
+    }
+}
+
 /// The events endpoint's opaque position in a resource's stream of events, passed back exactly
 /// as Asana gave it.
-#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+///
+/// It is sent as a query value, so `Debug` does not print it; [`as_str`](Self::as_str) does.
+#[derive(Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(transparent)]
 pub struct SyncToken(String);
+
+impl fmt::Debug for SyncToken {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_tuple("SyncToken").field(&Redacted).finish()
+    }
+}
 
 impl SyncToken {
     /// Wraps a sync token Asana returned.
@@ -351,3 +400,6 @@ impl fmt::Display for DecodeError {
 }
 
 impl std::error::Error for DecodeError {}
+
+#[cfg(test)]
+mod tests;

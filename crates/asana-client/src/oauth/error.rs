@@ -3,19 +3,22 @@
 //!
 //! Asana's OAuth guide documents no error body for its token endpoints, so the body is read as
 //! [RFC 6749 section 5.2](https://www.rfc-editor.org/rfc/rfc6749#section-5.2) defines it:
-//! `{"error": "...", "error_description": "..."}`. No `Display` here holds a token, the client
-//! secret, an authorisation code or a response body; an error's description is kept in a field for
-//! a log the caller controls.
+//! `{"error": "...", "error_description": "..."}`. No `Display` or `Debug` here holds a token, the
+//! client secret, an authorisation code, a response body or Asana's `error_description`; the
+//! description is kept for a caller to read on purpose ([`OAuthError::description`]).
 
 use std::fmt;
 
 use http::StatusCode;
 
-use crate::error::DecodeError;
+use crate::error::{DecodeError, Redacted};
 use crate::transport::TransportError;
 
 /// Why a call to Asana's OAuth endpoints, or reading the redirect back from Asana, failed.
-#[derive(Debug, thiserror::Error)]
+///
+/// `Debug` writes `<redacted>` in place of a description; read it with
+/// [`description`](Self::description).
+#[derive(thiserror::Error)]
 #[non_exhaustive]
 pub enum OAuthError {
     /// Asana answered `invalid_grant`: the authorisation code or refresh token is invalid, expired,
@@ -79,6 +82,17 @@ pub enum OAuthError {
 }
 
 impl OAuthError {
+    /// Asana's `error_description`, when the error carried one. It is text from Asana or from the
+    /// redirect's query, so it is never printed by `Display` or `Debug`; log it only on purpose.
+    pub fn description(&self) -> Option<&str> {
+        match self {
+            Self::InvalidGrant { description }
+            | Self::Refused { description, .. }
+            | Self::Denied { description, .. } => description.as_deref(),
+            _ => None,
+        }
+    }
+
     /// Whether the grant is dead and the person must authorise the app again.
     pub fn needs_reconnect(&self) -> bool {
         matches!(self, Self::InvalidGrant { .. })
@@ -96,8 +110,45 @@ impl OAuthError {
     }
 }
 
+impl fmt::Debug for OAuthError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let redacted = |description: &Option<String>| description.as_ref().map(|_| Redacted);
+        match self {
+            Self::InvalidGrant { description } => f
+                .debug_struct("InvalidGrant")
+                .field("description", &redacted(description))
+                .finish(),
+            Self::Refused {
+                status,
+                code,
+                description,
+            } => f
+                .debug_struct("Refused")
+                .field("status", status)
+                .field("code", code)
+                .field("description", &redacted(description))
+                .finish(),
+            Self::Status { status } => f.debug_struct("Status").field("status", status).finish(),
+            Self::Decode { source } => f.debug_struct("Decode").field("source", source).finish(),
+            Self::Transport { source } => {
+                f.debug_struct("Transport").field("source", source).finish()
+            }
+            Self::Denied { code, description } => f
+                .debug_struct("Denied")
+                .field("code", code)
+                .field("description", &redacted(description))
+                .finish(),
+            Self::StateMismatch => f.write_str("StateMismatch"),
+            Self::MissingCode => f.write_str("MissingCode"),
+            Self::MissingRefreshToken => f.write_str("MissingRefreshToken"),
+        }
+    }
+}
+
 /// An OAuth `error` code, from a token endpoint's answer or from the redirect.
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+///
+/// `Debug`, like `Display`, writes an unknown code only when it looks like one.
+#[derive(Clone, PartialEq, Eq, Hash)]
 #[non_exhaustive]
 pub enum OAuthErrorCode {
     /// `invalid_request`: a parameter is missing, repeated or malformed.
@@ -153,18 +204,44 @@ impl OAuthErrorCode {
     }
 }
 
-impl fmt::Display for OAuthErrorCode {
-    /// Writes the code when it looks like one (lower-case letters and `_`, at most 64), so text
-    /// that is not a code never reaches a log through `Display`.
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl OAuthErrorCode {
+    /// Whether the code looks like one (lower-case letters and `_`, at most 64), so that text
+    /// that is not a code never reaches a log.
+    fn looks_like_a_code(&self) -> bool {
         let code = self.as_str();
-        let looks_like_a_code = !code.is_empty()
+        !code.is_empty()
             && code.len() <= 64
-            && code.bytes().all(|b| b.is_ascii_lowercase() || b == b'_');
-        if looks_like_a_code {
-            f.write_str(code)
+            && code.bytes().all(|b| b.is_ascii_lowercase() || b == b'_')
+    }
+}
+
+impl fmt::Display for OAuthErrorCode {
+    /// Writes the code when it looks like one, so text that is not a code never reaches a log
+    /// through `Display`.
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if self.looks_like_a_code() {
+            f.write_str(self.as_str())
         } else {
             f.write_str("an unrecognised error code")
+        }
+    }
+}
+
+impl fmt::Debug for OAuthErrorCode {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Other(code) if self.looks_like_a_code() => {
+                f.debug_tuple("Other").field(code).finish()
+            }
+            Self::Other(_) => f.debug_tuple("Other").field(&Redacted).finish(),
+            Self::InvalidRequest => f.write_str("InvalidRequest"),
+            Self::InvalidClient => f.write_str("InvalidClient"),
+            Self::InvalidGrant => f.write_str("InvalidGrant"),
+            Self::UnauthorizedClient => f.write_str("UnauthorizedClient"),
+            Self::UnsupportedGrantType => f.write_str("UnsupportedGrantType"),
+            Self::InvalidScope => f.write_str("InvalidScope"),
+            Self::AccessDenied => f.write_str("AccessDenied"),
+            Self::ForbiddenScopes => f.write_str("ForbiddenScopes"),
         }
     }
 }

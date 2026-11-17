@@ -51,7 +51,7 @@ tarball (`cargo package --workspace --exclude xtask`).
   is passed back exactly as it came. An unknown enum value, `resource_type` or extra field is
   kept, never an error.
 - **Nothing secret is printed.** Tokens and secrets are `secrecy` types. No `Display` or `Debug`
-  of an error includes a response body, a query value or a header value.
+  of an error includes a response body, Asana's messages, a query value or a header value.
 - **No cargo features** in the library crates, and every dependency is declared once, in the
   root `[workspace.dependencies]`.
 - No `unwrap` or `expect` outside tests. A lint suppression is `#[expect(lint, reason = "...")]`.

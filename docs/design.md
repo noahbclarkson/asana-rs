@@ -85,9 +85,11 @@ cooldown, a token from `Auth`, the transport, then the answer's status decides.
 ## One error type, nothing secret in it
 
 `Error` is one `#[non_exhaustive]` enum for every call, with variants for the statuses a caller
-handles differently. Its `Display` never includes a response body, Asana's messages, a query
-value, a header value or a token, because those carry customer data and errors end up in logs.
-Asana's messages are still kept in `ApiErrors` for a developer to read on purpose. `Decode` carries
+handles differently. Neither its `Display` nor its `Debug` includes a response body, Asana's
+messages, a query value, a header value or a token, because those carry customer data and errors
+end up in logs, most often through `Debug`. Asana's messages are still kept in `ApiErrors` for a
+developer to read on purpose (`Error::api_errors`), and OAuth's `error_description` through
+`OAuthError::description`. `Decode` carries
 the JSON path of the failing value, never the value. Tokens, client secrets and webhook secrets
 are `secrecy` types whose `Debug` is redacted.
 

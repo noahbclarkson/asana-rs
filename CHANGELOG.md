@@ -73,5 +73,12 @@ These change what code built against an earlier revision of `main` sees or compi
   passed. A task removed from a section and added back within a delivery is one
   `SectionEntered`, reported even when a shared `SeenTasks` had seen the earlier arrival. Groups
   at the same instant now come out departures first.
+- `asana-client`: `Debug` of an error no longer prints Asana's messages or other request
+  values. `ApiErrors` and `ApiError` have hand-written `Debug` that writes `<redacted>` for each
+  `message` and `help` (the count and each `phrase` stay); `SyncToken`'s `Debug` hides the token;
+  `OAuthError`'s `Debug` hides `error_description`; `OAuthErrorCode`'s `Debug` hides an unknown
+  code that does not look like one, as its `Display` already did. Read them on purpose with
+  `Error::api_errors`, `ApiErrors::messages`, `SyncToken::as_str` and the new
+  `OAuthError::description`.
 
 [0.1.0]: https://github.com/noahbclarkson/asana-rs/releases/tag/v0.1.0

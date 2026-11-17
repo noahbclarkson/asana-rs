@@ -156,8 +156,8 @@ adapter, if you use axum or actix-web) yourself.
   safe to repeat; one token refresh after a `401` for OAuth; lists as a lazy `Stream` of items or
   pages, with Asana's offsets passed back untouched.
 - **One error type.** `asana_client::Error` says what happened (`NotFound`, `RateLimited`,
-  `PremiumRequired`, `Decode` with the JSON path that failed, …). Its `Display` never includes a
-  response body, a query value, a header or a token.
+  `PremiumRequired`, `Decode` with the JSON path that failed, …). Neither its `Display` nor its
+  `Debug` includes a response body, Asana's messages, a query value, a header or a token.
 - **Asana's data is treated as loose.** Unknown enum values and unknown resource types are kept,
   not errors. Numbers in custom fields are `rust_decimal::Decimal`, read through the shortest
   text of the double Asana sends, so `1250.5` is never `1250.4999999999999`.

@@ -163,6 +163,8 @@ The token calls return `OAuthError`. `needs_reconnect()` says whether the grant 
 (`invalid_grant`) and the person must authorise again; `is_retryable()` whether trying later
 could work (a `5xx`, a `429`, a transient transport failure). A denied authorisation on the
 redirect is `OAuthError::Denied`, and a redirect whose `state` does not match is
-`OAuthError::StateMismatch`. Like every error in this workspace, its `Display` holds no token, code or secret.
+`OAuthError::StateMismatch`. Like every error in this workspace, neither its `Display` nor its
+`Debug` holds a token, a code, a secret or Asana's `error_description`, which can echo the
+request; read the description on purpose with `description()`.
 `AuthorizationCode`, `RefreshToken`, `AccessToken`, `PkceVerifier` and the client secret are
 `secrecy` types whose `Debug` is redacted.

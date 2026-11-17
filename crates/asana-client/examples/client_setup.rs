@@ -57,7 +57,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await
     {
         Ok(read) => println!("{:?}", read.name),
-        // Asana's own messages are kept for a developer; `Display` never prints them.
+        // Asana's own messages are kept to read on purpose; `Display` and `Debug` never print them.
         Err(Error::NotFound(errors)) => {
             println!("no such task: {:?}", errors.messages().collect::<Vec<_>>());
         }

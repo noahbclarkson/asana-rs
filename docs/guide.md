@@ -598,7 +598,7 @@ match client
     .await
 {
     Ok(read) => println!("{:?}", read.name),
-    // Asana's own messages are kept for a developer; `Display` never prints them.
+    // Asana's own messages are kept to read on purpose; `Display` and `Debug` never print them.
     Err(Error::NotFound(errors)) => {
         println!("no such task: {:?}", errors.messages().collect::<Vec<_>>());
     }
@@ -633,9 +633,13 @@ match client
 `api_errors()` gives Asana's messages, and `is_retryable()` says whether the same request could
 succeed later. `Error` is `#[non_exhaustive]`, so a `match` needs a catch-all arm.
 
-No `Display` in this crate includes a response body, Asana's messages, a query value, a header
-or a token, because those carry customer data. Asana's messages are in `ApiErrors` for a
-developer to read, and `ApiError::phrase` is what Asana's support asks for on a `500`.
+No `Display` or `Debug` of an error in this crate includes a response body, Asana's messages, a
+query value, a header or a token, because those carry customer data and `Debug` is what
+`{error:?}`, `tracing`'s `?error` and a `main` that returns `Result` print. `Debug` of `ApiErrors`
+writes `<redacted>` for each message and help text, and `Debug` of a `SyncToken` hides the token.
+Asana's messages are in `ApiErrors` for a developer to read on purpose (`api_errors()`, then
+`messages()`), and `ApiError::phrase`, which `Debug` keeps, is what Asana's support asks for on a
+`500`.
 
 ## Calling any operation
 
