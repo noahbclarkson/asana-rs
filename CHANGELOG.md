@@ -94,5 +94,8 @@ These change what code built against an earlier revision of `main` sees or compi
   (`NotSent`, `Refused`, `Unknown`, `Applied`). A `DELETE` resent after an attempt whose answer
   was lost, and answered `404`, now succeeds instead of returning `Error::NotFound` for a delete
   that worked.
+- `asana-client`: a batch counts against the client's limits action by action, as Asana counts
+  it: a read or write permit per action and a search token per search. Before, a batch of ten
+  took one write permit and no search token, so concurrent batches overran Asana's limits.
 
 [0.1.0]: https://github.com/noahbclarkson/asana-rs/releases/tag/v0.1.0

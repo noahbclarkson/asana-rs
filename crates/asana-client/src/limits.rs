@@ -42,26 +42,85 @@ const MAX_COOLDOWN: Duration = Duration::from_secs(24 * 60 * 60);
 /// The operations that count against the search limit.
 const SEARCH_OPERATIONS: &[&str] = &["searchTasksForWorkspace"];
 
+/// What one request counts against the limits: one read or one write, and a search token for a
+/// search. A batch counts each of its actions, as Asana does.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub(crate) struct Admission {
+    reads: u32,
+    writes: u32,
+    searches: u32,
+}
+
+impl Admission {
+    /// One request of this method and operation.
+    pub(crate) fn of(method: Method, operation: &str) -> Self {
+        let mut admission = Self::default();
+        admission.add(method, operation);
+        admission
+    }
+
+    /// Counts one more request (a batch action) of this method and operation.
+    pub(crate) fn add(&mut self, method: Method, operation: &str) {
+        match method {
+            Method::Get => self.reads = self.reads.saturating_add(1),
+            Method::Post | Method::Put | Method::Delete => {
+                self.writes = self.writes.saturating_add(1);
+            }
+        }
+        if SEARCH_OPERATIONS.contains(&operation) {
+            self.searches = self.searches.saturating_add(1);
+        }
+    }
+}
+
+/// The permits an admitted request holds while it runs; dropping it gives them back.
+pub(crate) struct Permits<'a> {
+    // Held only to be dropped when the request ends.
+    _reads: Option<SemaphorePermit<'a>>,
+    _writes: Option<SemaphorePermit<'a>>,
+}
+
 /// The live state behind [`Limits`] for one client.
 pub(crate) struct Governor {
     reads: Semaphore,
+    read_capacity: u32,
     writes: Semaphore,
+    write_capacity: u32,
     search: SearchBucket,
     cooldown: Mutex<Option<Instant>>,
 }
 
 impl Governor {
     pub(crate) fn new(limits: Limits) -> Self {
+        let read_capacity = limits.reads.max(1);
+        let write_capacity = limits.writes.max(1);
         Self {
-            reads: Semaphore::new(limits.reads.max(1) as usize),
-            writes: Semaphore::new(limits.writes.max(1) as usize),
+            reads: Semaphore::new(read_capacity as usize),
+            read_capacity,
+            writes: Semaphore::new(write_capacity as usize),
+            write_capacity,
             search: SearchBucket::new(limits.searches_per_minute.max(1)),
             cooldown: Mutex::new(None),
         }
     }
 
-    /// Waits until a request of this kind may start, and returns the permit it holds while it
-    /// runs. The search bucket and the cooldown are waited out as well, the cooldown for at most
+    /// Takes `wanted` permits of `semaphore`, or all of them when it holds fewer (a batch of ten
+    /// reads under a limit of five takes the five, so it waits for every read to finish but never
+    /// for ever). Reads are always taken before writes, so two batches cannot hold each other up.
+    async fn take<'a>(
+        semaphore: &'a Semaphore,
+        capacity: u32,
+        wanted: u32,
+    ) -> Option<SemaphorePermit<'a>> {
+        if wanted == 0 {
+            return None;
+        }
+        // The semaphores are never closed, so this is always a permit.
+        semaphore.acquire_many(wanted.min(capacity)).await.ok()
+    }
+
+    /// Waits until a request counting as `admission` may start, and returns the permits it holds
+    /// while it runs. The search bucket and the cooldown are waited out as well, the cooldown for at most
     /// `max_wait`.
     ///
     /// # Errors
@@ -70,22 +129,20 @@ impl Governor {
     /// sent. It is checked before queueing for a permit and again after.
     pub(crate) async fn admit(
         &self,
-        method: Method,
-        operation: &str,
+        admission: Admission,
         max_wait: Duration,
-    ) -> Result<Option<SemaphorePermit<'_>>, Duration> {
+    ) -> Result<Permits<'_>, Duration> {
         self.refuse_a_long_cooldown(max_wait)?;
-        if SEARCH_OPERATIONS.contains(&operation) {
+        for _ in 0..admission.searches {
             self.search.take().await;
         }
-        let semaphore = match method {
-            Method::Get => &self.reads,
-            Method::Post | Method::Put | Method::Delete => &self.writes,
-        };
-        // The semaphores are never closed, so this is always a permit.
-        let permit = semaphore.acquire().await.ok();
+        let reads = Self::take(&self.reads, self.read_capacity, admission.reads).await;
+        let writes = Self::take(&self.writes, self.write_capacity, admission.writes).await;
         self.wait_out_cooldown(max_wait).await?;
-        Ok(permit)
+        Ok(Permits {
+            _reads: reads,
+            _writes: writes,
+        })
     }
 
     /// The cooldown left, when it is longer than `max_wait`.

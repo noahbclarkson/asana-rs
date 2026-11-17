@@ -22,6 +22,9 @@
 //! Asana runs the actions in parallel, in no promised order, and answers in the order they were
 //! pushed. Each action counts against the rate limits as a request of its own; if any would be
 //! limited the whole batch answers `429`, which the client waits out and retries like any call.
+//! The client admits a batch the same way: a read permit for each `GET` action and a write permit
+//! for each other, held together while the batch runs (at most the whole limit, when a batch has
+//! more actions of a kind than the limit allows at once), and a search token for each search.
 //! An upload cannot be batched, nor can a batch.
 
 use std::marker::PhantomData;
@@ -33,6 +36,7 @@ use http::StatusCode;
 use serde::Deserialize;
 use serde_json::{Map, Value};
 
+use crate::limits::Admission;
 use crate::retry::safe_to_repeat;
 use crate::{Client, Error, decode_response};
 
@@ -53,6 +57,7 @@ impl Client {
             id: NEXT_BATCH.fetch_add(1, Ordering::Relaxed),
             actions: Vec::new(),
             repeatable: true,
+            admission: Admission::default(),
         }
     }
 }
@@ -66,6 +71,8 @@ pub struct Batch<'a> {
     actions: Vec<Value>,
     /// Whether every action is safe to send twice, so the batch is too.
     repeatable: bool,
+    /// What the actions count against the client's limits.
+    admission: Admission,
 }
 
 /// A claim on one action's result, typed by its descriptor. Redeem it with
@@ -109,6 +116,7 @@ impl Batch<'_> {
         }
         self.actions.push(action(&endpoint)?);
         self.repeatable &= safe_to_repeat(E::METHOD, E::IDEMPOTENT);
+        self.admission.add(E::METHOD, E::OPERATION_ID);
         Ok(Ticket {
             batch: self.id,
             index: self.actions.len() - 1,
@@ -129,7 +137,8 @@ impl Batch<'_> {
     /// Sends the batch and returns every action's answer, to be read with tickets.
     ///
     /// Sends `createBatchRequest` (`POST /batch`); no granular scope (each action needs its own).
-    /// A `429` is waited out and retried like any call. After a server failure or a lost
+    /// It waits for a read or write permit for each action, and a search token for each search,
+    /// as if each were sent alone. A `429` is waited out and retried like any call. After a server failure or a lost
     /// connection the batch is sent again only when every action in it is safe to repeat. An
     /// empty batch sends nothing.
     ///
@@ -146,15 +155,21 @@ impl Batch<'_> {
         }
         let answers = if self.repeatable {
             self.client
-                .send(BatchCall::<true> {
-                    actions: self.actions,
-                })
+                .send_admitting(
+                    BatchCall::<true> {
+                        actions: self.actions,
+                    },
+                    self.admission,
+                )
                 .await?
         } else {
             self.client
-                .send(BatchCall::<false> {
-                    actions: self.actions,
-                })
+                .send_admitting(
+                    BatchCall::<false> {
+                        actions: self.actions,
+                    },
+                    self.admission,
+                )
                 .await?
         };
         Ok(BatchResults {

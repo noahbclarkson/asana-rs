@@ -17,6 +17,7 @@ use tracing::field::Empty;
 use crate::auth::{AccessToken, AuthError};
 use crate::client::Client;
 use crate::error::{DecodeError, Error};
+use crate::limits::Admission;
 use crate::multipart;
 use crate::page::Page;
 use crate::retry::{retry_after, retryable_status, safe_to_repeat};
@@ -73,7 +74,18 @@ impl Client {
     /// Any [`Error`]: what Asana answered, a body that could not be read, or a request that never
     /// got an answer, after the retries the [`RetryPolicy`](crate::RetryPolicy) allows.
     pub async fn send<E: Endpoint>(&self, endpoint: E) -> Result<E::Output, Error> {
-        let answer = self.execute(&endpoint, None).await?;
+        let answer = self.execute(&endpoint, None, None).await?;
+        decode_output::<E>(&answer.body)
+    }
+
+    /// Sends one operation that counts against the limits as `admission` rather than as one
+    /// request: a batch, which Asana counts action by action.
+    pub(crate) async fn send_admitting<E: Endpoint>(
+        &self,
+        endpoint: E,
+        admission: Admission,
+    ) -> Result<E::Output, Error> {
+        let answer = self.execute(&endpoint, None, Some(admission)).await?;
         decode_output::<E>(&answer.body)
     }
 
@@ -89,7 +101,7 @@ impl Client {
         endpoint: E,
         timeout: Duration,
     ) -> Result<E::Output, Error> {
-        let answer = self.execute(&endpoint, Some(timeout)).await?;
+        let answer = self.execute(&endpoint, Some(timeout), None).await?;
         decode_output::<E>(&answer.body)
     }
 
@@ -105,7 +117,7 @@ impl Client {
     }
 
     pub(crate) async fn page_of<E: Paginated>(&self, endpoint: &E) -> Result<Page<E::Item>, Error> {
-        let answer = self.execute(endpoint, None).await?;
+        let answer = self.execute(endpoint, None, None).await?;
         let page: PageEnvelope<E::Item> = decode_json(E::OPERATION_ID, &answer.body)?;
         Ok(Page::new(page.data, page.next_page.map(|next| next.offset)))
     }
@@ -115,6 +127,7 @@ impl Client {
         &self,
         endpoint: &E,
         timeout: Option<Duration>,
+        admission: Option<Admission>,
     ) -> Result<Answer, Error> {
         let span = tracing::debug_span!(
             "asana.request",
@@ -125,7 +138,8 @@ impl Client {
             attempt = Empty,
             wait_ms = Empty,
         );
-        self.attempt_until_done(endpoint, timeout, &span)
+        let admission = admission.unwrap_or_else(|| Admission::of(E::METHOD, E::OPERATION_ID));
+        self.attempt_until_done(endpoint, timeout, admission, &span)
             .instrument(span.clone())
             .await
     }
@@ -134,6 +148,7 @@ impl Client {
         &self,
         endpoint: &E,
         timeout: Option<Duration>,
+        admission: Admission,
         span: &tracing::Span,
     ) -> Result<Answer, Error> {
         let inner = &self.inner;
@@ -148,10 +163,7 @@ impl Client {
         let mut waited = Duration::ZERO;
         let outcome = loop {
             let queued_at = Instant::now();
-            let admitted = inner
-                .governor
-                .admit(E::METHOD, E::OPERATION_ID, inner.retry.max_wait)
-                .await;
+            let admitted = inner.governor.admit(admission, inner.retry.max_wait).await;
             waited += queued_at.elapsed();
             let permit = match admitted {
                 Ok(permit) => permit,

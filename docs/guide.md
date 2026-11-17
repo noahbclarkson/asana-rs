@@ -98,6 +98,9 @@ search ceilings, so most of the time requests wait on the client side instead of
 - **Concurrency.** A `GET` takes a read permit and a `POST`, `PUT` or `DELETE` a write permit, for
   as long as it runs.
 - **Search.** `searchTasksForWorkspace` takes a token from a bucket of `searches_per_minute`.
+- **Batches.** Asana counts each action in a batch as a request of its own, so a batch takes a
+  read or write permit for each action (at most the whole limit of a kind) and a search token for
+  each search, and holds them while it runs.
 - **Cooldown.** When any request gets a `429`, no request from that client (or any clone of it)
   starts before the time Asana gave. A request that would have to wait more than
   `RetryPolicy::max_wait` of it is not sent: it fails at once with `Error::RateLimited`, whose
