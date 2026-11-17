@@ -195,7 +195,7 @@ version = "0.1.0"
 dependencies = [
  "asana-openapi",
  "asana-webhooks",
- "base64 0.22.1",
+ "base64 0.23.1",
  "bon",
  "bytes",
  "futures-util",
@@ -255,7 +255,7 @@ name = "asana-webhooks"
 version = "0.1.0"
 dependencies = [
  "asana-openapi",
- "base64 0.22.1",
+ "base64 0.23.1",
  "hex",
  "hmac",
  "rand 0.9.5",
