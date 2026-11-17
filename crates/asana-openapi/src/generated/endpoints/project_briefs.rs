@@ -22,6 +22,7 @@ impl crate::endpoint::Endpoint for GetProjectBrief {
     const ROUTE: &'static str = "/project_briefs/{project_brief_gid}";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::ProjectBriefField::lists);
     fn path(&self) -> String {
         format!("/project_briefs/{}", self.project_brief_gid)
     }
@@ -55,6 +56,7 @@ impl crate::endpoint::Endpoint for UpdateProjectBrief {
     const ROUTE: &'static str = "/project_briefs/{project_brief_gid}";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::ProjectBriefField::lists);
     fn path(&self) -> String {
         format!("/project_briefs/{}", self.project_brief_gid)
     }
@@ -113,6 +115,7 @@ impl crate::endpoint::Endpoint for CreateProjectBrief {
     const ROUTE: &'static str = "/projects/{project_gid}/project_briefs";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = false;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::ProjectBriefField::lists);
     fn path(&self) -> String {
         format!("/projects/{}/project_briefs", self.project_gid)
     }

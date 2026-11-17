@@ -26,6 +26,8 @@ impl crate::endpoint::Endpoint for GetWorkspaceMembershipsForUser {
     const ROUTE: &'static str = "/users/{user_gid}/workspace_memberships";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> =
+        Some(crate::fields::WorkspaceMembershipField::lists);
     fn path(&self) -> String {
         format!(
             "/users/{}/workspace_memberships",
@@ -82,6 +84,8 @@ impl crate::endpoint::Endpoint for GetWorkspaceMembership {
     const ROUTE: &'static str = "/workspace_memberships/{workspace_membership_gid}";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> =
+        Some(crate::fields::WorkspaceMembershipField::lists);
     fn path(&self) -> String {
         format!("/workspace_memberships/{}", self.workspace_membership_gid)
     }
@@ -120,6 +124,8 @@ impl crate::endpoint::Endpoint for GetWorkspaceMembershipsForWorkspace {
     const ROUTE: &'static str = "/workspaces/{workspace_gid}/workspace_memberships";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> =
+        Some(crate::fields::WorkspaceMembershipField::lists);
     fn path(&self) -> String {
         format!("/workspaces/{}/workspace_memberships", self.workspace_gid)
     }

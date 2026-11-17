@@ -43,14 +43,17 @@
 //! task search with the common filters, stories, attachments (multipart upload, links, and the
 //! bytes behind `download_url`), task templates, duplication and jobs, the batch API, the events
 //! stream, and webhooks. Any other operation in Asana's specification answers `501` naming its
-//! `operationId`, so a gap is loud rather than a silent `404`. Routes are matched by the
+//! `operationId`, and so does a search filter or sort the fake does not model, so a gap is loud
+//! rather than a silent `404` or a filter ignored. Routes are matched by the
 //! generated descriptors' own `METHOD` and `ROUTE`, so they follow the generated code.
 //!
 //! Answers follow Asana: `{"data": …}`, `next_page` with an opaque `offset` when a `limit` is
 //! sent, `opt_fields` honoured (nested paths such as `memberships.section.name` included; a
 //! single object is the full record without it, a list item is compact), and errors as
 //! `{"errors": [{"message", "help"}]}` with `400`, `401`, `402`, `403`, `404`, `412` (the events
-//! stream's first call) and `429` (on request, with [`Fault`]).
+//! stream's first call) and `429` (on request, with [`Fault`]). Like Asana it refuses an
+//! `opt_fields` path the specification does not list for the resource and an offset issued for
+//! another list with `400`, and answers a path no operation has `404`.
 //!
 //! # Webhooks
 //!

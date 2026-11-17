@@ -21,6 +21,8 @@ impl crate::endpoint::Endpoint for CreateOrganizationExport {
     const ROUTE: &'static str = "/organization_exports";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = false;
+    const OPT_FIELDS: Option<fn(&str) -> bool> =
+        Some(crate::fields::OrganizationExportField::lists);
     fn path(&self) -> String {
         "/organization_exports".to_owned()
     }
@@ -55,6 +57,8 @@ impl crate::endpoint::Endpoint for GetOrganizationExport {
     const ROUTE: &'static str = "/organization_exports/{organization_export_gid}";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> =
+        Some(crate::fields::OrganizationExportField::lists);
     fn path(&self) -> String {
         format!("/organization_exports/{}", self.organization_export_gid)
     }

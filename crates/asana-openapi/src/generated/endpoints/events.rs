@@ -26,6 +26,7 @@ impl crate::endpoint::Endpoint for GetEvents {
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = true;
     const ENVELOPE: crate::endpoint::Envelope = crate::endpoint::Envelope::Whole;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::EventField::lists);
     fn path(&self) -> String {
         "/events".to_owned()
     }

@@ -25,6 +25,7 @@ impl crate::endpoint::Endpoint for GetTags {
     const ROUTE: &'static str = "/tags";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::TagsRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::TagField::lists);
     fn path(&self) -> String {
         "/tags".to_owned()
     }
@@ -81,6 +82,7 @@ impl crate::endpoint::Endpoint for CreateTag {
     const ROUTE: &'static str = "/tags";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::TagsWrite);
     const IDEMPOTENT: bool = false;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::TagField::lists);
     fn path(&self) -> String {
         "/tags".to_owned()
     }
@@ -115,6 +117,7 @@ impl crate::endpoint::Endpoint for GetTag {
     const ROUTE: &'static str = "/tags/{tag_gid}";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::TagsRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::TagField::lists);
     fn path(&self) -> String {
         format!("/tags/{}", self.tag_gid)
     }
@@ -148,6 +151,7 @@ impl crate::endpoint::Endpoint for UpdateTag {
     const ROUTE: &'static str = "/tags/{tag_gid}";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::TagsWrite);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::TagField::lists);
     fn path(&self) -> String {
         format!("/tags/{}", self.tag_gid)
     }
@@ -208,6 +212,7 @@ impl crate::endpoint::Endpoint for GetTagsForTask {
     const ROUTE: &'static str = "/tasks/{task_gid}/tags";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::TagsRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::TagField::lists);
     fn path(&self) -> String {
         format!("/tasks/{}/tags", self.task_gid)
     }
@@ -265,6 +270,7 @@ impl crate::endpoint::Endpoint for GetTagsForWorkspace {
     const ROUTE: &'static str = "/workspaces/{workspace_gid}/tags";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::TagsRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::TagField::lists);
     fn path(&self) -> String {
         format!("/workspaces/{}/tags", self.workspace_gid)
     }
@@ -320,6 +326,7 @@ impl crate::endpoint::Endpoint for CreateTagForWorkspace {
     const ROUTE: &'static str = "/workspaces/{workspace_gid}/tags";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::TagsWrite);
     const IDEMPOTENT: bool = false;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::TagField::lists);
     fn path(&self) -> String {
         format!("/workspaces/{}/tags", self.workspace_gid)
     }

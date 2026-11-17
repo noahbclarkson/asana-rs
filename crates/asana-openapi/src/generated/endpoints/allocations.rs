@@ -31,6 +31,7 @@ impl crate::endpoint::Endpoint for GetAllocations {
     const ROUTE: &'static str = "/allocations";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::AllocationField::lists);
     fn path(&self) -> String {
         "/allocations".to_owned()
     }
@@ -89,6 +90,7 @@ impl crate::endpoint::Endpoint for CreateAllocation {
     const ROUTE: &'static str = "/allocations";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = false;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::AllocationField::lists);
     fn path(&self) -> String {
         "/allocations".to_owned()
     }
@@ -123,6 +125,7 @@ impl crate::endpoint::Endpoint for GetAllocation {
     const ROUTE: &'static str = "/allocations/{allocation_gid}";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::AllocationField::lists);
     fn path(&self) -> String {
         format!("/allocations/{}", self.allocation_gid)
     }
@@ -156,6 +159,7 @@ impl crate::endpoint::Endpoint for UpdateAllocation {
     const ROUTE: &'static str = "/allocations/{allocation_gid}";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::AllocationField::lists);
     fn path(&self) -> String {
         format!("/allocations/{}", self.allocation_gid)
     }

@@ -3,7 +3,11 @@
 //! Search is premium-only: a workspace seeded as free answers `402`. Unlike Asana, the fake's
 //! index is never behind, so a task is found the moment it is made. As in Asana there is no
 //! `offset`: one answer holds at most `limit` tasks (100 by default), and a caller pages by
-//! `created_at`. Filters the fake does not understand are ignored rather than refused.
+//! `created_at`.
+//!
+//! A filter the fake does not model is answered `501` naming it, never ignored: ignoring it would
+//! return tasks Asana would have filtered out, and a test asserting that a task is found would pass
+//! where Asana would not find it. A `custom_fields` operator Asana does not have is `400`.
 
 use asana_openapi::endpoints::SearchTasksForWorkspace;
 use http::StatusCode;
@@ -18,7 +22,84 @@ pub(crate) fn routes() -> Vec<Route> {
     vec![serve::<SearchTasksForWorkspace>(search)]
 }
 
+/// The query parameters the fake models, besides `custom_fields.{gid}.{operator}`.
+const MODELLED: &[&str] = &[
+    "opt_fields",
+    "opt_pretty",
+    "limit",
+    "sort_by",
+    "sort_ascending",
+    "text",
+    "completed",
+    "is_subtask",
+    "resource_subtype",
+    "projects.any",
+    "projects.all",
+    "projects.not",
+    "sections.any",
+    "sections.all",
+    "sections.not",
+    "tags.any",
+    "tags.all",
+    "tags.not",
+    "assignee.any",
+    "assignee.not",
+    "created_at.after",
+    "created_at.before",
+    "modified_at.after",
+    "modified_at.before",
+    "due_on",
+    "due_on.after",
+    "due_on.before",
+];
+
+/// The `custom_fields` operators Asana documents, all of which the fake models.
+const OPERATORS: &[&str] = &[
+    "is_set",
+    "value",
+    "less_than",
+    "greater_than",
+    "contains",
+    "starts_with",
+    "ends_with",
+];
+
+/// The `sort_by` values the fake models; Asana also has `likes`.
+const SORTS: &[&str] = &["modified_at", "created_at", "completed_at", "due_date"];
+
+/// Refuses what the fake cannot answer as Asana would: `501` for a filter or sort it does not
+/// model, `400` for a `custom_fields` filter that is not one Asana has.
+fn check_query(call: &Call) -> Result<(), Refusal> {
+    let not_modelled = |what: String| {
+        Refusal::new(
+            StatusCode::NOT_IMPLEMENTED,
+            format!("asana-fake does not model {what} in searchTasksForWorkspace"),
+        )
+    };
+    for (name, _) in &call.query {
+        if MODELLED.contains(&name.as_str()) {
+            continue;
+        }
+        if let Some(rest) = name.strip_prefix("custom_fields.") {
+            match rest.split_once('.') {
+                Some((_, operator)) if OPERATORS.contains(&operator) => continue,
+                _ => {
+                    return Err(Refusal::bad_request(format!(
+                        "{name}: Not a valid custom field filter"
+                    )));
+                }
+            }
+        }
+        return Err(not_modelled(format!("the search filter `{name}`")));
+    }
+    match call.query("sort_by") {
+        Some(sort) if !SORTS.contains(&sort) => Err(not_modelled(format!("sorting by `{sort}`"))),
+        _ => Ok(()),
+    }
+}
+
 fn search(state: &mut State, call: &Call) -> Reply {
+    check_query(call)?;
     let workspace = call.param(0).to_owned();
     if !lookup(&state.workspaces, "workspace", &workspace)?.premium {
         return Err(Refusal::new(
@@ -48,6 +129,7 @@ fn search(state: &mut State, call: &Call) -> Reply {
         "created_at" => found.sort_by_key(|(_, task)| task.created_at),
         "completed_at" => found.sort_by_key(|(_, task)| task.completed_at),
         "due_date" => found.sort_by(|(_, a), (_, b)| a.due_on.cmp(&b.due_on)),
+        // `modified_at`; `check_query` refused anything else.
         _ => found.sort_by_key(|(_, task)| task.modified_at),
     }
     if !ascending {
@@ -201,7 +283,7 @@ fn custom_fields(call: &Call, task: &Task) -> bool {
                 }
                 _ => false,
             },
-            // An operator the fake does not know is ignored, like an unknown filter.
+            // `check_query` refused any other operator before the search ran.
             _ => true,
         }
     })

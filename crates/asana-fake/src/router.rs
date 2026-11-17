@@ -10,7 +10,7 @@ use std::sync::LazyLock;
 use asana_openapi::endpoint::{Endpoint, Method};
 use asana_openapi::endpoints::OPERATIONS;
 
-use crate::answer::{Call, Reply};
+use crate::answer::{Call, Refusal, Reply};
 use crate::state::State;
 
 /// A handler that reads and changes the state under its lock.
@@ -31,6 +31,41 @@ pub(crate) struct Route {
     segments: Vec<Segment>,
     pub(crate) operation: &'static str,
     pub(crate) action: Action,
+    /// Whether the specification lists an `opt_fields` path for the operation's resource.
+    opt_fields: Option<fn(&str) -> bool>,
+}
+
+impl Route {
+    /// Refuses, as Asana does with `400`, an `opt_fields` path the specification does not list
+    /// for the operation's resource (a misspelt `with_raw` path, say).
+    pub(crate) fn check_fields(&self, query: &[(String, String)]) -> Result<(), Refusal> {
+        let requested = query
+            .iter()
+            .filter(|(key, _)| key == "opt_fields")
+            .flat_map(|(_, value)| value.split(','));
+        self.check_paths(requested)
+    }
+
+    /// As [`check_fields`](Self::check_fields), for paths given one by one (a batch action's
+    /// `options.fields`).
+    pub(crate) fn check_paths<'a>(
+        &self,
+        paths: impl IntoIterator<Item = &'a str>,
+    ) -> Result<(), Refusal> {
+        let Some(lists) = self.opt_fields else {
+            return Ok(());
+        };
+        match paths
+            .into_iter()
+            .map(str::trim)
+            .find(|path| !path.is_empty() && !lists(path))
+        {
+            Some(path) => Err(Refusal::bad_request(format!(
+                "opt_fields: `{path}` is not a field of this resource"
+            ))),
+            None => Ok(()),
+        }
+    }
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -46,6 +81,7 @@ pub(crate) fn route<E: Endpoint>(action: Action) -> Route {
         segments: segments(E::ROUTE),
         operation: E::OPERATION_ID,
         action,
+        opt_fields: E::OPT_FIELDS,
     }
 }
 

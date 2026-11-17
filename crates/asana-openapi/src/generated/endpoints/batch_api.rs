@@ -21,6 +21,7 @@ impl crate::endpoint::Endpoint for CreateBatchRequest {
     const ROUTE: &'static str = "/batch";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = false;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::BatchField::lists);
     fn path(&self) -> String {
         "/batch".to_owned()
     }

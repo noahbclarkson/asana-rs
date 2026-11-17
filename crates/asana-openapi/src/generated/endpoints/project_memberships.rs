@@ -22,6 +22,7 @@ impl crate::endpoint::Endpoint for GetProjectMembership {
     const ROUTE: &'static str = "/project_memberships/{project_membership_gid}";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::ProjectMembershipField::lists);
     fn path(&self) -> String {
         format!("/project_memberships/{}", self.project_membership_gid)
     }
@@ -60,6 +61,7 @@ impl crate::endpoint::Endpoint for GetProjectMembershipsForProject {
     const ROUTE: &'static str = "/projects/{project_gid}/project_memberships";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::ProjectMembershipField::lists);
     fn path(&self) -> String {
         format!("/projects/{}/project_memberships", self.project_gid)
     }

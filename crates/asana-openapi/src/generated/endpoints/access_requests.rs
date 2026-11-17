@@ -25,6 +25,7 @@ impl crate::endpoint::Endpoint for GetAccessRequests {
     const ROUTE: &'static str = "/access_requests";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::AccessRequestField::lists);
     fn path(&self) -> String {
         "/access_requests".to_owned()
     }

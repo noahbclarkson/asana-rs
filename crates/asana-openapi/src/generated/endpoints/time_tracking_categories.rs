@@ -28,6 +28,8 @@ impl crate::endpoint::Endpoint for GetTimeTrackingCategories {
     const SCOPE: Option<crate::scopes::Scope> =
         Some(crate::scopes::Scope::TimeTrackingCategoriesRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> =
+        Some(crate::fields::TimeTrackingCategoryField::lists);
     fn path(&self) -> String {
         "/time_tracking_categories".to_owned()
     }
@@ -85,6 +87,8 @@ impl crate::endpoint::Endpoint for CreateTimeTrackingCategory {
     const SCOPE: Option<crate::scopes::Scope> =
         Some(crate::scopes::Scope::TimeTrackingCategoriesWrite);
     const IDEMPOTENT: bool = false;
+    const OPT_FIELDS: Option<fn(&str) -> bool> =
+        Some(crate::fields::TimeTrackingCategoryField::lists);
     fn path(&self) -> String {
         "/time_tracking_categories".to_owned()
     }
@@ -120,6 +124,8 @@ impl crate::endpoint::Endpoint for GetTimeTrackingCategory {
     const SCOPE: Option<crate::scopes::Scope> =
         Some(crate::scopes::Scope::TimeTrackingCategoriesRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> =
+        Some(crate::fields::TimeTrackingCategoryField::lists);
     fn path(&self) -> String {
         format!(
             "/time_tracking_categories/{}",
@@ -157,6 +163,8 @@ impl crate::endpoint::Endpoint for UpdateTimeTrackingCategory {
     const SCOPE: Option<crate::scopes::Scope> =
         Some(crate::scopes::Scope::TimeTrackingCategoriesWrite);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> =
+        Some(crate::fields::TimeTrackingCategoryField::lists);
     fn path(&self) -> String {
         format!(
             "/time_tracking_categories/{}",
@@ -230,6 +238,7 @@ impl crate::endpoint::Endpoint for GetTimeTrackingEntriesForTimeTrackingCategory
     const SCOPE: Option<crate::scopes::Scope> =
         Some(crate::scopes::Scope::TimeTrackingCategoriesRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::TimeTrackingEntryField::lists);
     fn path(&self) -> String {
         format!(
             "/time_tracking_categories/{}/time_tracking_entries",

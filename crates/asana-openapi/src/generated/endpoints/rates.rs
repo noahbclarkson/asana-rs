@@ -29,6 +29,7 @@ impl crate::endpoint::Endpoint for GetRates {
     const ROUTE: &'static str = "/rates";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::RateOrPlaceholderField::lists);
     fn path(&self) -> String {
         "/rates".to_owned()
     }
@@ -83,6 +84,7 @@ impl crate::endpoint::Endpoint for CreateRate {
     const ROUTE: &'static str = "/rates";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = false;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::RateField::lists);
     fn path(&self) -> String {
         "/rates".to_owned()
     }
@@ -117,6 +119,7 @@ impl crate::endpoint::Endpoint for GetRate {
     const ROUTE: &'static str = "/rates/{rate_gid}";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::RateField::lists);
     fn path(&self) -> String {
         format!("/rates/{}", self.rate_gid)
     }
@@ -150,6 +153,7 @@ impl crate::endpoint::Endpoint for UpdateRate {
     const ROUTE: &'static str = "/rates/{rate_gid}";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::RateField::lists);
     fn path(&self) -> String {
         format!("/rates/{}", self.rate_gid)
     }

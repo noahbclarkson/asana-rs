@@ -37,6 +37,7 @@ impl crate::endpoint::Endpoint for GetGoals {
     const ROUTE: &'static str = "/goals";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::GoalsRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::GoalField::lists);
     fn path(&self) -> String {
         "/goals".to_owned()
     }
@@ -108,6 +109,7 @@ impl crate::endpoint::Endpoint for CreateGoal {
     const ROUTE: &'static str = "/goals";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = false;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::GoalField::lists);
     fn path(&self) -> String {
         "/goals".to_owned()
     }
@@ -142,6 +144,7 @@ impl crate::endpoint::Endpoint for GetGoal {
     const ROUTE: &'static str = "/goals/{goal_gid}";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::GoalsRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::GoalField::lists);
     fn path(&self) -> String {
         format!("/goals/{}", self.goal_gid)
     }
@@ -175,6 +178,7 @@ impl crate::endpoint::Endpoint for UpdateGoal {
     const ROUTE: &'static str = "/goals/{goal_gid}";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::GoalField::lists);
     fn path(&self) -> String {
         format!("/goals/{}", self.goal_gid)
     }
@@ -260,6 +264,7 @@ impl crate::endpoint::Endpoint for AddFollowers {
     const ROUTE: &'static str = "/goals/{goal_gid}/addFollowers";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::GoalField::lists);
     fn path(&self) -> String {
         format!("/goals/{}/addFollowers", self.goal_gid)
     }
@@ -294,6 +299,7 @@ impl crate::endpoint::Endpoint for GetParentGoalsForGoal {
     const ROUTE: &'static str = "/goals/{goal_gid}/parentGoals";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::GoalsRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::GoalField::lists);
     fn path(&self) -> String {
         format!("/goals/{}/parentGoals", self.goal_gid)
     }
@@ -354,6 +360,7 @@ impl crate::endpoint::Endpoint for RemoveFollowers {
     const ROUTE: &'static str = "/goals/{goal_gid}/removeFollowers";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::GoalField::lists);
     fn path(&self) -> String {
         format!("/goals/{}/removeFollowers", self.goal_gid)
     }
@@ -390,6 +397,7 @@ impl crate::endpoint::Endpoint for CreateGoalMetric {
     const ROUTE: &'static str = "/goals/{goal_gid}/setMetric";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = false;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::GoalField::lists);
     fn path(&self) -> String {
         format!("/goals/{}/setMetric", self.goal_gid)
     }
@@ -426,6 +434,7 @@ impl crate::endpoint::Endpoint for UpdateGoalMetric {
     const ROUTE: &'static str = "/goals/{goal_gid}/setMetricCurrentValue";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = false;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::GoalField::lists);
     fn path(&self) -> String {
         format!("/goals/{}/setMetricCurrentValue", self.goal_gid)
     }

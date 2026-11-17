@@ -28,6 +28,7 @@ impl crate::endpoint::Endpoint for GetWebhooks {
     const ROUTE: &'static str = "/webhooks";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::WebhooksRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::WebhookField::lists);
     fn path(&self) -> String {
         "/webhooks".to_owned()
     }
@@ -82,6 +83,7 @@ impl crate::endpoint::Endpoint for CreateWebhook {
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::WebhooksWrite);
     const IDEMPOTENT: bool = false;
     const ENVELOPE: crate::endpoint::Envelope = crate::endpoint::Envelope::Whole;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::WebhookField::lists);
     fn path(&self) -> String {
         "/webhooks".to_owned()
     }
@@ -116,6 +118,7 @@ impl crate::endpoint::Endpoint for GetWebhook {
     const ROUTE: &'static str = "/webhooks/{webhook_gid}";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::WebhooksRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::WebhookField::lists);
     fn path(&self) -> String {
         format!("/webhooks/{}", self.webhook_gid)
     }
@@ -149,6 +152,7 @@ impl crate::endpoint::Endpoint for UpdateWebhook {
     const ROUTE: &'static str = "/webhooks/{webhook_gid}";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::WebhooksWrite);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::WebhookField::lists);
     fn path(&self) -> String {
         format!("/webhooks/{}", self.webhook_gid)
     }

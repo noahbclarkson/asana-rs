@@ -27,6 +27,8 @@ impl crate::endpoint::Endpoint for GetProjectPortfolioSettingsForPortfolio {
     const SCOPE: Option<crate::scopes::Scope> =
         Some(crate::scopes::Scope::ProjectPortfolioSettingsRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> =
+        Some(crate::fields::ProjectPortfolioSettingField::lists);
     fn path(&self) -> String {
         format!(
             "/portfolios/{}/project_portfolio_settings",
@@ -84,6 +86,8 @@ impl crate::endpoint::Endpoint for GetProjectPortfolioSetting {
     const SCOPE: Option<crate::scopes::Scope> =
         Some(crate::scopes::Scope::ProjectPortfolioSettingsRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> =
+        Some(crate::fields::ProjectPortfolioSettingField::lists);
     fn path(&self) -> String {
         format!(
             "/project_portfolio_settings/{}",
@@ -121,6 +125,8 @@ impl crate::endpoint::Endpoint for UpdateProjectPortfolioSetting {
     const SCOPE: Option<crate::scopes::Scope> =
         Some(crate::scopes::Scope::ProjectPortfolioSettingsWrite);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> =
+        Some(crate::fields::ProjectPortfolioSettingField::lists);
     fn path(&self) -> String {
         format!(
             "/project_portfolio_settings/{}",
@@ -163,6 +169,8 @@ impl crate::endpoint::Endpoint for GetProjectPortfolioSettingsForProject {
     const SCOPE: Option<crate::scopes::Scope> =
         Some(crate::scopes::Scope::ProjectPortfolioSettingsRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> =
+        Some(crate::fields::ProjectPortfolioSettingField::lists);
     fn path(&self) -> String {
         format!("/projects/{}/project_portfolio_settings", self.project_gid)
     }

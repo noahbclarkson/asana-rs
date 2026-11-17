@@ -32,6 +32,7 @@ impl crate::endpoint::Endpoint for GetStoriesForGoal {
     const ROUTE: &'static str = "/goals/{goal_gid}/stories";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::StoriesRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::StoryField::lists);
     fn path(&self) -> String {
         format!("/goals/{}/stories", self.goal_gid)
     }
@@ -113,6 +114,7 @@ impl crate::endpoint::Endpoint for CreateStoryForGoal {
     const ROUTE: &'static str = "/goals/{goal_gid}/stories";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::StoriesWrite);
     const IDEMPOTENT: bool = false;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::StoryField::lists);
     fn path(&self) -> String {
         format!("/goals/{}/stories", self.goal_gid)
     }
@@ -157,6 +159,7 @@ impl crate::endpoint::Endpoint for GetStoriesForRecord {
     const ROUTE: &'static str = "/records/{record_gid}/stories";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::StoriesRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::StoryField::lists);
     fn path(&self) -> String {
         format!("/records/{}/stories", self.record_gid)
     }
@@ -238,6 +241,7 @@ impl crate::endpoint::Endpoint for CreateStoryForRecord {
     const ROUTE: &'static str = "/records/{record_gid}/stories";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::StoriesWrite);
     const IDEMPOTENT: bool = false;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::StoryField::lists);
     fn path(&self) -> String {
         format!("/records/{}/stories", self.record_gid)
     }
@@ -272,6 +276,7 @@ impl crate::endpoint::Endpoint for GetStory {
     const ROUTE: &'static str = "/stories/{story_gid}";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::StoriesRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::StoryField::lists);
     fn path(&self) -> String {
         format!("/stories/{}", self.story_gid)
     }
@@ -305,6 +310,7 @@ impl crate::endpoint::Endpoint for UpdateStory {
     const ROUTE: &'static str = "/stories/{story_gid}";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::StoriesWrite);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::StoryField::lists);
     fn path(&self) -> String {
         format!("/stories/{}", self.story_gid)
     }
@@ -371,6 +377,7 @@ impl crate::endpoint::Endpoint for GetStoriesForTask {
     const ROUTE: &'static str = "/tasks/{task_gid}/stories";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::StoriesRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::StoryField::lists);
     fn path(&self) -> String {
         format!("/tasks/{}/stories", self.task_gid)
     }
@@ -452,6 +459,7 @@ impl crate::endpoint::Endpoint for CreateStoryForTask {
     const ROUTE: &'static str = "/tasks/{task_gid}/stories";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::StoriesWrite);
     const IDEMPOTENT: bool = false;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::StoryField::lists);
     fn path(&self) -> String {
         format!("/tasks/{}/stories", self.task_gid)
     }

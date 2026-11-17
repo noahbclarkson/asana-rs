@@ -25,6 +25,7 @@ impl crate::endpoint::Endpoint for GetTaskTemplates {
     const ROUTE: &'static str = "/task_templates";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::TaskTemplatesRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::TaskTemplateField::lists);
     fn path(&self) -> String {
         "/task_templates".to_owned()
     }
@@ -79,6 +80,7 @@ impl crate::endpoint::Endpoint for GetTaskTemplate {
     const ROUTE: &'static str = "/task_templates/{task_template_gid}";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::TaskTemplatesRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::TaskTemplateField::lists);
     fn path(&self) -> String {
         format!("/task_templates/{}", self.task_template_gid)
     }
@@ -134,6 +136,7 @@ impl crate::endpoint::Endpoint for InstantiateTask {
     const ROUTE: &'static str = "/task_templates/{task_template_gid}/instantiateTask";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = false;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::JobField::lists);
     fn path(&self) -> String {
         format!("/task_templates/{}/instantiateTask", self.task_template_gid)
     }

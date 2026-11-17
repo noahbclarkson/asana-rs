@@ -22,6 +22,7 @@ impl crate::endpoint::Endpoint for GetProjectStatus {
     const ROUTE: &'static str = "/project_statuses/{project_status_gid}";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::ProjectStatusField::lists);
     fn path(&self) -> String {
         format!("/project_statuses/{}", self.project_status_gid)
     }
@@ -79,6 +80,7 @@ impl crate::endpoint::Endpoint for GetProjectStatusesForProject {
     const ROUTE: &'static str = "/projects/{project_gid}/project_statuses";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::ProjectStatusField::lists);
     fn path(&self) -> String {
         format!("/projects/{}/project_statuses", self.project_gid)
     }
@@ -134,6 +136,7 @@ impl crate::endpoint::Endpoint for CreateProjectStatusForProject {
     const ROUTE: &'static str = "/projects/{project_gid}/project_statuses";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = false;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::ProjectStatusField::lists);
     fn path(&self) -> String {
         format!("/projects/{}/project_statuses", self.project_gid)
     }

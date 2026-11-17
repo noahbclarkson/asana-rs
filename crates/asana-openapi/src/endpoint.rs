@@ -156,6 +156,11 @@ pub trait Endpoint: Send + Sync {
     const IDEMPOTENT: bool;
     /// Where the result sits in the response body.
     const ENVELOPE: Envelope = Envelope::Data;
+    /// For an operation that takes `opt_fields`, whether Asana's specification lists a path for
+    /// its resource (the same list [`fields!`](crate::fields!) checks against); `None` when it
+    /// takes none or the descriptor does not say. A test double uses it to refuse an unknown path
+    /// as Asana does.
+    const OPT_FIELDS: Option<fn(&str) -> bool> = None;
 
     /// The path with its parameters filled in, starting with `/`.
     fn path(&self) -> String;

@@ -21,6 +21,7 @@ impl crate::endpoint::Endpoint for CreateTable {
     const ROUTE: &'static str = "/tables";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::TablesWrite);
     const IDEMPOTENT: bool = false;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::TableField::lists);
     fn path(&self) -> String {
         "/tables".to_owned()
     }
@@ -55,6 +56,7 @@ impl crate::endpoint::Endpoint for GetTable {
     const ROUTE: &'static str = "/tables/{table_gid}";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::TablesRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::TableField::lists);
     fn path(&self) -> String {
         format!("/tables/{}", self.table_gid)
     }
@@ -88,6 +90,7 @@ impl crate::endpoint::Endpoint for UpdateTable {
     const ROUTE: &'static str = "/tables/{table_gid}";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::TablesWrite);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::TableField::lists);
     fn path(&self) -> String {
         format!("/tables/{}", self.table_gid)
     }
@@ -146,6 +149,8 @@ impl crate::endpoint::Endpoint for AddCustomFieldSettingForTable {
     const ROUTE: &'static str = "/tables/{table_gid}/addCustomFieldSetting";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::TablesWrite);
     const IDEMPOTENT: bool = false;
+    const OPT_FIELDS: Option<fn(&str) -> bool> =
+        Some(crate::fields::CustomFieldTableSettingField::lists);
     fn path(&self) -> String {
         format!("/tables/{}/addCustomFieldSetting", self.table_gid)
     }
@@ -184,6 +189,8 @@ impl crate::endpoint::Endpoint for GetCustomFieldSettingsForTable {
     const ROUTE: &'static str = "/tables/{table_gid}/custom_field_settings";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::TablesRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> =
+        Some(crate::fields::CustomFieldTableSettingField::lists);
     fn path(&self) -> String {
         format!("/tables/{}/custom_field_settings", self.table_gid)
     }
@@ -243,6 +250,8 @@ impl crate::endpoint::Endpoint for GetCustomFieldSettingsForTableLegacy {
     const ROUTE: &'static str = "/tables/{table_gid}/getCustomFieldSettings";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::TablesRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> =
+        Some(crate::fields::CustomFieldTableSettingField::lists);
     fn path(&self) -> String {
         format!("/tables/{}/getCustomFieldSettings", self.table_gid)
     }
@@ -327,6 +336,7 @@ impl crate::endpoint::Endpoint for GetTablesForWorkspace {
     const ROUTE: &'static str = "/workspaces/{workspace_gid}/tables";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::TablesRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::TableField::lists);
     fn path(&self) -> String {
         format!("/workspaces/{}/tables", self.workspace_gid)
     }

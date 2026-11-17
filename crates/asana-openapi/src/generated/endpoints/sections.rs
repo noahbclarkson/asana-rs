@@ -26,6 +26,7 @@ impl crate::endpoint::Endpoint for GetSectionsForProject {
     const ROUTE: &'static str = "/projects/{project_gid}/sections";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::ProjectsRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::SectionField::lists);
     fn path(&self) -> String {
         format!("/projects/{}/sections", self.project_gid)
     }
@@ -81,6 +82,7 @@ impl crate::endpoint::Endpoint for CreateSectionForProject {
     const ROUTE: &'static str = "/projects/{project_gid}/sections";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::ProjectsWrite);
     const IDEMPOTENT: bool = false;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::SectionField::lists);
     fn path(&self) -> String {
         format!("/projects/{}/sections", self.project_gid)
     }
@@ -148,6 +150,7 @@ impl crate::endpoint::Endpoint for GetSection {
     const ROUTE: &'static str = "/sections/{section_gid}";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::ProjectsRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::SectionField::lists);
     fn path(&self) -> String {
         format!("/sections/{}", self.section_gid)
     }
@@ -181,6 +184,7 @@ impl crate::endpoint::Endpoint for UpdateSection {
     const ROUTE: &'static str = "/sections/{section_gid}";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::ProjectsWrite);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::SectionField::lists);
     fn path(&self) -> String {
         format!("/sections/{}", self.section_gid)
     }

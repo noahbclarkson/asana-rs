@@ -28,6 +28,7 @@ impl crate::endpoint::Endpoint for GetStatusesForObject {
     const ROUTE: &'static str = "/status_updates";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::StatusUpdateField::lists);
     fn path(&self) -> String {
         "/status_updates".to_owned()
     }
@@ -81,6 +82,7 @@ impl crate::endpoint::Endpoint for CreateStatusForObject {
     const ROUTE: &'static str = "/status_updates";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = false;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::StatusUpdateField::lists);
     fn path(&self) -> String {
         "/status_updates".to_owned()
     }
@@ -115,6 +117,7 @@ impl crate::endpoint::Endpoint for GetStatus {
     const ROUTE: &'static str = "/status_updates/{status_update_gid}";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::StatusUpdateField::lists);
     fn path(&self) -> String {
         format!("/status_updates/{}", self.status_update_gid)
     }

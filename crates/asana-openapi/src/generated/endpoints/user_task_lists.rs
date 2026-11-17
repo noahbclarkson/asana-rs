@@ -22,6 +22,7 @@ impl crate::endpoint::Endpoint for GetUserTaskList {
     const ROUTE: &'static str = "/user_task_lists/{user_task_list_gid}";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::TasksRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::UserTaskListField::lists);
     fn path(&self) -> String {
         format!("/user_task_lists/{}", self.user_task_list_gid)
     }
@@ -55,6 +56,7 @@ impl crate::endpoint::Endpoint for GetUserTaskListForUser {
     const ROUTE: &'static str = "/users/{user_gid}/user_task_list";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::TasksRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::UserTaskListField::lists);
     fn path(&self) -> String {
         format!(
             "/users/{}/user_task_list",

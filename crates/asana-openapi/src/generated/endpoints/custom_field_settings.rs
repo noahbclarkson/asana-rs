@@ -26,6 +26,8 @@ impl crate::endpoint::Endpoint for GetCustomFieldSettingsForGoal {
     const ROUTE: &'static str = "/goals/{goal_gid}/custom_field_settings";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::GoalsRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> =
+        Some(crate::fields::CustomFieldSettingField::lists);
     fn path(&self) -> String {
         format!("/goals/{}/custom_field_settings", self.goal_gid)
     }
@@ -83,6 +85,8 @@ impl crate::endpoint::Endpoint for GetCustomFieldSettingsForPortfolio {
     const ROUTE: &'static str = "/portfolios/{portfolio_gid}/custom_field_settings";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::PortfoliosRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> =
+        Some(crate::fields::CustomFieldSettingField::lists);
     fn path(&self) -> String {
         format!("/portfolios/{}/custom_field_settings", self.portfolio_gid)
     }
@@ -140,6 +144,8 @@ impl crate::endpoint::Endpoint for GetCustomFieldSettingsForProject {
     const ROUTE: &'static str = "/projects/{project_gid}/custom_field_settings";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::ProjectsRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> =
+        Some(crate::fields::CustomFieldSettingField::lists);
     fn path(&self) -> String {
         format!("/projects/{}/custom_field_settings", self.project_gid)
     }
@@ -193,6 +199,8 @@ impl crate::endpoint::Endpoint for GetCustomFieldSettingsForTeam {
     const ROUTE: &'static str = "/teams/{team_gid}/custom_field_settings";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::TeamsRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> =
+        Some(crate::fields::CustomFieldSettingField::lists);
     fn path(&self) -> String {
         format!("/teams/{}/custom_field_settings", self.team_gid)
     }

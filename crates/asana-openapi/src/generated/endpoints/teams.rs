@@ -21,6 +21,7 @@ impl crate::endpoint::Endpoint for CreateTeam {
     const ROUTE: &'static str = "/teams";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = false;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::TeamField::lists);
     fn path(&self) -> String {
         "/teams".to_owned()
     }
@@ -55,6 +56,7 @@ impl crate::endpoint::Endpoint for GetTeam {
     const ROUTE: &'static str = "/teams/{team_gid}";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::TeamsRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::TeamField::lists);
     fn path(&self) -> String {
         format!("/teams/{}", self.team_gid)
     }
@@ -88,6 +90,7 @@ impl crate::endpoint::Endpoint for UpdateTeam {
     const ROUTE: &'static str = "/teams/{team_gid}";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::TeamField::lists);
     fn path(&self) -> String {
         format!("/teams/{}", self.team_gid)
     }
@@ -124,6 +127,7 @@ impl crate::endpoint::Endpoint for AddUserForTeam {
     const ROUTE: &'static str = "/teams/{team_gid}/addUser";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::TeamMembershipField::lists);
     fn path(&self) -> String {
         format!("/teams/{}/addUser", self.team_gid)
     }
@@ -191,6 +195,7 @@ impl crate::endpoint::Endpoint for GetTeamsForUser {
     const ROUTE: &'static str = "/users/{user_gid}/teams";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::TeamsRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::TeamField::lists);
     fn path(&self) -> String {
         format!(
             "/users/{}/teams",
@@ -251,6 +256,7 @@ impl crate::endpoint::Endpoint for GetTeamsForWorkspace {
     const ROUTE: &'static str = "/workspaces/{workspace_gid}/teams";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::TeamsRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::TeamField::lists);
     fn path(&self) -> String {
         format!("/workspaces/{}/teams", self.workspace_gid)
     }

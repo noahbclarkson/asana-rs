@@ -32,6 +32,7 @@ impl crate::endpoint::Endpoint for GetOooEntries {
     const ROUTE: &'static str = "/ooo_entries";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::OooEntriesRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::OooEntryField::lists);
     fn path(&self) -> String {
         "/ooo_entries".to_owned()
     }
@@ -89,6 +90,7 @@ impl crate::endpoint::Endpoint for CreateOooEntry {
     const ROUTE: &'static str = "/ooo_entries";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::OooEntriesWrite);
     const IDEMPOTENT: bool = false;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::OooEntryField::lists);
     fn path(&self) -> String {
         "/ooo_entries".to_owned()
     }
@@ -123,6 +125,7 @@ impl crate::endpoint::Endpoint for GetOooEntry {
     const ROUTE: &'static str = "/ooo_entries/{ooo_entry_gid}";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::OooEntriesRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::OooEntryField::lists);
     fn path(&self) -> String {
         format!("/ooo_entries/{}", self.ooo_entry_gid)
     }
@@ -156,6 +159,7 @@ impl crate::endpoint::Endpoint for UpdateOooEntry {
     const ROUTE: &'static str = "/ooo_entries/{ooo_entry_gid}";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::OooEntriesWrite);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::OooEntryField::lists);
     fn path(&self) -> String {
         format!("/ooo_entries/{}", self.ooo_entry_gid)
     }

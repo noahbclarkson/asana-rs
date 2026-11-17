@@ -111,6 +111,7 @@ pub fn descriptor(operation: &Operation<'_>, types: &Types) -> GenResult<TokenSt
         _ => None,
     };
     let enums = operation.query_params.iter().filter_map(query_enum);
+    let opt_fields_const = opt_fields_const(operation);
 
     Ok(quote! {
         #doc
@@ -130,6 +131,7 @@ pub fn descriptor(operation: &Operation<'_>, types: &Types) -> GenResult<TokenSt
             const SCOPE: Option<crate::scopes::Scope> = #scope;
             const IDEMPOTENT: bool = #idempotent;
             #envelope
+            #opt_fields_const
 
             #path
             #query
@@ -139,6 +141,20 @@ pub fn descriptor(operation: &Operation<'_>, types: &Types) -> GenResult<TokenSt
         #paginated
         #( #enums )*
     })
+}
+
+/// `Endpoint::OPT_FIELDS` for an operation that takes `opt_fields`: its resource's list.
+pub fn opt_fields_const(operation: &Operation<'_>) -> TokenStream {
+    match operation.opt_fields() {
+        Some((family, _)) => {
+            let field = format_ident!("{}", crate::naming::field_enum_name(family));
+            quote! {
+                const OPT_FIELDS: Option<fn(&str) -> bool> =
+                    Some(crate::fields::#field::lists);
+            }
+        }
+        None => quote! {},
+    }
 }
 
 /// A field's identifier, raw when it is a keyword.

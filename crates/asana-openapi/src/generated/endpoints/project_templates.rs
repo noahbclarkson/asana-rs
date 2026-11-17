@@ -27,6 +27,7 @@ impl crate::endpoint::Endpoint for GetProjectTemplates {
     const ROUTE: &'static str = "/project_templates";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::ProjectTemplatesRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::ProjectTemplateField::lists);
     fn path(&self) -> String {
         "/project_templates".to_owned()
     }
@@ -85,6 +86,7 @@ impl crate::endpoint::Endpoint for GetProjectTemplate {
     const ROUTE: &'static str = "/project_templates/{project_template_gid}";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::ProjectTemplatesRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::ProjectTemplateField::lists);
     fn path(&self) -> String {
         format!("/project_templates/{}", self.project_template_gid)
     }
@@ -140,6 +142,7 @@ impl crate::endpoint::Endpoint for InstantiateProject {
     const ROUTE: &'static str = "/project_templates/{project_template_gid}/instantiateProject";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::ProjectsWrite);
     const IDEMPOTENT: bool = false;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::JobField::lists);
     fn path(&self) -> String {
         format!(
             "/project_templates/{}/instantiateProject",
@@ -184,6 +187,7 @@ impl crate::endpoint::Endpoint for GetProjectTemplatesForTeam {
     const ROUTE: &'static str = "/teams/{team_gid}/project_templates";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::ProjectTemplatesRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::ProjectTemplateField::lists);
     fn path(&self) -> String {
         format!("/teams/{}/project_templates", self.team_gid)
     }

@@ -17,6 +17,10 @@ impl UserTaskListField {
     pub const ALL: &'static [Self] = &[Self::Name, Self::Owner, Self::Workspace];
     /// Every field's path, in declaration order, so `PATHS[field as usize]` is its path.
     const PATHS: &'static [&'static str] = &["name", "owner", "workspace"];
+    /// Whether the specification lists `path` for this resource.
+    pub const fn lists(path: &str) -> bool {
+        Self::lookup(path).is_some()
+    }
     /// The field for a path the specification lists, usable in a `const` context.
     pub const fn lookup(path: &str) -> Option<Self> {
         let mut index = 0;

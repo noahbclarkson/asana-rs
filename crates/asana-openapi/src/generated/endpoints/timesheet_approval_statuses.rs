@@ -36,6 +36,8 @@ impl crate::endpoint::Endpoint for GetTimesheetApprovalStatuses {
     const SCOPE: Option<crate::scopes::Scope> =
         Some(crate::scopes::Scope::TimesheetApprovalStatusesRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> =
+        Some(crate::fields::TimesheetApprovalStatusField::lists);
     fn path(&self) -> String {
         "/timesheet_approval_statuses".to_owned()
     }
@@ -93,6 +95,8 @@ impl crate::endpoint::Endpoint for CreateTimesheetApprovalStatus {
     const SCOPE: Option<crate::scopes::Scope> =
         Some(crate::scopes::Scope::TimesheetApprovalStatusesWrite);
     const IDEMPOTENT: bool = false;
+    const OPT_FIELDS: Option<fn(&str) -> bool> =
+        Some(crate::fields::TimesheetApprovalStatusField::lists);
     fn path(&self) -> String {
         "/timesheet_approval_statuses".to_owned()
     }
@@ -128,6 +132,8 @@ impl crate::endpoint::Endpoint for GetTimesheetApprovalStatus {
     const SCOPE: Option<crate::scopes::Scope> =
         Some(crate::scopes::Scope::TimesheetApprovalStatusesRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> =
+        Some(crate::fields::TimesheetApprovalStatusField::lists);
     fn path(&self) -> String {
         format!(
             "/timesheet_approval_statuses/{}",
@@ -165,6 +171,8 @@ impl crate::endpoint::Endpoint for UpdateTimesheetApprovalStatus {
     const SCOPE: Option<crate::scopes::Scope> =
         Some(crate::scopes::Scope::TimesheetApprovalStatusesWrite);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> =
+        Some(crate::fields::TimesheetApprovalStatusField::lists);
     fn path(&self) -> String {
         format!(
             "/timesheet_approval_statuses/{}",

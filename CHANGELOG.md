@@ -135,5 +135,16 @@ These change what code built against an earlier revision of `main` sees or compi
   `WebhookError::Create { handshake_seen: true, .. }` and dropped the captured secret. It now
   returns `OutcomeUnknown` with the secret and the route, so the caller can find the webhook and
   keep or delete it.
+- `asana-fake`: a new `Fault::TimeoutAfterApplying` (`Fault::timeout_after_applying()`)
+  carries the request out and then loses its answer, so a test can reproduce a create that
+  happened although the client saw a timeout. The fake now refuses what it accepted silently: a
+  task-search filter or `sort_by` it does not model answers `501` naming it (it used to be
+  ignored, so the search returned tasks Asana would have filtered out), a `custom_fields`
+  operator Asana does not have answers `400`, an `opt_fields` path the specification does not
+  list for the resource answers `400` (in a batch action too), and an offset is good only for the
+  list (path and filters) that issued it. A path no operation has answers `404`, as Asana does,
+  not `400`. `asana-openapi`: `Endpoint` has a new provided constant, `OPT_FIELDS`, which every
+  generated descriptor that takes `opt_fields` sets to its resource's `lists` function, and each
+  field enum has a new `const fn lists(path) -> bool`.
 
 [0.1.0]: https://github.com/noahbclarkson/asana-rs/releases/tag/v0.1.0

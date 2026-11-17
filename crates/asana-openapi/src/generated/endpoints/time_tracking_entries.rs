@@ -26,6 +26,7 @@ impl crate::endpoint::Endpoint for GetTimeTrackingEntriesForTask {
     const ROUTE: &'static str = "/tasks/{task_gid}/time_tracking_entries";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::TimeTrackingEntriesRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::TimeTrackingEntryField::lists);
     fn path(&self) -> String {
         format!("/tasks/{}/time_tracking_entries", self.task_gid)
     }
@@ -81,6 +82,7 @@ impl crate::endpoint::Endpoint for CreateTimeTrackingEntry {
     const ROUTE: &'static str = "/tasks/{task_gid}/time_tracking_entries";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = false;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::TimeTrackingEntryField::lists);
     fn path(&self) -> String {
         format!("/tasks/{}/time_tracking_entries", self.task_gid)
     }
@@ -138,6 +140,7 @@ impl crate::endpoint::Endpoint for GetTimeTrackingEntries {
     const ROUTE: &'static str = "/time_tracking_entries";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::TimeTrackingEntriesRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::TimeTrackingEntryField::lists);
     fn path(&self) -> String {
         "/time_tracking_entries".to_owned()
     }
@@ -215,6 +218,7 @@ impl crate::endpoint::Endpoint for GetTimeTrackingEntry {
     const ROUTE: &'static str = "/time_tracking_entries/{time_tracking_entry_gid}";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::TimeTrackingEntriesRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::TimeTrackingEntryField::lists);
     fn path(&self) -> String {
         format!("/time_tracking_entries/{}", self.time_tracking_entry_gid)
     }
@@ -248,6 +252,7 @@ impl crate::endpoint::Endpoint for UpdateTimeTrackingEntry {
     const ROUTE: &'static str = "/time_tracking_entries/{time_tracking_entry_gid}";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::TimeTrackingEntryField::lists);
     fn path(&self) -> String {
         format!("/time_tracking_entries/{}", self.time_tracking_entry_gid)
     }

@@ -31,6 +31,7 @@ impl crate::endpoint::Endpoint for GetPortfolios {
     const ROUTE: &'static str = "/portfolios";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::PortfoliosRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::PortfolioField::lists);
     fn path(&self) -> String {
         "/portfolios".to_owned()
     }
@@ -85,6 +86,7 @@ impl crate::endpoint::Endpoint for CreatePortfolio {
     const ROUTE: &'static str = "/portfolios";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::PortfoliosWrite);
     const IDEMPOTENT: bool = false;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::PortfolioField::lists);
     fn path(&self) -> String {
         "/portfolios".to_owned()
     }
@@ -119,6 +121,7 @@ impl crate::endpoint::Endpoint for GetPortfolio {
     const ROUTE: &'static str = "/portfolios/{portfolio_gid}";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::PortfoliosRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::PortfolioField::lists);
     fn path(&self) -> String {
         format!("/portfolios/{}", self.portfolio_gid)
     }
@@ -152,6 +155,7 @@ impl crate::endpoint::Endpoint for UpdatePortfolio {
     const ROUTE: &'static str = "/portfolios/{portfolio_gid}";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::PortfoliosWrite);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::PortfolioField::lists);
     fn path(&self) -> String {
         format!("/portfolios/{}", self.portfolio_gid)
     }
@@ -264,6 +268,7 @@ impl crate::endpoint::Endpoint for AddMembersForPortfolio {
     const ROUTE: &'static str = "/portfolios/{portfolio_gid}/addMembers";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::PortfolioField::lists);
     fn path(&self) -> String {
         format!("/portfolios/{}/addMembers", self.portfolio_gid)
     }
@@ -300,6 +305,7 @@ impl crate::endpoint::Endpoint for DuplicatePortfolio {
     const ROUTE: &'static str = "/portfolios/{portfolio_gid}/duplicate";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::PortfoliosWrite);
     const IDEMPOTENT: bool = false;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::JobField::lists);
     fn path(&self) -> String {
         format!("/portfolios/{}/duplicate", self.portfolio_gid)
     }
@@ -341,6 +347,7 @@ impl crate::endpoint::Endpoint for GetItemsForPortfolio {
     const ROUTE: &'static str = "/portfolios/{portfolio_gid}/items";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::PortfoliosRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::PortfolioItemField::lists);
     fn path(&self) -> String {
         format!("/portfolios/{}/items", self.portfolio_gid)
     }
@@ -453,6 +460,7 @@ impl crate::endpoint::Endpoint for RemoveMembersForPortfolio {
     const ROUTE: &'static str = "/portfolios/{portfolio_gid}/removeMembers";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::PortfolioField::lists);
     fn path(&self) -> String {
         format!("/portfolios/{}/removeMembers", self.portfolio_gid)
     }

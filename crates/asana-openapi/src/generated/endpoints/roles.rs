@@ -27,6 +27,7 @@ impl crate::endpoint::Endpoint for GetRoles {
     const ROUTE: &'static str = "/roles";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::RolesRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::RbacRoleField::lists);
     fn path(&self) -> String {
         "/roles".to_owned()
     }
@@ -80,6 +81,7 @@ impl crate::endpoint::Endpoint for CreateRole {
     const ROUTE: &'static str = "/roles";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::RolesWrite);
     const IDEMPOTENT: bool = false;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::RbacRoleField::lists);
     fn path(&self) -> String {
         "/roles".to_owned()
     }
@@ -114,6 +116,7 @@ impl crate::endpoint::Endpoint for GetRole {
     const ROUTE: &'static str = "/roles/{role_gid}";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::RolesRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::RbacRoleField::lists);
     fn path(&self) -> String {
         format!("/roles/{}", self.role_gid)
     }
@@ -147,6 +150,7 @@ impl crate::endpoint::Endpoint for UpdateRole {
     const ROUTE: &'static str = "/roles/{role_gid}";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::RolesWrite);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::RbacRoleField::lists);
     fn path(&self) -> String {
         format!("/roles/{}", self.role_gid)
     }

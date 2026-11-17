@@ -54,6 +54,7 @@ fn one(state: &mut State, action: &Value) -> Reply {
         .into_owned()
         .collect();
     let options = action.get("options").and_then(Value::as_object);
+    let mut listed_fields: Vec<String> = Vec::new();
     let mut selection = Selection::parse(
         query
             .iter()
@@ -70,6 +71,7 @@ fn one(state: &mut State, action: &Value) -> Reply {
                         .map(str::to_owned)
                         .collect();
                     selection = Selection::of_list(&fields);
+                    listed_fields = fields;
                 }
                 (key, Value::String(text)) => query.push((key.to_owned(), text.clone())),
                 (key, Value::Number(number)) => query.push((key.to_owned(), number.to_string())),
@@ -81,6 +83,8 @@ fn one(state: &mut State, action: &Value) -> Reply {
     match find(method, path) {
         Matched::Served(route, params) => match route.action {
             Action::Sync(handler) => {
+                route.check_fields(&query)?;
+                route.check_paths(listed_fields.iter().map(String::as_str))?;
                 let call = Call {
                     params,
                     query,
@@ -97,6 +101,6 @@ fn one(state: &mut State, action: &Value) -> Reply {
             ))),
         },
         Matched::Unserved(operation) => Err(crate::transport::unserved(operation)),
-        Matched::Nothing => Err(Refusal::bad_request("No matching route for request")),
+        Matched::Nothing => Err(crate::transport::no_route()),
     }
 }

@@ -71,6 +71,7 @@ impl crate::endpoint::Endpoint for GetBudget {
     const ROUTE: &'static str = "/budgets/{budget_gid}";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::BudgetField::lists);
     fn path(&self) -> String {
         format!("/budgets/{}", self.budget_gid)
     }
@@ -104,6 +105,7 @@ impl crate::endpoint::Endpoint for UpdateBudget {
     const ROUTE: &'static str = "/budgets/{budget_gid}";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::BudgetField::lists);
     fn path(&self) -> String {
         format!("/budgets/{}", self.budget_gid)
     }

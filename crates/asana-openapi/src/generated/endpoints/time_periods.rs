@@ -29,6 +29,7 @@ impl crate::endpoint::Endpoint for GetTimePeriods {
     const ROUTE: &'static str = "/time_periods";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::TimePeriodField::lists);
     fn path(&self) -> String {
         "/time_periods".to_owned()
     }
@@ -84,6 +85,7 @@ impl crate::endpoint::Endpoint for GetTimePeriod {
     const ROUTE: &'static str = "/time_periods/{time_period_gid}";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::TimePeriodField::lists);
     fn path(&self) -> String {
         format!("/time_periods/{}", self.time_period_gid)
     }

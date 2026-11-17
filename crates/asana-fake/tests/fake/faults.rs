@@ -124,3 +124,201 @@ async fn a_slow_answer_arrives_after_its_delay() {
     assert!(started.elapsed() >= Duration::from_secs(5));
     assert_eq!(world.fake.requests_for::<GetTask>().len(), 1);
 }
+
+#[tokio::test(start_paused = true)]
+async fn a_create_whose_answer_is_lost_after_applying_has_still_made_the_task() {
+    let world = World::new();
+    let client = client(&world.fake);
+    world
+        .fake
+        .fail_next::<CreateTask>(Fault::timeout_after_applying());
+
+    let error = client
+        .tasks()
+        .create()
+        .workspace(world.workspace.clone())
+        .name("Made anyway")
+        .send()
+        .await
+        .unwrap_err();
+
+    // The client sees what it would see live, and does not send the create again...
+    assert!(matches!(error, Error::Transport { .. }), "{error:?}");
+    assert_eq!(error.outcome(), asana_client::Outcome::Unknown);
+    assert!(!error.is_retryable());
+    assert_eq!(world.fake.requests_for::<CreateTask>().len(), 1);
+    // ...and the task exists, as it may in Asana: read before writing again.
+    let found = client
+        .workspaces()
+        .search_tasks(world.workspace)
+        .text("Made anyway")
+        .send()
+        .await
+        .unwrap();
+    assert_eq!(found.len(), 1);
+}
+
+/// Sends `request` straight to the fake and returns its status and error message.
+async fn raw(fake: &FakeAsana, method: &str, path_and_query: &str) -> (StatusCode, String) {
+    use asana_client::Transport as _;
+
+    let request = http::Request::builder()
+        .method(method)
+        .uri(format!("https://app.asana.com/api/1.0{path_and_query}"))
+        .header("authorization", "Bearer 0/made-up")
+        .body(bytes::Bytes::new())
+        .unwrap();
+    let response = fake.transport().send(request).await.unwrap();
+    let body: serde_json::Value = serde_json::from_slice(response.body()).unwrap();
+    let message = body["errors"][0]["message"]
+        .as_str()
+        .unwrap_or_default()
+        .to_owned();
+    (response.status(), message)
+}
+
+#[tokio::test]
+async fn a_search_filter_the_fake_does_not_model_is_refused_by_name() {
+    let world = World::new();
+    let client = client(&world.fake);
+
+    // Ignoring it would find the task where Asana, applying the filter, would not.
+    let error = client
+        .workspaces()
+        .search_tasks(world.workspace.clone())
+        .text("welcome")
+        .param("followers.any", world.ada.to_string())
+        .send()
+        .await
+        .unwrap_err();
+    assert_eq!(
+        error.status(),
+        Some(StatusCode::NOT_IMPLEMENTED),
+        "{error:?}"
+    );
+    let (status, message) = raw(
+        &world.fake,
+        "GET",
+        &format!(
+            "/workspaces/{}/tasks/search?completed_at.after=2026-01-01T00:00:00Z",
+            world.workspace
+        ),
+    )
+    .await;
+    assert_eq!(status, StatusCode::NOT_IMPLEMENTED);
+    assert!(message.contains("completed_at.after"), "{message}");
+    let (status, message) = raw(
+        &world.fake,
+        "GET",
+        &format!("/workspaces/{}/tasks/search?sort_by=likes", world.workspace),
+    )
+    .await;
+    assert_eq!(status, StatusCode::NOT_IMPLEMENTED);
+    assert!(message.contains("likes"), "{message}");
+
+    // An operator Asana does not have is Asana's own refusal.
+    let error = client
+        .workspaces()
+        .search_tasks(world.workspace)
+        .param("custom_fields.1200000000000009.bogus", "1")
+        .send()
+        .await
+        .unwrap_err();
+    assert!(matches!(error, Error::BadRequest(_)), "{error:?}");
+}
+
+#[tokio::test]
+async fn an_opt_fields_path_the_specification_does_not_list_is_refused() {
+    use asana_client::openapi::fields::{Fields, TaskField};
+
+    let world = World::new();
+    let client = client(&world.fake);
+    let error = client
+        .tasks()
+        .get(world.task.clone())
+        .fields(Fields::<TaskField>::none().with_raw("nmae"))
+        .send()
+        .await
+        .unwrap_err();
+    assert!(matches!(error, Error::BadRequest(_)), "{error:?}");
+    // A listed path, nested ones included, is served.
+    client
+        .tasks()
+        .get(world.task.clone())
+        .fields(asana_client::fields![Task: name, memberships.section.name])
+        .send()
+        .await
+        .unwrap();
+
+    // The same rule inside a batch, action by action.
+    let mut batch = client.batch();
+    let bad = batch
+        .push(
+            GetTask::builder(world.task.clone())
+                .opt_fields(Fields::none().with_raw("nmae"))
+                .build(),
+        )
+        .unwrap();
+    let good = batch.push(GetTask::builder(world.task).build()).unwrap();
+    let mut results = batch.send().await.unwrap();
+    assert!(matches!(results.take(bad), Err(Error::BadRequest(_))));
+    results.take(good).unwrap();
+}
+
+#[tokio::test]
+async fn an_offset_from_one_list_is_refused_by_another() {
+    use asana_client::openapi::endpoint::PageLimit;
+    use asana_client::openapi::endpoints::{GetTasksForProject, GetTasksForSection};
+
+    let world = World::new();
+    let client = client(&world.fake);
+    // A second task, so the project's list has a next page.
+    let _ = client
+        .tasks()
+        .create()
+        .workspace(world.workspace.clone())
+        .name("Second")
+        .section(world.project.clone(), world.planned.clone())
+        .send()
+        .await
+        .unwrap();
+    let first = client
+        .send_page(
+            GetTasksForProject::builder(world.project.clone())
+                .limit(PageLimit::new(1))
+                .build(),
+        )
+        .await
+        .unwrap();
+    let offset = first.next.unwrap();
+
+    // Good for the list that issued it...
+    client
+        .send_page(
+            GetTasksForProject::builder(world.project)
+                .limit(PageLimit::new(1))
+                .offset(offset.clone())
+                .build(),
+        )
+        .await
+        .unwrap();
+    // ...refused by another.
+    let error = client
+        .send_page(
+            GetTasksForSection::builder(world.planned)
+                .limit(PageLimit::new(1))
+                .offset(offset)
+                .build(),
+        )
+        .await
+        .unwrap_err();
+    assert!(matches!(error, Error::BadRequest(_)), "{error:?}");
+}
+
+#[tokio::test]
+async fn a_path_no_operation_has_is_404() {
+    let world = World::new();
+    let (status, message) = raw(&world.fake, "GET", "/no/such/route").await;
+    assert_eq!(status, StatusCode::NOT_FOUND);
+    assert_eq!(message, "No matching route for request");
+}

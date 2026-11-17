@@ -23,6 +23,7 @@ impl crate::endpoint::Endpoint for GetWorkspaces {
     const ROUTE: &'static str = "/workspaces";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::WorkspacesRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::WorkspaceField::lists);
     fn path(&self) -> String {
         "/workspaces".to_owned()
     }
@@ -76,6 +77,7 @@ impl crate::endpoint::Endpoint for GetWorkspace {
     const ROUTE: &'static str = "/workspaces/{workspace_gid}";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::WorkspacesRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::WorkspaceField::lists);
     fn path(&self) -> String {
         format!("/workspaces/{}", self.workspace_gid)
     }
@@ -109,6 +111,7 @@ impl crate::endpoint::Endpoint for UpdateWorkspace {
     const ROUTE: &'static str = "/workspaces/{workspace_gid}";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::WorkspaceField::lists);
     fn path(&self) -> String {
         format!("/workspaces/{}", self.workspace_gid)
     }
@@ -143,6 +146,7 @@ impl crate::endpoint::Endpoint for AddUserForWorkspace {
     const ROUTE: &'static str = "/workspaces/{workspace_gid}/addUser";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::UserField::lists);
     fn path(&self) -> String {
         format!("/workspaces/{}/addUser", self.workspace_gid)
     }

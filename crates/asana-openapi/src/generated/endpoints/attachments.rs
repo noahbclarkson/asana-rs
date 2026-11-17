@@ -26,6 +26,7 @@ impl crate::endpoint::Endpoint for GetAttachmentsForObject {
     const ROUTE: &'static str = "/attachments";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::AttachmentsRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::AttachmentField::lists);
     fn path(&self) -> String {
         "/attachments".to_owned()
     }
@@ -181,6 +182,7 @@ impl crate::endpoint::Endpoint for CreateAttachmentForObject {
     const ROUTE: &'static str = "/attachments";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::AttachmentsWrite);
     const IDEMPOTENT: bool = false;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::AttachmentField::lists);
     fn path(&self) -> String {
         "/attachments".to_owned()
     }
@@ -245,6 +247,7 @@ impl crate::endpoint::Endpoint for GetAttachment {
     const ROUTE: &'static str = "/attachments/{attachment_gid}";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::AttachmentsRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::AttachmentField::lists);
     fn path(&self) -> String {
         format!("/attachments/{}", self.attachment_gid)
     }

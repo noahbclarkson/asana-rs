@@ -70,6 +70,7 @@ pub fn descriptor(
         &operation.route,
     ));
     let many = operation.returns_many();
+    let opt_fields_const = render::opt_fields_const(operation);
     let query_fields = operation
         .query_params
         .iter()
@@ -209,6 +210,7 @@ pub fn descriptor(
             const ROUTE: &'static str = #route;
             const SCOPE: Option<crate::scopes::Scope> = #scope;
             const IDEMPOTENT: bool = #idempotent;
+            #opt_fields_const
 
             fn path(&self) -> String {
                 #route.to_owned()

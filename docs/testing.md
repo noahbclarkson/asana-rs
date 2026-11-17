@@ -47,13 +47,23 @@ What it serves, and how it answers:
   dependencies), sections, projects, custom fields and enum options, tags, users and workspaces,
   task search, stories, attachments (upload, links and download), task templates, duplication
   and jobs, the batch API, the events stream, and webhooks. Any other operation answers `501`
-  naming its `operationId`, so a gap in the fake is loud.
-- **Asana's shapes**: the `{"data": …}` envelope, `next_page` with an opaque offset when a
-  `limit` is sent, `opt_fields` honoured (nested paths included), and Asana's error bodies.
+  naming its `operationId`, and so does a task-search filter or sort the fake does not model
+  (`followers.any`, `sort_by=likes`, …), so a gap in the fake is loud instead of a filter
+  silently ignored.
+- **Asana's shapes and refusals**: the `{"data": …}` envelope, `next_page` with an opaque offset
+  when a `limit` is sent, `opt_fields` honoured (nested paths included), and Asana's error
+  bodies. As Asana does, it answers `400` for an `opt_fields` path the specification does not list
+  for the resource (a misspelt `with_raw` path), for an offset issued for another list or other
+  filters, and for a `custom_fields` search operator Asana does not have, and `404` for a path
+  no operation has.
 - **Failures on request**: `fake.fail_next::<E>(fault)` makes the next call of operation `E`
   fail, and `fail_next_request(fault)` the next call of any operation. A `Fault` is
   `rate_limited(retry_after)`, `server_error()`, `premium_required()`, `status(code, message)`,
-  `timeout()` or `slow(delay)`. A workspace seeded with `.free()` answers task search `402`.
+  `timeout()`, `timeout_after_applying()` or `slow(delay)`. `timeout()` loses the request before
+  anything happens; `timeout_after_applying()` carries it out and then loses the answer, which is
+  the case a create must not be sent again for: after it the fake holds what the request made, so
+  a test of "the create timed out, read before writing again" can fail where it would live. A
+  workspace seeded with `.free()` answers task search `402`.
   Run such tests with `#[tokio::test(start_paused = true)]` so the
   client's waits pass at once.
 - **Other people's changes**: `fake.as_user(&user)` returns an `Actor` that moves, creates,

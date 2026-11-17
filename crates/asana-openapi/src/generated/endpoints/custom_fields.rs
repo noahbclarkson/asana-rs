@@ -21,6 +21,7 @@ impl crate::endpoint::Endpoint for CreateCustomField {
     const ROUTE: &'static str = "/custom_fields";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::CustomFieldsWrite);
     const IDEMPOTENT: bool = false;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::CustomFieldField::lists);
     fn path(&self) -> String {
         "/custom_fields".to_owned()
     }
@@ -55,6 +56,7 @@ impl crate::endpoint::Endpoint for GetCustomField {
     const ROUTE: &'static str = "/custom_fields/{custom_field_gid}";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::CustomFieldsRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::CustomFieldField::lists);
     fn path(&self) -> String {
         format!("/custom_fields/{}", self.custom_field_gid)
     }
@@ -88,6 +90,7 @@ impl crate::endpoint::Endpoint for UpdateCustomField {
     const ROUTE: &'static str = "/custom_fields/{custom_field_gid}";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::CustomFieldsWrite);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::CustomFieldField::lists);
     fn path(&self) -> String {
         format!("/custom_fields/{}", self.custom_field_gid)
     }
@@ -149,6 +152,7 @@ impl crate::endpoint::Endpoint for CreateEnumOptionForCustomField {
     const ROUTE: &'static str = "/custom_fields/{custom_field_gid}/enum_options";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::CustomFieldsWrite);
     const IDEMPOTENT: bool = false;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::EnumOptionField::lists);
     fn path(&self) -> String {
         format!("/custom_fields/{}/enum_options", self.custom_field_gid)
     }
@@ -188,6 +192,7 @@ impl crate::endpoint::Endpoint for InsertEnumOptionForCustomField {
     const ROUTE: &'static str = "/custom_fields/{custom_field_gid}/enum_options/insert";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::CustomFieldsWrite);
     const IDEMPOTENT: bool = false;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::EnumOptionField::lists);
     fn path(&self) -> String {
         format!(
             "/custom_fields/{}/enum_options/insert",
@@ -230,6 +235,7 @@ impl crate::endpoint::Endpoint for UpdateEnumOption {
     const ROUTE: &'static str = "/enum_options/{enum_option_gid}";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::CustomFieldsWrite);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::EnumOptionField::lists);
     fn path(&self) -> String {
         format!("/enum_options/{}", self.enum_option_gid)
     }
@@ -271,6 +277,7 @@ impl crate::endpoint::Endpoint for GetCustomFieldsForWorkspace {
     const ROUTE: &'static str = "/workspaces/{workspace_gid}/custom_fields";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::CustomFieldsRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::CustomFieldField::lists);
     fn path(&self) -> String {
         format!("/workspaces/{}/custom_fields", self.workspace_gid)
     }

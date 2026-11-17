@@ -28,6 +28,7 @@ impl crate::endpoint::Endpoint for GetNotificationsForUser {
     const ROUTE: &'static str = "/users/{user_gid}/notifications";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::NotificationsRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::NotificationField::lists);
     fn path(&self) -> String {
         format!(
             "/users/{}/notifications",
@@ -86,6 +87,7 @@ impl crate::endpoint::Endpoint for MarkNotificationsReadForUser {
     const ROUTE: &'static str = "/users/{user_gid}/notifications/markRead";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::NotificationsWrite);
     const IDEMPOTENT: bool = false;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::MarkNotificationsField::lists);
     fn path(&self) -> String {
         format!(
             "/users/{}/notifications/markRead",
@@ -125,6 +127,7 @@ impl crate::endpoint::Endpoint for MarkNotificationsUnreadForUser {
     const ROUTE: &'static str = "/users/{user_gid}/notifications/markUnread";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::NotificationsWrite);
     const IDEMPOTENT: bool = false;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::MarkNotificationsField::lists);
     fn path(&self) -> String {
         format!(
             "/users/{}/notifications/markUnread",

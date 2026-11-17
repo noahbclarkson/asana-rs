@@ -21,6 +21,7 @@ impl crate::endpoint::Endpoint for CreateRecord {
     const ROUTE: &'static str = "/records";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::RecordsWrite);
     const IDEMPOTENT: bool = false;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::RecordItemField::lists);
     fn path(&self) -> String {
         "/records".to_owned()
     }
@@ -55,6 +56,7 @@ impl crate::endpoint::Endpoint for GetRecord {
     const ROUTE: &'static str = "/records/{record_gid}";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::RecordsRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::RecordItemField::lists);
     fn path(&self) -> String {
         format!("/records/{}", self.record_gid)
     }
@@ -88,6 +90,7 @@ impl crate::endpoint::Endpoint for UpdateRecord {
     const ROUTE: &'static str = "/records/{record_gid}";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::RecordsWrite);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::RecordItemField::lists);
     fn path(&self) -> String {
         format!("/records/{}", self.record_gid)
     }
@@ -152,6 +155,7 @@ impl crate::endpoint::Endpoint for GetRecordsForTable {
     const ROUTE: &'static str = "/tables/{table_gid}/records";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::RecordsRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::RecordItemField::lists);
     fn path(&self) -> String {
         format!("/tables/{}/records", self.table_gid)
     }
@@ -264,6 +268,7 @@ impl crate::endpoint::Endpoint for SearchRecordsForWorkspace {
     const ROUTE: &'static str = "/workspaces/{workspace_gid}/records/search";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::RecordsRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::RecordItemField::lists);
     fn path(&self) -> String {
         format!("/workspaces/{}/records/search", self.workspace_gid)
     }

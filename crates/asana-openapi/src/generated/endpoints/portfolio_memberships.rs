@@ -30,6 +30,8 @@ impl crate::endpoint::Endpoint for GetPortfolioMemberships {
     const ROUTE: &'static str = "/portfolio_memberships";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> =
+        Some(crate::fields::DeprecatedPortfolioMembershipField::lists);
     fn path(&self) -> String {
         "/portfolio_memberships".to_owned()
     }
@@ -92,6 +94,8 @@ impl crate::endpoint::Endpoint for GetPortfolioMembership {
     const ROUTE: &'static str = "/portfolio_memberships/{portfolio_membership_gid}";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> =
+        Some(crate::fields::DeprecatedPortfolioMembershipField::lists);
     fn path(&self) -> String {
         format!("/portfolio_memberships/{}", self.portfolio_membership_gid)
     }
@@ -130,6 +134,8 @@ impl crate::endpoint::Endpoint for GetPortfolioMembershipsForPortfolio {
     const ROUTE: &'static str = "/portfolios/{portfolio_gid}/portfolio_memberships";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> =
+        Some(crate::fields::DeprecatedPortfolioMembershipField::lists);
     fn path(&self) -> String {
         format!("/portfolios/{}/portfolio_memberships", self.portfolio_gid)
     }

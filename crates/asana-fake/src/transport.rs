@@ -57,6 +57,11 @@ pub(crate) fn unserved(operation: &str) -> Refusal {
     )
 }
 
+/// Asana's answer to a path no operation has: `404`.
+pub(crate) fn no_route() -> Refusal {
+    Refusal::new(StatusCode::NOT_FOUND, "No matching route for request")
+}
+
 /// A request body, read according to its `Content-Type`.
 enum Body {
     None,
@@ -126,7 +131,9 @@ impl FakeAsana {
             });
             take_fault(&mut state, operation)
         };
+        let mut answer_lost = false;
         match fault {
+            Some(Fault::TimeoutAfterApplying) => answer_lost = true,
             Some(Fault::RateLimited { retry_after }) => {
                 return Ok(respond(rate_limited(retry_after)));
             }
@@ -150,6 +157,9 @@ impl FakeAsana {
         };
         let answer = match matched {
             Matched::Served(route, params) => {
+                if let Err(refusal) = route.check_fields(&query) {
+                    return Ok(respond(refusal.into_answer()));
+                }
                 let call = Call {
                     params,
                     selection: Selection::parse(
@@ -175,11 +185,14 @@ impl FakeAsana {
                 }
             }
             Matched::Unserved(operation) => unserved(operation).into_answer(),
-            Matched::Nothing => Refusal::bad_request("No matching route for request").into_answer(),
+            Matched::Nothing => no_route().into_answer(),
         };
         let auto_deliver = self.lock().auto_deliver;
         if auto_deliver {
             self.deliver().await;
+        }
+        if answer_lost {
+            return Err(TransportError::timeout(FakeTimeout));
         }
         Ok(respond(answer))
     }

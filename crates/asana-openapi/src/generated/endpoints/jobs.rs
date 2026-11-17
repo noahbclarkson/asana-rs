@@ -22,6 +22,7 @@ impl crate::endpoint::Endpoint for GetJob {
     const ROUTE: &'static str = "/jobs/{job_gid}";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::JobsRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::JobField::lists);
     fn path(&self) -> String {
         format!("/jobs/{}", self.job_gid)
     }

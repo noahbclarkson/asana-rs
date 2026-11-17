@@ -29,6 +29,7 @@ impl crate::endpoint::Endpoint for GetTasksForProject {
     const ROUTE: &'static str = "/projects/{project_gid}/tasks";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::TasksRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::TaskField::lists);
     fn path(&self) -> String {
         format!("/projects/{}/tasks", self.project_gid)
     }
@@ -90,6 +91,7 @@ impl crate::endpoint::Endpoint for GetTasksForSection {
     const ROUTE: &'static str = "/sections/{section_gid}/tasks";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::TasksRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::TaskField::lists);
     fn path(&self) -> String {
         format!("/sections/{}/tasks", self.section_gid)
     }
@@ -148,6 +150,7 @@ impl crate::endpoint::Endpoint for GetTasksForTag {
     const ROUTE: &'static str = "/tags/{tag_gid}/tasks";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::TasksRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::TaskField::lists);
     fn path(&self) -> String {
         format!("/tags/{}/tasks", self.tag_gid)
     }
@@ -218,6 +221,7 @@ impl crate::endpoint::Endpoint for GetTasks {
     const ROUTE: &'static str = "/tasks";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::TasksRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::TaskField::lists);
     fn path(&self) -> String {
         "/tasks".to_owned()
     }
@@ -283,6 +287,7 @@ impl crate::endpoint::Endpoint for CreateTask {
     const ROUTE: &'static str = "/tasks";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::TasksWrite);
     const IDEMPOTENT: bool = false;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::TaskField::lists);
     fn path(&self) -> String {
         "/tasks".to_owned()
     }
@@ -317,6 +322,7 @@ impl crate::endpoint::Endpoint for GetTask {
     const ROUTE: &'static str = "/tasks/{task_gid}";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::TasksRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::TaskField::lists);
     fn path(&self) -> String {
         format!("/tasks/{}", self.task_gid)
     }
@@ -350,6 +356,7 @@ impl crate::endpoint::Endpoint for UpdateTask {
     const ROUTE: &'static str = "/tasks/{task_gid}";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::TasksWrite);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::TaskField::lists);
     fn path(&self) -> String {
         format!("/tasks/{}", self.task_gid)
     }
@@ -462,6 +469,7 @@ impl crate::endpoint::Endpoint for AddFollowersForTask {
     const ROUTE: &'static str = "/tasks/{task_gid}/addFollowers";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::TasksWrite);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::TaskField::lists);
     fn path(&self) -> String {
         format!("/tasks/{}/addFollowers", self.task_gid)
     }
@@ -554,6 +562,7 @@ impl crate::endpoint::Endpoint for GetDependenciesForTask {
     const ROUTE: &'static str = "/tasks/{task_gid}/dependencies";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::TasksRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::TaskField::lists);
     fn path(&self) -> String {
         format!("/tasks/{}/dependencies", self.task_gid)
     }
@@ -611,6 +620,7 @@ impl crate::endpoint::Endpoint for GetDependentsForTask {
     const ROUTE: &'static str = "/tasks/{task_gid}/dependents";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::TasksRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::TaskField::lists);
     fn path(&self) -> String {
         format!("/tasks/{}/dependents", self.task_gid)
     }
@@ -666,6 +676,7 @@ impl crate::endpoint::Endpoint for DuplicateTask {
     const ROUTE: &'static str = "/tasks/{task_gid}/duplicate";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::TasksWrite);
     const IDEMPOTENT: bool = false;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::JobField::lists);
     fn path(&self) -> String {
         format!("/tasks/{}/duplicate", self.task_gid)
     }
@@ -756,6 +767,7 @@ impl crate::endpoint::Endpoint for RemoveFollowerForTask {
     const ROUTE: &'static str = "/tasks/{task_gid}/removeFollowers";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::TasksWrite);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::TaskField::lists);
     fn path(&self) -> String {
         format!("/tasks/{}/removeFollowers", self.task_gid)
     }
@@ -844,6 +856,7 @@ impl crate::endpoint::Endpoint for RollupTask {
     const ROUTE: &'static str = "/tasks/{task_gid}/rollup";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::TasksWrite);
     const IDEMPOTENT: bool = false;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::JobField::lists);
     fn path(&self) -> String {
         format!("/tasks/{}/rollup", self.task_gid)
     }
@@ -877,6 +890,7 @@ impl crate::endpoint::Endpoint for SetParentForTask {
     const ROUTE: &'static str = "/tasks/{task_gid}/setParent";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::TasksWrite);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::TaskField::lists);
     fn path(&self) -> String {
         format!("/tasks/{}/setParent", self.task_gid)
     }
@@ -915,6 +929,7 @@ impl crate::endpoint::Endpoint for GetSubtasksForTask {
     const ROUTE: &'static str = "/tasks/{task_gid}/subtasks";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::TasksRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::TaskField::lists);
     fn path(&self) -> String {
         format!("/tasks/{}/subtasks", self.task_gid)
     }
@@ -970,6 +985,7 @@ impl crate::endpoint::Endpoint for CreateSubtaskForTask {
     const ROUTE: &'static str = "/tasks/{task_gid}/subtasks";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::TasksWrite);
     const IDEMPOTENT: bool = false;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::TaskField::lists);
     fn path(&self) -> String {
         format!("/tasks/{}/subtasks", self.task_gid)
     }
@@ -1011,6 +1027,7 @@ impl crate::endpoint::Endpoint for GetTasksForUserTaskList {
     const ROUTE: &'static str = "/user_task_lists/{user_task_list_gid}/tasks";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::TasksRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::TaskField::lists);
     fn path(&self) -> String {
         format!("/user_task_lists/{}/tasks", self.user_task_list_gid)
     }
@@ -1234,6 +1251,7 @@ impl crate::endpoint::Endpoint for SearchTasksForWorkspace {
     const ROUTE: &'static str = "/workspaces/{workspace_gid}/tasks/search";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::TasksRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::TaskField::lists);
     fn path(&self) -> String {
         format!("/workspaces/{}/tasks/search", self.workspace_gid)
     }

@@ -31,6 +31,8 @@ impl crate::endpoint::Endpoint for TypeaheadForWorkspace {
     const ROUTE: &'static str = "/workspaces/{workspace_gid}/typeahead";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::WorkspacesTypeaheadRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> =
+        Some(crate::fields::AsanaNamedResourceField::lists);
     fn path(&self) -> String {
         format!("/workspaces/{}/typeahead", self.workspace_gid)
     }

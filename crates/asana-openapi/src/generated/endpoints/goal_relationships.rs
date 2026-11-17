@@ -29,6 +29,7 @@ impl crate::endpoint::Endpoint for GetGoalRelationships {
     const ROUTE: &'static str = "/goal_relationships";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::GoalRelationshipField::lists);
     fn path(&self) -> String {
         "/goal_relationships".to_owned()
     }
@@ -83,6 +84,7 @@ impl crate::endpoint::Endpoint for GetGoalRelationship {
     const ROUTE: &'static str = "/goal_relationships/{goal_relationship_gid}";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::GoalRelationshipField::lists);
     fn path(&self) -> String {
         format!("/goal_relationships/{}", self.goal_relationship_gid)
     }
@@ -116,6 +118,7 @@ impl crate::endpoint::Endpoint for UpdateGoalRelationship {
     const ROUTE: &'static str = "/goal_relationships/{goal_relationship_gid}";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::GoalRelationshipField::lists);
     fn path(&self) -> String {
         format!("/goal_relationships/{}", self.goal_relationship_gid)
     }
@@ -152,6 +155,7 @@ impl crate::endpoint::Endpoint for AddSupportingRelationship {
     const ROUTE: &'static str = "/goals/{goal_gid}/addSupportingRelationship";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = false;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::GoalRelationshipField::lists);
     fn path(&self) -> String {
         format!("/goals/{}/addSupportingRelationship", self.goal_gid)
     }

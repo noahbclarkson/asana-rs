@@ -22,6 +22,7 @@ impl crate::endpoint::Endpoint for GetAgent {
     const ROUTE: &'static str = "/agents/{agent_gid}";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::AgentField::lists);
     fn path(&self) -> String {
         format!("/agents/{}", self.agent_gid)
     }
@@ -57,6 +58,7 @@ impl crate::endpoint::Endpoint for GetAgentsForWorkspace {
     const ROUTE: &'static str = "/workspaces/{workspace_gid}/agents";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::AgentField::lists);
     fn path(&self) -> String {
         format!("/workspaces/{}/agents", self.workspace_gid)
     }

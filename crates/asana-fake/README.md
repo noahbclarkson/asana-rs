@@ -64,8 +64,11 @@ sends an empty batch, and `fake.set_auto_deliver(true)` delivers at the end of e
 
 ```rust
 fake.fail_next::<asana_client::openapi::endpoints::CreateTask>(Fault::rate_limited(Duration::from_secs(2)));
-fake.fail_next_request(Fault::server_error()); // also Fault::timeout(), Fault::slow(d), Fault::status(code, msg)
+fake.fail_next_request(Fault::server_error()); // also Fault::timeout(), Fault::timeout_after_applying(), Fault::slow(d), Fault::status(code, msg)
 ```
+
+`Fault::timeout()` loses a request before Asana acts on it; `Fault::timeout_after_applying()`
+carries it out and then loses the answer, the case where a create must not be sent again.
 
 ## What it serves
 
@@ -74,6 +77,9 @@ Tasks (subtasks, projects, followers, tags, parents, dependencies, duplication),
 tags, users and workspaces, task search with the common filters, stories, attachments (multipart
 upload, links, downloads), task templates and jobs, the batch API, the events stream (`412` first)
 and webhooks. Every other operation in Asana's specification answers `501` naming its
-`operationId`, so a gap in the fake is loud.
+`operationId`, and so does a search filter or sort the fake does not model, so a gap in the fake
+is loud rather than a test that passes where Asana would answer differently. As Asana does, it
+refuses an `opt_fields` path the specification does not list for the resource and an offset
+issued for another list (`400`), and answers a path no operation has `404`.
 
 Licensed under either of Apache License 2.0 or MIT license, at your option.

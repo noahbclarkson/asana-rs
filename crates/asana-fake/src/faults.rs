@@ -25,8 +25,14 @@ pub enum Fault {
         /// The error message.
         message: String,
     },
-    /// No answer: the transport reports a timeout. The request is not carried out.
+    /// No answer: the transport reports a timeout. The request is not carried out, as when it
+    /// never reached Asana or Asana dropped it.
     Timeout,
+    /// The request is carried out, then its answer is lost: the transport reports a timeout. The
+    /// case the client never resends a create for, because Asana may have acted: after it, the
+    /// fake holds what the request made or changed, and code that read the timeout as "nothing
+    /// happened" will find it.
+    TimeoutAfterApplying,
     /// The real answer, after a wait (on tokio's clock, so a paused test clock skips it).
     Slow(Duration),
 }
@@ -61,9 +67,15 @@ impl Fault {
         }
     }
 
-    /// No answer at all: the transport times out.
+    /// No answer at all: the transport times out, and nothing was done.
     pub fn timeout() -> Self {
         Self::Timeout
+    }
+
+    /// The request is carried out, then the transport times out: Asana acted, and the answer
+    /// was lost.
+    pub fn timeout_after_applying() -> Self {
+        Self::TimeoutAfterApplying
     }
 
     /// The real answer, after `delay`.
@@ -79,7 +91,8 @@ pub(crate) struct QueuedFault {
     pub(crate) fault: Fault,
 }
 
-/// The error a [`Fault::Timeout`] hands the client as the timeout's source.
+/// The error a [`Fault::Timeout`] or [`Fault::TimeoutAfterApplying`] hands the client as the
+/// timeout's source.
 #[derive(Debug, thiserror::Error)]
 #[error("the fake was told not to answer")]
 pub(crate) struct FakeTimeout;

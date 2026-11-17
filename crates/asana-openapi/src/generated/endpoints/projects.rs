@@ -32,6 +32,7 @@ impl crate::endpoint::Endpoint for GetProjects {
     const ROUTE: &'static str = "/projects";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::ProjectsRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::ProjectField::lists);
     fn path(&self) -> String {
         "/projects".to_owned()
     }
@@ -91,6 +92,7 @@ impl crate::endpoint::Endpoint for CreateProject {
     const ROUTE: &'static str = "/projects";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::ProjectsWrite);
     const IDEMPOTENT: bool = false;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::ProjectField::lists);
     fn path(&self) -> String {
         "/projects".to_owned()
     }
@@ -125,6 +127,7 @@ impl crate::endpoint::Endpoint for GetProject {
     const ROUTE: &'static str = "/projects/{project_gid}";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::ProjectsRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::ProjectField::lists);
     fn path(&self) -> String {
         format!("/projects/{}", self.project_gid)
     }
@@ -158,6 +161,7 @@ impl crate::endpoint::Endpoint for UpdateProject {
     const ROUTE: &'static str = "/projects/{project_gid}";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::ProjectsWrite);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::ProjectField::lists);
     fn path(&self) -> String {
         format!("/projects/{}", self.project_gid)
     }
@@ -216,6 +220,8 @@ impl crate::endpoint::Endpoint for AddCustomFieldSettingForProject {
     const ROUTE: &'static str = "/projects/{project_gid}/addCustomFieldSetting";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::ProjectsWrite);
     const IDEMPOTENT: bool = false;
+    const OPT_FIELDS: Option<fn(&str) -> bool> =
+        Some(crate::fields::CustomFieldSettingField::lists);
     fn path(&self) -> String {
         format!("/projects/{}/addCustomFieldSetting", self.project_gid)
     }
@@ -252,6 +258,7 @@ impl crate::endpoint::Endpoint for AddFollowersForProject {
     const ROUTE: &'static str = "/projects/{project_gid}/addFollowers";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::ProjectField::lists);
     fn path(&self) -> String {
         format!("/projects/{}/addFollowers", self.project_gid)
     }
@@ -288,6 +295,7 @@ impl crate::endpoint::Endpoint for AddMembersForProject {
     const ROUTE: &'static str = "/projects/{project_gid}/addMembers";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::ProjectField::lists);
     fn path(&self) -> String {
         format!("/projects/{}/addMembers", self.project_gid)
     }
@@ -324,6 +332,7 @@ impl crate::endpoint::Endpoint for DuplicateProject {
     const ROUTE: &'static str = "/projects/{project_gid}/duplicate";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::ProjectsWrite);
     const IDEMPOTENT: bool = false;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::JobField::lists);
     fn path(&self) -> String {
         format!("/projects/{}/duplicate", self.project_gid)
     }
@@ -390,6 +399,7 @@ impl crate::endpoint::Endpoint for RemoveFollowersForProject {
     const ROUTE: &'static str = "/projects/{project_gid}/removeFollowers";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::ProjectField::lists);
     fn path(&self) -> String {
         format!("/projects/{}/removeFollowers", self.project_gid)
     }
@@ -426,6 +436,7 @@ impl crate::endpoint::Endpoint for RemoveMembersForProject {
     const ROUTE: &'static str = "/projects/{project_gid}/removeMembers";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::ProjectField::lists);
     fn path(&self) -> String {
         format!("/projects/{}/removeMembers", self.project_gid)
     }
@@ -460,6 +471,7 @@ impl crate::endpoint::Endpoint for RollupProject {
     const ROUTE: &'static str = "/projects/{project_gid}/rollup";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::ProjectsWrite);
     const IDEMPOTENT: bool = false;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::JobField::lists);
     fn path(&self) -> String {
         format!("/projects/{}/rollup", self.project_gid)
     }
@@ -493,6 +505,7 @@ impl crate::endpoint::Endpoint for ProjectSaveAsTemplate {
     const ROUTE: &'static str = "/projects/{project_gid}/saveAsTemplate";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = false;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::JobField::lists);
     fn path(&self) -> String {
         format!("/projects/{}/saveAsTemplate", self.project_gid)
     }
@@ -527,6 +540,7 @@ impl crate::endpoint::Endpoint for GetTaskCountsForProject {
     const ROUTE: &'static str = "/projects/{project_gid}/task_counts";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::ProjectsRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::TaskCountField::lists);
     fn path(&self) -> String {
         format!("/projects/{}/task_counts", self.project_gid)
     }
@@ -564,6 +578,7 @@ impl crate::endpoint::Endpoint for GetProjectsForTask {
     const ROUTE: &'static str = "/tasks/{task_gid}/projects";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::ProjectsRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::ProjectField::lists);
     fn path(&self) -> String {
         format!("/tasks/{}/projects", self.task_gid)
     }
@@ -629,6 +644,7 @@ impl crate::endpoint::Endpoint for GetProjectsForTeam {
     const ROUTE: &'static str = "/teams/{team_gid}/projects";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::ProjectsRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::ProjectField::lists);
     fn path(&self) -> String {
         format!("/teams/{}/projects", self.team_gid)
     }
@@ -685,6 +701,7 @@ impl crate::endpoint::Endpoint for CreateProjectForTeam {
     const ROUTE: &'static str = "/teams/{team_gid}/projects";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::ProjectsWrite);
     const IDEMPOTENT: bool = false;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::ProjectField::lists);
     fn path(&self) -> String {
         format!("/teams/{}/projects", self.team_gid)
     }
@@ -725,6 +742,7 @@ impl crate::endpoint::Endpoint for GetProjectsForWorkspace {
     const ROUTE: &'static str = "/workspaces/{workspace_gid}/projects";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::ProjectsRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::ProjectField::lists);
     fn path(&self) -> String {
         format!("/workspaces/{}/projects", self.workspace_gid)
     }
@@ -781,6 +799,7 @@ impl crate::endpoint::Endpoint for CreateProjectForWorkspace {
     const ROUTE: &'static str = "/workspaces/{workspace_gid}/projects";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::ProjectsWrite);
     const IDEMPOTENT: bool = false;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::ProjectField::lists);
     fn path(&self) -> String {
         format!("/workspaces/{}/projects", self.workspace_gid)
     }
@@ -885,6 +904,7 @@ impl crate::endpoint::Endpoint for SearchProjectsForWorkspace {
     const ROUTE: &'static str = "/workspaces/{workspace_gid}/projects/search";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::ProjectsRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::ProjectField::lists);
     fn path(&self) -> String {
         format!("/workspaces/{}/projects/search", self.workspace_gid)
     }

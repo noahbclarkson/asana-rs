@@ -31,6 +31,7 @@ impl crate::endpoint::Endpoint for GetMemberships {
     const ROUTE: &'static str = "/memberships";
     const SCOPE: Option<crate::scopes::Scope> = None;
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::MembershipField::lists);
     fn path(&self) -> String {
         "/memberships".to_owned()
     }

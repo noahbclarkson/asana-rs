@@ -27,6 +27,7 @@ impl crate::endpoint::Endpoint for GetCustomTypes {
     const ROUTE: &'static str = "/custom_types";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::CustomTypesRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::CustomTypeField::lists);
     fn path(&self) -> String {
         "/custom_types".to_owned()
     }
@@ -85,6 +86,7 @@ impl crate::endpoint::Endpoint for GetCustomType {
     const ROUTE: &'static str = "/custom_types/{custom_type_gid}";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::CustomTypesRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::CustomTypeField::lists);
     fn path(&self) -> String {
         format!("/custom_types/{}", self.custom_type_gid)
     }

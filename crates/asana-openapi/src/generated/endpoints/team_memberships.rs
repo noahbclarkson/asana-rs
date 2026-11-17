@@ -30,6 +30,7 @@ impl crate::endpoint::Endpoint for GetTeamMemberships {
     const ROUTE: &'static str = "/team_memberships";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::TeamMembershipsRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::TeamMembershipField::lists);
     fn path(&self) -> String {
         "/team_memberships".to_owned()
     }
@@ -89,6 +90,7 @@ impl crate::endpoint::Endpoint for GetTeamMembership {
     const ROUTE: &'static str = "/team_memberships/{team_membership_gid}";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::TeamMembershipsRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::TeamMembershipField::lists);
     fn path(&self) -> String {
         format!("/team_memberships/{}", self.team_membership_gid)
     }
@@ -124,6 +126,7 @@ impl crate::endpoint::Endpoint for GetTeamMembershipsForTeam {
     const ROUTE: &'static str = "/teams/{team_gid}/team_memberships";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::TeamMembershipsRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::TeamMembershipField::lists);
     fn path(&self) -> String {
         format!("/teams/{}/team_memberships", self.team_gid)
     }
@@ -183,6 +186,7 @@ impl crate::endpoint::Endpoint for GetTeamMembershipsForUser {
     const ROUTE: &'static str = "/users/{user_gid}/team_memberships";
     const SCOPE: Option<crate::scopes::Scope> = Some(crate::scopes::Scope::TeamMembershipsRead);
     const IDEMPOTENT: bool = true;
+    const OPT_FIELDS: Option<fn(&str) -> bool> = Some(crate::fields::TeamMembershipField::lists);
     fn path(&self) -> String {
         format!(
             "/users/{}/team_memberships",
