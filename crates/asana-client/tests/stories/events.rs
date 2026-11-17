@@ -165,3 +165,46 @@ async fn an_expired_token_given_to_sync_is_the_typed_error() {
         .unwrap_err();
     assert!(matches!(error, Error::SyncTokenExpired { sync } if sync == token("s7")));
 }
+
+#[tokio::test(start_paused = true)]
+async fn a_page_with_no_events_counts_as_caught_up_even_with_has_more() {
+    // A stream ends there instead of asking again at once.
+    let transport = Scripted::replies(vec![Ok(page(Vec::new(), "s2", true))]);
+    let client = client(transport.clone());
+    let project: ProjectGid = gid(PROJECT);
+    let items: Vec<_> = client
+        .events()
+        .stream(&project, Some(token("s1")))
+        .collect()
+        .await;
+    assert_eq!(items.len(), 1, "{items:?}");
+    assert_eq!(
+        items[0].as_ref().unwrap(),
+        &EventsItem::CaughtUp { sync: token("s2") }
+    );
+    assert_eq!(transport.count(), 1);
+
+    // A poller waits its interval before asking again.
+    let transport = Scripted::replies(vec![
+        Ok(page(Vec::new(), "s2", true)),
+        Ok(page(Vec::new(), "s3", true)),
+        Ok(expired("s9")),
+    ]);
+    let poller = crate::support::client(transport.clone());
+    let start = tokio::time::Instant::now();
+    let items: Vec<_> = poller
+        .events()
+        .poll(&project, Some(token("s1")), Duration::from_secs(30))
+        .collect()
+        .await;
+    assert_eq!(items.len(), 3, "{items:?}");
+    let offsets: Vec<_> = transport.times().iter().map(|at| *at - start).collect();
+    assert_eq!(
+        offsets,
+        [
+            Duration::ZERO,
+            Duration::from_secs(30),
+            Duration::from_secs(60)
+        ]
+    );
+}

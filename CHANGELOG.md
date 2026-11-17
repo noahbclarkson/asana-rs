@@ -153,5 +153,7 @@ These change what code built against an earlier revision of `main` sees or compi
   256 KiB body cap can hold, so a real burst of small events is no longer refused `413` for
   good. The `Receiver` logs a refused over-large delivery at error level and a verified one over
   half the body cap as a warning, and `Limits` documents the basis for its defaults.
+- `asana-client`: the events stream and poller treat a page with no events as caught up even
+  when it says `has_more`, instead of asking again at once for as long as Asana answers that way.
 
 [0.1.0]: https://github.com/noahbclarkson/asana-rs/releases/tag/v0.1.0

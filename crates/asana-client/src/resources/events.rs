@@ -140,8 +140,10 @@ impl Events<'_> {
 
     /// Every event since `token`, then [`EventsItem::CaughtUp`], then the end of the stream.
     ///
-    /// Pages are read as the stream is: a page with `has_more` is followed at once by the next.
-    /// The stream ends after its first error. Each page is one `getEvents` request, as
+    /// Pages are read as the stream is: a page with `has_more` is followed at once by the next,
+    /// unless it holds no events, which counts as caught up (Asana can answer `has_more` with
+    /// nothing in the page, and asking again at once could repeat without end). The stream ends
+    /// after its first error. Each page is one `getEvents` request, as
     /// [`sync`](Self::sync) describes.
     pub fn stream<G: Gid>(&self, resource: &G, token: Option<SyncToken>) -> EventItems {
         items(
@@ -259,7 +261,9 @@ impl State {
             self.ready.push_back(item);
         }
         self.token = Some(sync.clone());
-        if !has_more {
+        // A page with no events is caught up whatever `has_more` says: asking again at once
+        // could repeat for as long as Asana answers that way, spending the read quota.
+        if !has_more || count == 0 {
             self.ready.push_back(EventsItem::CaughtUp { sync });
             match self.every {
                 Some(_) => self.wait_first = true,
