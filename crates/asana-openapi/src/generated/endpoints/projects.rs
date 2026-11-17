@@ -67,6 +67,9 @@ impl crate::endpoint::Paginated for GetProjects {
     fn set_limit(&mut self, limit: crate::endpoint::PageLimit) {
         self.limit = Some(limit);
     }
+    fn limit(&self) -> Option<crate::endpoint::PageLimit> {
+        self.limit
+    }
 }
 /// Create a project.
 ///
@@ -595,6 +598,9 @@ impl crate::endpoint::Paginated for GetProjectsForTask {
     fn set_limit(&mut self, limit: crate::endpoint::PageLimit) {
         self.limit = Some(limit);
     }
+    fn limit(&self) -> Option<crate::endpoint::PageLimit> {
+        self.limit
+    }
 }
 /// Get a team's projects.
 ///
@@ -651,6 +657,9 @@ impl crate::endpoint::Paginated for GetProjectsForTeam {
     }
     fn set_limit(&mut self, limit: crate::endpoint::PageLimit) {
         self.limit = Some(limit);
+    }
+    fn limit(&self) -> Option<crate::endpoint::PageLimit> {
+        self.limit
     }
 }
 /// Create a project in a team.
@@ -744,6 +753,9 @@ impl crate::endpoint::Paginated for GetProjectsForWorkspace {
     }
     fn set_limit(&mut self, limit: crate::endpoint::PageLimit) {
         self.limit = Some(limit);
+    }
+    fn limit(&self) -> Option<crate::endpoint::PageLimit> {
+        self.limit
     }
 }
 /// Create a project in a workspace.

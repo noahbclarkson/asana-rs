@@ -227,3 +227,60 @@ async fn the_audit_log_ends_at_its_first_page_with_no_items() {
     assert_eq!(client.collect_max(audit(), 10).await.unwrap().len(), 1);
     assert_eq!(server.received_requests().await.unwrap().len(), 4);
 }
+
+fn limits_sent(requests: &[wiremock::Request]) -> Vec<String> {
+    requests
+        .iter()
+        .filter_map(|request| {
+            request
+                .url
+                .query_pairs()
+                .find(|(key, _)| key == "limit")
+                .map(|(_, value)| value.into_owned())
+        })
+        .collect()
+}
+
+#[tokio::test]
+async fn a_page_size_the_caller_set_is_kept() {
+    use asana_client::openapi::endpoint::PageLimit;
+
+    let server = three_pages().await;
+    let client = client(&server);
+    let small = || {
+        GetTasksForProject::builder(PROJECT.parse().unwrap())
+            .limit(PageLimit::new(10))
+            .build()
+    };
+
+    let tasks: Vec<_> = client.stream(small()).try_collect().await.unwrap();
+    assert_eq!(tasks.len(), 5);
+    let _: Vec<_> = client.pages(small()).try_collect().await.unwrap();
+    let requests = server.received_requests().await.unwrap();
+    assert_eq!(limits_sent(&requests), ["10"; 6]);
+
+    // Without one, the client asks for the largest page.
+    let fresh = three_pages().await;
+    let _: Vec<_> = self::client(&fresh)
+        .stream(endpoint())
+        .try_collect()
+        .await
+        .unwrap();
+    let requests = fresh.received_requests().await.unwrap();
+    assert_eq!(limits_sent(&requests), ["100"; 3]);
+}
+
+#[tokio::test]
+async fn collect_max_keeps_pages_within_the_callers_page_size() {
+    use asana_client::openapi::endpoint::PageLimit;
+
+    let server = three_pages().await;
+    let client = client(&server);
+    let endpoint = GetTasksForProject::builder(PROJECT.parse().unwrap())
+        .limit(PageLimit::new(2))
+        .build();
+    let tasks = client.collect_max(endpoint, 3).await.unwrap();
+    assert_eq!(names(&tasks), ["a", "b", "c"]);
+    let requests = server.received_requests().await.unwrap();
+    assert_eq!(limits_sent(&requests), ["2", "1"]);
+}

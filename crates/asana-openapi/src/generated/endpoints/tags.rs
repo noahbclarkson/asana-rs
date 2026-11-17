@@ -57,6 +57,9 @@ impl crate::endpoint::Paginated for GetTags {
     fn set_limit(&mut self, limit: crate::endpoint::PageLimit) {
         self.limit = Some(limit);
     }
+    fn limit(&self) -> Option<crate::endpoint::PageLimit> {
+        self.limit
+    }
 }
 /// Create a tag.
 ///
@@ -233,6 +236,9 @@ impl crate::endpoint::Paginated for GetTagsForTask {
     fn set_limit(&mut self, limit: crate::endpoint::PageLimit) {
         self.limit = Some(limit);
     }
+    fn limit(&self) -> Option<crate::endpoint::PageLimit> {
+        self.limit
+    }
 }
 /// Get tags in a workspace.
 ///
@@ -286,6 +292,9 @@ impl crate::endpoint::Paginated for GetTagsForWorkspace {
     }
     fn set_limit(&mut self, limit: crate::endpoint::PageLimit) {
         self.limit = Some(limit);
+    }
+    fn limit(&self) -> Option<crate::endpoint::PageLimit> {
+        self.limit
     }
 }
 /// Create a tag in a workspace.

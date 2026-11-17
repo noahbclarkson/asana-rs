@@ -212,6 +212,9 @@ impl crate::endpoint::Paginated for GetCustomFieldSettingsForTable {
     fn set_limit(&mut self, limit: crate::endpoint::PageLimit) {
         self.limit = Some(limit);
     }
+    fn limit(&self) -> Option<crate::endpoint::PageLimit> {
+        self.limit
+    }
 }
 /// Get a table's custom field settings.
 ///
@@ -267,6 +270,9 @@ impl crate::endpoint::Paginated for GetCustomFieldSettingsForTableLegacy {
     }
     fn set_limit(&mut self, limit: crate::endpoint::PageLimit) {
         self.limit = Some(limit);
+    }
+    fn limit(&self) -> Option<crate::endpoint::PageLimit> {
+        self.limit
     }
 }
 /// Remove a custom field from a table.
@@ -348,5 +354,8 @@ impl crate::endpoint::Paginated for GetTablesForWorkspace {
     }
     fn set_limit(&mut self, limit: crate::endpoint::PageLimit) {
         self.limit = Some(limit);
+    }
+    fn limit(&self) -> Option<crate::endpoint::PageLimit> {
+        self.limit
     }
 }

@@ -343,6 +343,10 @@ fn paginated(name: &Ident, item: &TokenStream, has_limit: bool) -> TokenStream {
             fn set_limit(&mut self, limit: crate::endpoint::PageLimit) {
                 self.limit = Some(limit);
             }
+
+            fn limit(&self) -> Option<crate::endpoint::PageLimit> {
+                self.limit
+            }
         }
     } else {
         quote! {

@@ -54,6 +54,9 @@ impl crate::endpoint::Paginated for GetCustomFieldSettingsForGoal {
     fn set_limit(&mut self, limit: crate::endpoint::PageLimit) {
         self.limit = Some(limit);
     }
+    fn limit(&self) -> Option<crate::endpoint::PageLimit> {
+        self.limit
+    }
 }
 /// Get a portfolio's custom fields.
 ///
@@ -108,6 +111,9 @@ impl crate::endpoint::Paginated for GetCustomFieldSettingsForPortfolio {
     fn set_limit(&mut self, limit: crate::endpoint::PageLimit) {
         self.limit = Some(limit);
     }
+    fn limit(&self) -> Option<crate::endpoint::PageLimit> {
+        self.limit
+    }
 }
 /// Get a project's custom fields.
 ///
@@ -161,6 +167,9 @@ impl crate::endpoint::Paginated for GetCustomFieldSettingsForProject {
     }
     fn set_limit(&mut self, limit: crate::endpoint::PageLimit) {
         self.limit = Some(limit);
+    }
+    fn limit(&self) -> Option<crate::endpoint::PageLimit> {
+        self.limit
     }
 }
 /// Get a team's custom fields.

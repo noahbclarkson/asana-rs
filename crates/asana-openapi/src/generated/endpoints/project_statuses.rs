@@ -107,6 +107,9 @@ impl crate::endpoint::Paginated for GetProjectStatusesForProject {
     fn set_limit(&mut self, limit: crate::endpoint::PageLimit) {
         self.limit = Some(limit);
     }
+    fn limit(&self) -> Option<crate::endpoint::PageLimit> {
+        self.limit
+    }
 }
 /// Create a project status.
 ///

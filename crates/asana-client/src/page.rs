@@ -64,10 +64,13 @@ pub type Items<T> = BoxStream<'static, Result<T, Error>>;
 pub type Pages<T> = BoxStream<'static, Result<Page<T>, Error>>;
 
 impl Client {
-    /// Every page of a list, 100 items to a page, starting at the descriptor's offset (the first
-    /// page unless one was set). Nothing is fetched until the stream is read.
+    /// Every page of a list, starting at the descriptor's offset (the first page unless one was
+    /// set). Pages hold the descriptor's `limit`, or 100 items when it sets none. Nothing is
+    /// fetched until the stream is read.
     pub fn pages<E: Paginated + 'static>(&self, mut endpoint: E) -> Pages<E::Item> {
-        endpoint.set_limit(PageLimit::MAX);
+        if endpoint.limit().is_none() {
+            endpoint.set_limit(PageLimit::MAX);
+        }
         let client = self.clone();
         stream::unfold(Some(endpoint), move |endpoint| {
             let client = client.clone();
@@ -91,7 +94,8 @@ impl Client {
         .boxed()
     }
 
-    /// Every item of a list, fetched 100 at a time as the stream is read.
+    /// Every item of a list, fetched a page at a time as the stream is read: the descriptor's
+    /// `limit` to a page, or 100 when it sets none.
     pub fn stream<E: Paginated + 'static>(&self, endpoint: E) -> Items<E::Item> {
         self.pages(endpoint)
             .flat_map(|page| match page {
@@ -101,7 +105,8 @@ impl Client {
             .boxed()
     }
 
-    /// The first `max` items of a list, fetching no more pages than that needs.
+    /// The first `max` items of a list, fetching no more pages than that needs, and pages no
+    /// larger than the descriptor's `limit` when it sets one.
     ///
     /// # Errors
     ///
@@ -111,9 +116,10 @@ impl Client {
         mut endpoint: E,
         max: usize,
     ) -> Result<Vec<E::Item>, Error> {
+        let page_size = usize::from(endpoint.limit().unwrap_or(PageLimit::MAX).get());
         let mut items = Vec::new();
         while items.len() < max {
-            let wanted = (max - items.len()).min(usize::from(PageLimit::MAX.get()));
+            let wanted = (max - items.len()).min(page_size);
             endpoint.set_limit(PageLimit::new(u8::try_from(wanted).unwrap_or(u8::MAX)));
             let page = self.page_of(&endpoint).await?;
             let last = ends_list::<E, _>(&page);

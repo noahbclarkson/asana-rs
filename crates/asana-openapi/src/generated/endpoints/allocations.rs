@@ -65,6 +65,9 @@ impl crate::endpoint::Paginated for GetAllocations {
     fn set_limit(&mut self, limit: crate::endpoint::PageLimit) {
         self.limit = Some(limit);
     }
+    fn limit(&self) -> Option<crate::endpoint::PageLimit> {
+        self.limit
+    }
 }
 /// Create an allocation.
 ///

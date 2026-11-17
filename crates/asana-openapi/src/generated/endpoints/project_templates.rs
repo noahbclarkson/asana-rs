@@ -60,6 +60,9 @@ impl crate::endpoint::Paginated for GetProjectTemplates {
     fn set_limit(&mut self, limit: crate::endpoint::PageLimit) {
         self.limit = Some(limit);
     }
+    fn limit(&self) -> Option<crate::endpoint::PageLimit> {
+        self.limit
+    }
 }
 /// Get a project template.
 ///
@@ -208,5 +211,8 @@ impl crate::endpoint::Paginated for GetProjectTemplatesForTeam {
     }
     fn set_limit(&mut self, limit: crate::endpoint::PageLimit) {
         self.limit = Some(limit);
+    }
+    fn limit(&self) -> Option<crate::endpoint::PageLimit> {
+        self.limit
     }
 }

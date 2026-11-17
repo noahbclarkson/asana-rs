@@ -58,6 +58,9 @@ impl crate::endpoint::Paginated for GetTasksForProject {
     fn set_limit(&mut self, limit: crate::endpoint::PageLimit) {
         self.limit = Some(limit);
     }
+    fn limit(&self) -> Option<crate::endpoint::PageLimit> {
+        self.limit
+    }
 }
 /// Get tasks from a section.
 ///
@@ -116,6 +119,9 @@ impl crate::endpoint::Paginated for GetTasksForSection {
     fn set_limit(&mut self, limit: crate::endpoint::PageLimit) {
         self.limit = Some(limit);
     }
+    fn limit(&self) -> Option<crate::endpoint::PageLimit> {
+        self.limit
+    }
 }
 /// Get tasks from a tag.
 ///
@@ -169,6 +175,9 @@ impl crate::endpoint::Paginated for GetTasksForTag {
     }
     fn set_limit(&mut self, limit: crate::endpoint::PageLimit) {
         self.limit = Some(limit);
+    }
+    fn limit(&self) -> Option<crate::endpoint::PageLimit> {
+        self.limit
     }
 }
 /// Get multiple tasks.
@@ -249,6 +258,9 @@ impl crate::endpoint::Paginated for GetTasks {
     }
     fn set_limit(&mut self, limit: crate::endpoint::PageLimit) {
         self.limit = Some(limit);
+    }
+    fn limit(&self) -> Option<crate::endpoint::PageLimit> {
+        self.limit
     }
 }
 /// Create a task.
@@ -570,6 +582,9 @@ impl crate::endpoint::Paginated for GetDependenciesForTask {
     fn set_limit(&mut self, limit: crate::endpoint::PageLimit) {
         self.limit = Some(limit);
     }
+    fn limit(&self) -> Option<crate::endpoint::PageLimit> {
+        self.limit
+    }
 }
 /// Get dependents from a task.
 ///
@@ -623,6 +638,9 @@ impl crate::endpoint::Paginated for GetDependentsForTask {
     }
     fn set_limit(&mut self, limit: crate::endpoint::PageLimit) {
         self.limit = Some(limit);
+    }
+    fn limit(&self) -> Option<crate::endpoint::PageLimit> {
+        self.limit
     }
 }
 /// Duplicate a task.
@@ -925,6 +943,9 @@ impl crate::endpoint::Paginated for GetSubtasksForTask {
     fn set_limit(&mut self, limit: crate::endpoint::PageLimit) {
         self.limit = Some(limit);
     }
+    fn limit(&self) -> Option<crate::endpoint::PageLimit> {
+        self.limit
+    }
 }
 /// Create a subtask.
 ///
@@ -1018,6 +1039,9 @@ impl crate::endpoint::Paginated for GetTasksForUserTaskList {
     }
     fn set_limit(&mut self, limit: crate::endpoint::PageLimit) {
         self.limit = Some(limit);
+    }
+    fn limit(&self) -> Option<crate::endpoint::PageLimit> {
+        self.limit
     }
 }
 /// Get a task for a given custom ID.

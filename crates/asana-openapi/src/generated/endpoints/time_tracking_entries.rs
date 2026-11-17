@@ -54,6 +54,9 @@ impl crate::endpoint::Paginated for GetTimeTrackingEntriesForTask {
     fn set_limit(&mut self, limit: crate::endpoint::PageLimit) {
         self.limit = Some(limit);
     }
+    fn limit(&self) -> Option<crate::endpoint::PageLimit> {
+        self.limit
+    }
 }
 /// Create a time tracking entry.
 ///
@@ -186,6 +189,9 @@ impl crate::endpoint::Paginated for GetTimeTrackingEntries {
     }
     fn set_limit(&mut self, limit: crate::endpoint::PageLimit) {
         self.limit = Some(limit);
+    }
+    fn limit(&self) -> Option<crate::endpoint::PageLimit> {
+        self.limit
     }
 }
 /// Get a time tracking entry.

@@ -60,6 +60,9 @@ impl crate::endpoint::Paginated for GetAiStudioRuns {
     fn set_limit(&mut self, limit: crate::endpoint::PageLimit) {
         self.limit = Some(limit);
     }
+    fn limit(&self) -> Option<crate::endpoint::PageLimit> {
+        self.limit
+    }
 }
 /// Get AI Studio seats.
 ///
@@ -119,6 +122,9 @@ impl crate::endpoint::Paginated for GetAiStudioSeats {
     }
     fn set_limit(&mut self, limit: crate::endpoint::PageLimit) {
         self.limit = Some(limit);
+    }
+    fn limit(&self) -> Option<crate::endpoint::PageLimit> {
+        self.limit
     }
 }
 /// The values of the `state` query parameter.

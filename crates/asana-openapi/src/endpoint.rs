@@ -162,6 +162,13 @@ pub trait Paginated: Endpoint {
 
     /// Sets how many objects a page holds.
     fn set_limit(&mut self, limit: PageLimit);
+
+    /// The page size the descriptor asks for, when one was set. A client reading every page
+    /// uses it, and chooses its own only when this is `None` (the default for a descriptor that
+    /// does not say).
+    fn limit(&self) -> Option<PageLimit> {
+        None
+    }
 }
 
 /// An opaque position in a paged list, handed back to Asana exactly as it was given. It expires.

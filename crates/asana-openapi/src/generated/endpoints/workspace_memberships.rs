@@ -57,6 +57,9 @@ impl crate::endpoint::Paginated for GetWorkspaceMembershipsForUser {
     fn set_limit(&mut self, limit: crate::endpoint::PageLimit) {
         self.limit = Some(limit);
     }
+    fn limit(&self) -> Option<crate::endpoint::PageLimit> {
+        self.limit
+    }
 }
 /// Get a workspace membership.
 ///
@@ -145,5 +148,8 @@ impl crate::endpoint::Paginated for GetWorkspaceMembershipsForWorkspace {
     }
     fn set_limit(&mut self, limit: crate::endpoint::PageLimit) {
         self.limit = Some(limit);
+    }
+    fn limit(&self) -> Option<crate::endpoint::PageLimit> {
+        self.limit
     }
 }

@@ -65,17 +65,19 @@ impl<'a, E: Endpoint> Request<'a, E> {
 }
 
 impl<E: Paginated + 'static> Request<'_, E> {
-    /// Every item of the list, fetched 100 at a time as the stream is read.
+    /// Every item of the list, fetched a page at a time as the stream is read: 100 to a page, or
+    /// the request's `limit` when it sets one.
     pub fn stream(self) -> Items<E::Item> {
         self.client.stream(self.endpoint)
     }
 
-    /// Every page of the list, 100 items to a page.
+    /// Every page of the list, 100 items to a page, or the request's `limit` when it sets one.
     pub fn pages(self) -> Pages<E::Item> {
         self.client.pages(self.endpoint)
     }
 
-    /// The first `max` items, fetching no more pages than that needs.
+    /// The first `max` items, fetching no more pages than that needs, in pages no larger than the
+    /// request's `limit` when it sets one.
     ///
     /// # Errors
     ///

@@ -107,6 +107,9 @@ impl crate::endpoint::Paginated for GetUsers {
     fn set_limit(&mut self, limit: crate::endpoint::PageLimit) {
         self.limit = Some(limit);
     }
+    fn limit(&self) -> Option<crate::endpoint::PageLimit> {
+        self.limit
+    }
 }
 /// Get a user.
 ///
@@ -256,6 +259,9 @@ impl crate::endpoint::Paginated for GetFavoritesForUser {
     }
     fn set_limit(&mut self, limit: crate::endpoint::PageLimit) {
         self.limit = Some(limit);
+    }
+    fn limit(&self) -> Option<crate::endpoint::PageLimit> {
+        self.limit
     }
 }
 /// The values of the `resource_type` query parameter.

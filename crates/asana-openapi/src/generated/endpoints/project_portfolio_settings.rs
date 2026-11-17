@@ -58,6 +58,9 @@ impl crate::endpoint::Paginated for GetProjectPortfolioSettingsForPortfolio {
     fn set_limit(&mut self, limit: crate::endpoint::PageLimit) {
         self.limit = Some(limit);
     }
+    fn limit(&self) -> Option<crate::endpoint::PageLimit> {
+        self.limit
+    }
 }
 /// Get a project portfolio setting.
 ///
@@ -187,5 +190,8 @@ impl crate::endpoint::Paginated for GetProjectPortfolioSettingsForProject {
     }
     fn set_limit(&mut self, limit: crate::endpoint::PageLimit) {
         self.limit = Some(limit);
+    }
+    fn limit(&self) -> Option<crate::endpoint::PageLimit> {
+        self.limit
     }
 }

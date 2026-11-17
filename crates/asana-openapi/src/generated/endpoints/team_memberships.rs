@@ -64,6 +64,9 @@ impl crate::endpoint::Paginated for GetTeamMemberships {
     fn set_limit(&mut self, limit: crate::endpoint::PageLimit) {
         self.limit = Some(limit);
     }
+    fn limit(&self) -> Option<crate::endpoint::PageLimit> {
+        self.limit
+    }
 }
 /// Get a team membership.
 ///
@@ -149,6 +152,9 @@ impl crate::endpoint::Paginated for GetTeamMembershipsForTeam {
     fn set_limit(&mut self, limit: crate::endpoint::PageLimit) {
         self.limit = Some(limit);
     }
+    fn limit(&self) -> Option<crate::endpoint::PageLimit> {
+        self.limit
+    }
 }
 /// Get memberships from a user.
 ///
@@ -207,5 +213,8 @@ impl crate::endpoint::Paginated for GetTeamMembershipsForUser {
     }
     fn set_limit(&mut self, limit: crate::endpoint::PageLimit) {
         self.limit = Some(limit);
+    }
+    fn limit(&self) -> Option<crate::endpoint::PageLimit> {
+        self.limit
     }
 }

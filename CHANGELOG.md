@@ -101,5 +101,10 @@ These change what code built against an earlier revision of `main` sees or compi
   streams, `Client::pages` and `collect_max` follow a next page past a page with no items. Before,
   any empty page ended the list and silently dropped the rest. The audit log
   (`getAuditLogEvents`), which offers a next page for ever, still ends at its first empty page.
+- `asana-openapi`: `Paginated` has a new provided method, `limit(&self) -> Option<PageLimit>`,
+  which every generated list descriptor implements. `asana-client`: `Client::pages`,
+  `Client::stream`, `Request::stream` and `Request::pages` keep a page size the caller set
+  (`limit`) and ask for 100 only when none was set, and `collect_max` keeps its pages within it.
+  Before, they always asked for 100.
 
 [0.1.0]: https://github.com/noahbclarkson/asana-rs/releases/tag/v0.1.0
