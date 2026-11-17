@@ -3,7 +3,7 @@
 use std::fmt;
 
 use asana_openapi::ids::WebhookGid;
-use asana_webhooks::{FilterError, StoreError};
+use asana_webhooks::{FilterError, RouteKey, StoreError, WebhookSecret};
 
 use crate::Error;
 
@@ -34,8 +34,9 @@ pub enum WebhookError {
     /// Asana refused the create, or it got no answer, after the receiver captured the handshake
     /// (`handshake_seen`) or without it.
     ///
-    /// A [`Error::Transport`] here leaves it unknown whether Asana created the webhook: list the
-    /// resource's webhooks ([`Webhooks::list`](super::Webhooks::list)) to find out.
+    /// Asana creates a webhook only once the handshake was answered, so when the receiver saw
+    /// none, nothing was created here. An unknown outcome after the receiver answered the
+    /// handshake is [`OutcomeUnknown`](Self::OutcomeUnknown) instead.
     #[error("Asana did not create the webhook ({})", if *.handshake_seen {
         "after the receiver answered its handshake"
     } else {
@@ -47,6 +48,27 @@ pub enum WebhookError {
         source: Box<Error>,
         /// Whether the receiver captured a handshake secret on the route.
         handshake_seen: bool,
+    },
+    /// The receiver answered the handshake, then Asana's answer to the create was lost (a
+    /// timeout, a dropped connection or a `5xx`): Asana may have created the webhook, and it is
+    /// not deleted, because nothing names it.
+    ///
+    /// The route has been closed and the secret the receiver captured is here. Find the webhook
+    /// among the resource's ([`Webhooks::list`](super::Webhooks::list)) by its target (the base
+    /// URL with `route` as the last path segment, or the exact URL given to `establish_at`), then
+    /// either keep it, with this `secret` and `route`, or delete it. Establishing again without
+    /// looking can leave two webhooks on the resource.
+    #[error(
+        "Asana may have created the webhook: the receiver answered its handshake, then the answer to the create was lost"
+    )]
+    OutcomeUnknown {
+        /// Why no answer came.
+        #[source]
+        source: Box<Error>,
+        /// The route the receiver captured the handshake on.
+        route: RouteKey,
+        /// The secret the receiver captured, which is the webhook's if Asana created it.
+        secret: WebhookSecret,
     },
     /// The receiver never captured the handshake. Either Asana cannot reach the target, or the
     /// instance that received the handshake does not share the [`HandshakeStore`] with this one.

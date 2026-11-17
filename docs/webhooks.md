@@ -85,6 +85,13 @@ Things that follow from the protocol:
 - **The create is slow.** It lasts as long as Asana's call to your receiver, so `establish` gives
   it a timeout of its own (90 seconds, `Establish::timeout`). A custom transport that ignores the
   per-request `RequestTimeout` needs a total timeout of at least a minute.
+- **A lost answer can leave a webhook.** When the create fails after Asana answered that it made
+  the webhook, `establish` deletes it again and the error's `Cleanup` says whether that worked.
+  When the answer is lost after the receiver answered the handshake (a timeout, a dropped
+  connection, a `5xx`), Asana may have created a webhook nothing names: the error is
+  `WebhookError::OutcomeUnknown`, carrying the secret the receiver captured and the route. List
+  the resource's webhooks, find the one whose target ends with that route, and keep it (with that
+  secret) or delete it, before establishing again.
 - **Filters.** An event is delivered if it passes any filter. `fields` is only allowed with
   `action: changed`. Webhooks on a workspace, team, portfolio or goal must have filters and never
   see task, subtask or story events; `asana_webhooks::validate_filters` checks those rules for a

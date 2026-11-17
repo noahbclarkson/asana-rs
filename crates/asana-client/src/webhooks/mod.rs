@@ -26,8 +26,11 @@
 //! Asana's answer in constant time. On success keep the [`Established`] webhook's GID, its
 //! [`secret`](Established::secret) (encrypted: it signs every delivery) and its
 //! [`route`](Established::route) (the receiver looks the secret up by it). Every way it can fail
-//! after Asana created the webhook deletes the webhook again, and the error's [`Cleanup`] says
-//! whether that worked.
+//! after Asana answered that it created the webhook deletes the webhook again, and the error's
+//! [`Cleanup`] says whether that worked. When Asana's answer to the create is lost after the
+//! receiver answered the handshake, nothing names the webhook Asana may have created:
+//! [`WebhookError::OutcomeUnknown`] hands back the captured secret and the route so the caller
+//! can find it among the resource's webhooks and keep or delete it.
 //!
 //! The create is one request that lasts as long as Asana's handshake, so it is sent with a
 //! timeout of its own (90 seconds, [`Establish::timeout`]) through [`crate::RequestTimeout`].

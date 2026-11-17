@@ -16,7 +16,7 @@ use secrecy::ExposeSecret;
 
 use super::error::{Cleanup, WebhookError};
 use super::health;
-use crate::{Client, Error};
+use crate::{Client, Error, Outcome};
 
 /// How long a route stays open for its handshake by default: comfortably longer than the create
 /// request Asana holds open while it calls the receiver.
@@ -207,8 +207,14 @@ impl<T: HandshakeStore> Establish<'_, &T> {
     /// In order: checks the filters and the target, opens the route in the store, sends
     /// `POST /webhooks` (during which Asana calls the receiver, which captures the secret), takes
     /// the captured secret from the store, and compares it with the one in Asana's answer in
-    /// constant time. Whenever that fails after Asana created the webhook, the webhook is deleted
-    /// again and the error's [`Cleanup`] says whether that worked.
+    /// constant time. Whenever that fails after Asana answered that it created the webhook, the
+    /// webhook is deleted again and the error's [`Cleanup`] says whether that worked. When the
+    /// answer to the create is lost after the receiver answered the handshake, Asana may have
+    /// created it without naming it: the error is [`OutcomeUnknown`](WebhookError::OutcomeUnknown),
+    /// carrying the captured secret and the route so the caller can find it and keep or delete it.
+    ///
+    /// If this future is dropped while the create is in flight, the route is not closed and
+    /// Asana may have created a webhook nobody holds: list the resource's webhooks to find it.
     ///
     /// # Errors
     ///
@@ -216,7 +222,8 @@ impl<T: HandshakeStore> Establish<'_, &T> {
     /// [`InvalidTarget`](WebhookError::InvalidTarget) or [`Store`](WebhookError::Store) before
     /// anything is sent; [`LocalTarget`](WebhookError::LocalTarget),
     /// [`NotCaptured`](WebhookError::NotCaptured) or [`Create`](WebhookError::Create) when Asana
-    /// refuses; [`Rejected`](WebhookError::Rejected),
+    /// refuses; [`OutcomeUnknown`](WebhookError::OutcomeUnknown) when its answer is lost after
+    /// the handshake; [`Rejected`](WebhookError::Rejected),
     /// [`MissingSecret`](WebhookError::MissingSecret) or
     /// [`AfterCreate`](WebhookError::AfterCreate) after it created the webhook.
     pub async fn send(self) -> Result<Established, WebhookError> {
@@ -245,7 +252,7 @@ impl<T: HandshakeStore> Establish<'_, &T> {
         let captured = self.store.take(&route).await;
 
         match created {
-            Err(source) => Err(refused(source, captured.as_ref(), local)),
+            Err(source) => Err(refused(source, captured, route, local)),
             Ok(created) => confirm(self.client, created, captured, route).await,
         }
     }
@@ -254,10 +261,21 @@ impl<T: HandshakeStore> Establish<'_, &T> {
 /// The error for a create Asana refused (or that got no answer).
 fn refused(
     source: Error,
-    captured: Result<&Option<WebhookSecret>, &StoreError>,
+    captured: Result<Option<WebhookSecret>, StoreError>,
+    route: RouteKey,
     local: bool,
 ) -> WebhookError {
-    let handshake_seen = matches!(captured, Ok(Some(_)));
+    let captured = captured.ok().flatten();
+    if source.outcome() == Outcome::Unknown
+        && let Some(secret) = captured
+    {
+        return WebhookError::OutcomeUnknown {
+            source: Box::new(source),
+            route,
+            secret,
+        };
+    }
+    let handshake_seen = captured.is_some();
     match source.status() {
         Some(StatusCode::FORBIDDEN) if local => WebhookError::LocalTarget(Box::new(source)),
         Some(StatusCode::BAD_REQUEST) if !handshake_seen => WebhookError::NotCaptured {

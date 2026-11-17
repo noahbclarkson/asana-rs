@@ -458,3 +458,52 @@ async fn the_create_is_sent_with_a_timeout_long_enough_for_the_handshake() {
     assert_eq!(timeout(0), Some(RequestTimeout(Duration::from_secs(90))));
     assert_eq!(timeout(1), Some(RequestTimeout(Duration::from_secs(45))));
 }
+
+#[tokio::test]
+async fn a_create_whose_answer_is_lost_after_the_handshake_hands_back_the_secret() {
+    for lost in [
+        Err(asana_client::TransportError::timeout("slow")),
+        Ok(reply(503, "{}")),
+    ] {
+        let store = Arc::new(MemoryHandshakeStore::new());
+        let lost = std::sync::Mutex::new(Some(lost));
+        let transport = Scripted::new({
+            let store = store.clone();
+            move |request, _| {
+                let (_, route) = route_of(request);
+                // The receiver answers the handshake, then the create's answer is lost.
+                let secret = WebhookSecret::from_header(SECRET).unwrap();
+                store
+                    .capture(&route, secret)
+                    .now_or_never()
+                    .unwrap()
+                    .unwrap();
+                lost.lock().unwrap().take().unwrap()
+            }
+        });
+        let client = client(transport.clone());
+
+        let error = client
+            .webhooks()
+            .establish(project(), "https://hooks.example.com/asana")
+            .store(&*store)
+            .send()
+            .await
+            .unwrap_err();
+
+        let WebhookError::OutcomeUnknown { route, secret, .. } = &error else {
+            panic!("expected OutcomeUnknown, got {error:?}");
+        };
+        assert_eq!(secret.expose(), SECRET.as_bytes());
+        let (target, sent_route) = route_of(&transport.request(0));
+        assert_eq!(route, &sent_route);
+        assert!(target.ends_with(&route.to_string()));
+        // Sent once, nothing deleted, and the route is closed.
+        assert_eq!(transport.count(), 1);
+        assert!(store.take(route).now_or_never().unwrap().unwrap().is_none());
+        // Neither Display nor Debug shows the secret or the route.
+        let text = format!("{error} {error:?}");
+        assert!(!text.contains(SECRET), "{text}");
+        assert!(!text.contains(&route.to_string()), "{text}");
+    }
+}

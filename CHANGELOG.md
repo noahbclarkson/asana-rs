@@ -129,5 +129,11 @@ These change what code built against an earlier revision of `main` sees or compi
   `..` (a `custom_id` or a `UserRef::Email` of `..`, say), is refused with
   `Error::InvalidRequest` before it is sent. Percent-encoding the dots did not stop this, because
   URL parsing reads `%2E` as a dot, and the request went one level up the path.
+- `asana-client`: a new `WebhookError::OutcomeUnknown { source, route, secret }`. When the answer
+  to a webhook create is lost (a timeout, a dropped connection, a `5xx`) after the receiver
+  answered the handshake, Asana may have created a webhook nothing names; `establish` returned
+  `WebhookError::Create { handshake_seen: true, .. }` and dropped the captured secret. It now
+  returns `OutcomeUnknown` with the secret and the route, so the caller can find the webhook and
+  keep or delete it.
 
 [0.1.0]: https://github.com/noahbclarkson/asana-rs/releases/tag/v0.1.0
