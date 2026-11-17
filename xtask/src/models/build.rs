@@ -303,7 +303,8 @@ impl<'a> Builder<'a> {
                 fields: Vec::new(),
             },
         })?;
-        // `gid` and `resource_type` first, as Asana writes them; the rest as the schemas list them.
+        // `gid` and `resource_type` first, as Asana writes them; the rest in `flatten`'s order:
+        // along the `allOf` chain, each schema's properties in name order.
         let mut properties = properties.to_vec();
         properties.sort_by_key(|(json, _)| match *json {
             "gid" => 0,

@@ -117,6 +117,10 @@ pub fn description(schema: &Value) -> Option<&str> {
 
 /// The properties of a schema with its `allOf` chain resolved: inherited properties first, a later
 /// definition of the same name replacing an earlier one in place.
+///
+/// Within one schema the properties are taken in name order, sorted here rather than left to
+/// `serde_json`'s map, whose order depends on whether some crate in the build switches on its
+/// `preserve_order` feature. The generated field order is the same either way.
 pub fn flatten<'a>(raw: &'a Value, schema: &'a Value) -> GenResult<Vec<(&'a str, &'a Value)>> {
     let mut properties = Vec::new();
     collect(raw, schema, &mut properties, 0)?;
@@ -139,6 +143,8 @@ fn collect<'a>(
         collect(raw, part, into, depth + 1)?;
     }
     if let Some(properties) = schema.get("properties").and_then(Value::as_object) {
+        let mut properties: Vec<_> = properties.iter().collect();
+        properties.sort_by_key(|(name, _)| name.as_str());
         for (name, property) in properties {
             match into.iter_mut().find(|(existing, _)| existing == name) {
                 Some(slot) => slot.1 = property,
@@ -215,5 +221,25 @@ mod tests {
         let names: Vec<_> = properties.iter().map(|(name, _)| *name).collect();
         assert_eq!(names, ["gid", "name", "extra"]);
         assert_eq!(properties[1].1["type"], "integer");
+    }
+
+    #[test]
+    fn each_schemas_properties_come_in_name_order_whatever_the_map_keeps() {
+        // Written out of order. Without `preserve_order` the map sorts them already; with it, it
+        // would keep this order, and `flatten` must still give name order.
+        let raw = json!({"components": {"schemas": {
+            "ACompact": {"properties": {"zeta": {}, "gid": {}, "alpha": {}}},
+            "AResponse": {"allOf": [
+                {"$ref": "#/components/schemas/ACompact"},
+                {"properties": {"omega": {}, "beta": {}}}
+            ]}
+        }}});
+        let schema = component(&raw, "AResponse").unwrap();
+        let names: Vec<_> = flatten(&raw, schema)
+            .unwrap()
+            .into_iter()
+            .map(|(name, _)| name)
+            .collect();
+        assert_eq!(names, ["alpha", "gid", "zeta", "beta", "omega"]);
     }
 }
