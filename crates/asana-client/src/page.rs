@@ -2,7 +2,9 @@
 //!
 //! Asana pages a list with an opaque `offset` that expires, so pages are fetched lazily, in
 //! order, as the stream is read, and a failure ends the stream (start again from the beginning).
-//! A page with no items also ends it, because some lists (the audit log) always offer a next page.
+//! A list ends where Asana offers no next page. The audit log is the exception: once it has
+//! offered a next page it always does, to stream future events, so for it a page with no items
+//! also ends the list.
 
 use asana_openapi::endpoint::{Offset, PageLimit, Paginated};
 use futures_util::future::Either;
@@ -27,9 +29,13 @@ impl<T> Page<T> {
         Self { items, next }
     }
 
-    /// Whether this is the last page.
+    /// Whether this is the last page: Asana offered no next one.
+    ///
+    /// A page with no items can still have a next page, and the list goes on there. The audit
+    /// log (`getAuditLogEvents`) always offers a next page once it has offered one;
+    /// [`Client::pages`] and [`Client::stream`] end it at its first page with no items.
     pub fn is_last(&self) -> bool {
-        self.next.is_none() || self.items.is_empty()
+        self.next.is_none()
     }
 }
 
@@ -40,6 +46,15 @@ impl<T> IntoIterator for Page<T> {
     fn into_iter(self) -> Self::IntoIter {
         self.items.into_iter()
     }
+}
+
+/// The lists that offer a next page even when they have nothing more for now, so that their
+/// first page with no items is where they end.
+const ENDLESS_LISTS: &[&str] = &["getAuditLogEvents"];
+
+/// Whether `page` is where the list `E` ends.
+fn ends_list<E: Paginated, T>(page: &Page<T>) -> bool {
+    page.is_last() || (page.items.is_empty() && ENDLESS_LISTS.contains(&E::OPERATION_ID))
 }
 
 /// Every item of a list, fetched a page at a time as it is read.
@@ -60,7 +75,7 @@ impl Client {
                 let mut endpoint = endpoint?;
                 match client.page_of(&endpoint).await {
                     Ok(page) => {
-                        let rest = match (&page.next, page.is_last()) {
+                        let rest = match (&page.next, ends_list::<E, _>(&page)) {
                             (Some(next), false) => {
                                 endpoint.set_offset(Some(next.clone()));
                                 Some(endpoint)
@@ -101,7 +116,7 @@ impl Client {
             let wanted = (max - items.len()).min(usize::from(PageLimit::MAX.get()));
             endpoint.set_limit(PageLimit::new(u8::try_from(wanted).unwrap_or(u8::MAX)));
             let page = self.page_of(&endpoint).await?;
-            let last = page.is_last();
+            let last = ends_list::<E, _>(&page);
             let next = page.next.clone();
             items.extend(page.items);
             match next {

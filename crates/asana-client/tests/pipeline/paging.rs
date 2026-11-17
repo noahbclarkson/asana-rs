@@ -167,3 +167,63 @@ async fn a_failed_page_ends_the_stream_with_its_error() {
         Err(asana_client::Error::BadRequest(_))
     ));
 }
+
+#[tokio::test]
+async fn a_page_with_no_items_that_offers_a_next_one_does_not_end_the_list() {
+    let server = MockServer::start().await;
+    Mock::given(method("GET"))
+        .and(query_param_is_missing("offset"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(page(&["a"], Some("one"))))
+        .mount(&server)
+        .await;
+    Mock::given(method("GET"))
+        .and(query_param("offset", "one"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(page(&[], Some("two"))))
+        .mount(&server)
+        .await;
+    Mock::given(method("GET"))
+        .and(query_param("offset", "two"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(page(&["b"], None)))
+        .mount(&server)
+        .await;
+    let client = client(&server);
+
+    let tasks: Vec<_> = client.stream(endpoint()).try_collect().await.unwrap();
+    assert_eq!(names(&tasks), ["a", "b"]);
+    assert_eq!(client.pages(endpoint()).count().await, 3);
+    assert_eq!(
+        names(&client.collect_max(endpoint(), 10).await.unwrap()),
+        ["a", "b"]
+    );
+}
+
+#[tokio::test]
+async fn the_audit_log_ends_at_its_first_page_with_no_items() {
+    use asana_client::openapi::endpoints::GetAuditLogEvents;
+
+    let server = MockServer::start().await;
+    Mock::given(method("GET"))
+        .and(query_param_is_missing("offset"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "data": [{"gid": "1200000000000001"}],
+            "next_page": {"offset": "more"}
+        })))
+        .mount(&server)
+        .await;
+    // Asana keeps offering a next page, for events still to come.
+    Mock::given(method("GET"))
+        .and(query_param("offset", "more"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
+            "data": [],
+            "next_page": {"offset": "more"}
+        })))
+        .mount(&server)
+        .await;
+    let client = client(&server);
+    let audit = || GetAuditLogEvents::builder("1200000000000002".parse().unwrap()).build();
+
+    let events: Vec<_> = client.stream(audit()).try_collect().await.unwrap();
+    assert_eq!(events.len(), 1);
+    assert_eq!(client.collect_max(audit(), 10).await.unwrap().len(), 1);
+    assert_eq!(server.received_requests().await.unwrap().len(), 4);
+}

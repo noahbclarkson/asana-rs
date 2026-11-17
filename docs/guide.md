@@ -209,8 +209,10 @@ let page = client
 
 `StreamExt` and `TryStreamExt` come from `futures-util`. The streams are lazy (no request until
 read), `'static` and `Send`, so they can be moved into a task. They end at the first error, and
-at a page with no items. Offsets are passed back exactly as Asana gave them; they expire, so
-saving one for long only works for a while.
+where Asana offers no next page; a page with no items that does offer one is followed. The audit
+log is the exception: it offers a next page for ever, to stream future events, so its streams end
+at its first page with no items. Offsets are passed back exactly as Asana gave them; they expire,
+so saving one for long only works for a while.
 
 The same methods are on `Client` for any generated descriptor that pages: `client.stream(..)`,
 `client.pages(..)`, `client.collect_max(.., n)` and `client.send_page(..)`.

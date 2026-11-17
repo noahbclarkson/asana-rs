@@ -97,5 +97,9 @@ These change what code built against an earlier revision of `main` sees or compi
 - `asana-client`: a batch counts against the client's limits action by action, as Asana counts
   it: a read or write permit per action and a search token per search. Before, a batch of ten
   took one write permit and no search token, so concurrent batches overran Asana's limits.
+- `asana-client`: `Page::is_last()` is true only when Asana offers no next page, and the
+  streams, `Client::pages` and `collect_max` follow a next page past a page with no items. Before,
+  any empty page ended the list and silently dropped the rest. The audit log
+  (`getAuditLogEvents`), which offers a next page for ever, still ends at its first empty page.
 
 [0.1.0]: https://github.com/noahbclarkson/asana-rs/releases/tag/v0.1.0
