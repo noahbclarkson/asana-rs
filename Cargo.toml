@@ -57,7 +57,7 @@ axum = { version = "0.8", default-features = false }
 # The generator only (xtask is never published)
 heck = "0.5"
 openapiv3 = "2.2"
-prettyplease = "0.2"
+prettyplease = "0.3"
 proc-macro2 = "1"
 quote = "1"
 serde_yaml_ng = "0.10"
