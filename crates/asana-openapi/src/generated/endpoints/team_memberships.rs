@@ -19,7 +19,7 @@ pub struct GetTeamMemberships {
     pub user: Option<crate::ids::UserRef>,
     /// Globally unique identifier for the workspace. This parameter must be used with the user parameter.
     pub workspace: Option<crate::ids::WorkspaceGid>,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for Asana's compact record of each item.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::TeamMembershipField>,
 }
@@ -78,7 +78,7 @@ pub struct GetTeamMembership {
     /// The `team_membership_gid` path parameter.
     #[builder(start_fn)]
     pub team_membership_gid: crate::ids::TeamMembershipGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::TeamMembershipField>,
 }
@@ -113,7 +113,7 @@ pub struct GetTeamMembershipsForTeam {
     pub limit: Option<crate::endpoint::PageLimit>,
     /// Offset token. An offset to the next page returned by the API. A pagination request will return an offset token, which can be used as an input parameter to the next request. If an offset is not passed in, the API will return the first page of results. *Note: You can only pass in an offset that was returned to you via a previously paginated request.*
     pub offset: Option<crate::endpoint::Offset>,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for Asana's compact record of each item.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::TeamMembershipField>,
 }
@@ -172,7 +172,7 @@ pub struct GetTeamMembershipsForUser {
     pub offset: Option<crate::endpoint::Offset>,
     /// Globally unique identifier for the workspace.
     pub workspace: crate::ids::WorkspaceGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for Asana's compact record of each item.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::TeamMembershipField>,
 }

@@ -18,7 +18,7 @@ pub struct GetTasksForProject {
     pub limit: Option<crate::endpoint::PageLimit>,
     /// Offset token. An offset to the next page returned by the API. A pagination request will return an offset token, which can be used as an input parameter to the next request. If an offset is not passed in, the API will return the first page of results. *Note: You can only pass in an offset that was returned to you via a previously paginated request.*
     pub offset: Option<crate::endpoint::Offset>,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for Asana's compact record of each item.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::TaskField>,
 }
@@ -79,7 +79,7 @@ pub struct GetTasksForSection {
     /// Only return tasks that are either incomplete or that have been completed since this time. Accepts a date-time string or the keyword *now*.
     #[builder(into)]
     pub completed_since: Option<String>,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for Asana's compact record of each item.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::TaskField>,
 }
@@ -137,7 +137,7 @@ pub struct GetTasksForTag {
     pub limit: Option<crate::endpoint::PageLimit>,
     /// Offset token. An offset to the next page returned by the API. A pagination request will return an offset token, which can be used as an input parameter to the next request. If an offset is not passed in, the API will return the first page of results. *Note: You can only pass in an offset that was returned to you via a previously paginated request.*
     pub offset: Option<crate::endpoint::Offset>,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for Asana's compact record of each item.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::TaskField>,
 }
@@ -207,7 +207,7 @@ pub struct GetTasks {
     /// Filter results by custom type. Provide a custom type GID to return only objects of that custom type (an unknown GID returns `400`). Provide an empty string to return only objects with no custom type assigned. If this parameter is omitted, results are not filtered by custom type.
     #[builder(into)]
     pub custom_type: Option<String>,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for Asana's compact record of each item.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::TaskField>,
 }
@@ -270,7 +270,7 @@ impl crate::endpoint::Paginated for GetTasks {
 /// `POST /tasks`
 #[derive(Clone, Debug, bon::Builder)]
 pub struct CreateTask {
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::TaskField>,
     /// The task to create.
@@ -306,7 +306,7 @@ pub struct GetTask {
     /// The task to operate on.
     #[builder(start_fn)]
     pub task_gid: crate::ids::TaskGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::TaskField>,
 }
@@ -337,7 +337,7 @@ pub struct UpdateTask {
     /// The task to operate on.
     #[builder(start_fn)]
     pub task_gid: crate::ids::TaskGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::TaskField>,
     /// The task to update.
@@ -449,7 +449,7 @@ pub struct AddFollowersForTask {
     /// The task to operate on.
     #[builder(start_fn)]
     pub task_gid: crate::ids::TaskGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::TaskField>,
     /// The followers to add to the task.
@@ -543,7 +543,7 @@ pub struct GetDependenciesForTask {
     pub limit: Option<crate::endpoint::PageLimit>,
     /// Offset token. An offset to the next page returned by the API. A pagination request will return an offset token, which can be used as an input parameter to the next request. If an offset is not passed in, the API will return the first page of results. *Note: You can only pass in an offset that was returned to you via a previously paginated request.*
     pub offset: Option<crate::endpoint::Offset>,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for Asana's compact record of each item.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::TaskField>,
 }
@@ -600,7 +600,7 @@ pub struct GetDependentsForTask {
     pub limit: Option<crate::endpoint::PageLimit>,
     /// Offset token. An offset to the next page returned by the API. A pagination request will return an offset token, which can be used as an input parameter to the next request. If an offset is not passed in, the API will return the first page of results. *Note: You can only pass in an offset that was returned to you via a previously paginated request.*
     pub offset: Option<crate::endpoint::Offset>,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for Asana's compact record of each item.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::TaskField>,
 }
@@ -653,7 +653,7 @@ pub struct DuplicateTask {
     /// The task to operate on.
     #[builder(start_fn)]
     pub task_gid: crate::ids::TaskGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::JobField>,
     /// Describes the duplicate's name and the fields that will be duplicated.
@@ -743,7 +743,7 @@ pub struct RemoveFollowerForTask {
     /// The task to operate on.
     #[builder(start_fn)]
     pub task_gid: crate::ids::TaskGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::TaskField>,
     /// The followers to remove from the task.
@@ -833,7 +833,7 @@ pub struct RollupTask {
     /// The task to operate on.
     #[builder(start_fn)]
     pub task_gid: crate::ids::TaskGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::JobField>,
 }
@@ -864,7 +864,7 @@ pub struct SetParentForTask {
     /// The task to operate on.
     #[builder(start_fn)]
     pub task_gid: crate::ids::TaskGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::TaskField>,
     /// The new parent of the subtask.
@@ -904,7 +904,7 @@ pub struct GetSubtasksForTask {
     pub limit: Option<crate::endpoint::PageLimit>,
     /// Offset token. An offset to the next page returned by the API. A pagination request will return an offset token, which can be used as an input parameter to the next request. If an offset is not passed in, the API will return the first page of results. *Note: You can only pass in an offset that was returned to you via a previously paginated request.*
     pub offset: Option<crate::endpoint::Offset>,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for Asana's compact record of each item.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::TaskField>,
 }
@@ -957,7 +957,7 @@ pub struct CreateSubtaskForTask {
     /// The task to operate on.
     #[builder(start_fn)]
     pub task_gid: crate::ids::TaskGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::TaskField>,
     /// The new subtask to create.
@@ -1000,7 +1000,7 @@ pub struct GetTasksForUserTaskList {
     pub limit: Option<crate::endpoint::PageLimit>,
     /// Offset token. An offset to the next page returned by the API. A pagination request will return an offset token, which can be used as an input parameter to the next request. If an offset is not passed in, the API will return the first page of results. *Note: You can only pass in an offset that was returned to you via a previously paginated request.*
     pub offset: Option<crate::endpoint::Offset>,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for Asana's compact record of each item.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::TaskField>,
 }
@@ -1223,7 +1223,7 @@ pub struct SearchTasksForWorkspace {
     pub sort_by: Option<SearchTasksForWorkspaceSortBy>,
     /// Default `false`.
     pub sort_ascending: Option<bool>,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for Asana's compact record of each item.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::TaskField>,
 }

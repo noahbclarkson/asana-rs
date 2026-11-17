@@ -18,7 +18,7 @@ pub struct GetTimePeriods {
     pub end_on: Option<time::Date>,
     /// Globally unique identifier for the workspace.
     pub workspace: crate::ids::WorkspaceGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for Asana's compact record of each item.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::TimePeriodField>,
 }
@@ -73,7 +73,7 @@ pub struct GetTimePeriod {
     /// Globally unique identifier for the time period.
     #[builder(start_fn)]
     pub time_period_gid: crate::ids::TimePeriodGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::TimePeriodField>,
 }

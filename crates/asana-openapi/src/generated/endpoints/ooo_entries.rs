@@ -21,7 +21,7 @@ pub struct GetOooEntries {
     pub start_date: Option<time::Date>,
     /// An ISO 8601 date string. Filters to OOO entries that overlap with or start before this date.
     pub end_date: Option<time::Date>,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for Asana's compact record of each item.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::OooEntryField>,
 }
@@ -76,7 +76,7 @@ impl crate::endpoint::Paginated for GetOooEntries {
 /// `POST /ooo_entries`
 #[derive(Clone, Debug, bon::Builder)]
 pub struct CreateOooEntry {
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::OooEntryField>,
     /// The OOO entry to create.
@@ -112,7 +112,7 @@ pub struct GetOooEntry {
     /// Globally unique identifier for the OOO entry.
     #[builder(start_fn)]
     pub ooo_entry_gid: crate::ids::OooEntryGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::OooEntryField>,
 }
@@ -143,7 +143,7 @@ pub struct UpdateOooEntry {
     /// Globally unique identifier for the OOO entry.
     #[builder(start_fn)]
     pub ooo_entry_gid: crate::ids::OooEntryGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::OooEntryField>,
     /// The updated fields for the OOO entry.

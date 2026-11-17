@@ -1,7 +1,9 @@
 //! Choosing which fields Asana returns (`opt_fields`).
 //!
-//! By default Asana returns a compact record: little more than `gid` and `name`. A request names
-//! the other fields it wants as dotted paths, such as `memberships.section.name`. The
+//! By default Asana returns each item of a list as a compact record (little more than `gid` and
+//! `name`), and a single object (one read, created or updated) as its full record. A request names
+//! the fields it wants as dotted paths, such as `memberships.section.name`; naming them widens a
+//! list's items and narrows a single object to what was named. The
 //! specification lists the paths each resource accepts, so each resource has a generated enum of
 //! them and the [`fields!`](crate::fields!) macro turns a misspelt path into a compile error.
 
@@ -38,7 +40,8 @@ impl<F> Default for Fields<F> {
 }
 
 impl<F: FieldPath> Fields<F> {
-    /// An empty selection: Asana returns its compact record.
+    /// An empty selection: Asana returns its default record (compact for each item of a list,
+    /// full for a single object).
     pub fn none() -> Self {
         Self::default()
     }

@@ -11,7 +11,7 @@ pub struct GetProjectBrief {
     /// Globally unique identifier for the project brief.
     #[builder(start_fn)]
     pub project_brief_gid: crate::ids::ProjectBriefGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::ProjectBriefField>,
 }
@@ -42,7 +42,7 @@ pub struct UpdateProjectBrief {
     /// Globally unique identifier for the project brief.
     #[builder(start_fn)]
     pub project_brief_gid: crate::ids::ProjectBriefGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::ProjectBriefField>,
     /// The updated fields for the project brief.
@@ -100,7 +100,7 @@ pub struct CreateProjectBrief {
     /// Globally unique identifier for the project.
     #[builder(start_fn)]
     pub project_gid: crate::ids::ProjectGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::ProjectBriefField>,
     /// The project brief to create.

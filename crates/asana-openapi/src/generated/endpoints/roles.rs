@@ -16,7 +16,7 @@ pub struct GetRoles {
     pub workspace: crate::ids::WorkspaceGid,
     /// Only return projects whose `archived` field takes on the value of this parameter.
     pub archived: Option<bool>,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for Asana's compact record of each item.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::RbacRoleField>,
 }
@@ -67,7 +67,7 @@ impl crate::endpoint::Paginated for GetRoles {
 /// `POST /roles`
 #[derive(Clone, Debug, bon::Builder)]
 pub struct CreateRole {
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::RbacRoleField>,
     /// The role to create.
@@ -103,7 +103,7 @@ pub struct GetRole {
     /// Globally unique identifier for the role.
     #[builder(start_fn)]
     pub role_gid: crate::ids::RbacRoleGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::RbacRoleField>,
 }
@@ -134,7 +134,7 @@ pub struct UpdateRole {
     /// Globally unique identifier for the role.
     #[builder(start_fn)]
     pub role_gid: crate::ids::RbacRoleGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::RbacRoleField>,
     /// The updated fields for the role.

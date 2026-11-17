@@ -60,7 +60,7 @@ pub struct GetBudget {
     /// Globally unique identifier for the budget.
     #[builder(start_fn)]
     pub budget_gid: crate::ids::BudgetGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::BudgetField>,
 }
@@ -91,7 +91,7 @@ pub struct UpdateBudget {
     /// Globally unique identifier for the budget.
     #[builder(start_fn)]
     pub budget_gid: crate::ids::BudgetGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::BudgetField>,
     /// The budget to update.

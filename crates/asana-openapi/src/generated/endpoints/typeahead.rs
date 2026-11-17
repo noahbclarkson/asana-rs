@@ -20,7 +20,7 @@ pub struct TypeaheadForWorkspace {
     pub query: Option<String>,
     /// The number of results to return. The default is 20 if this parameter is omitted, with a minimum of 1 and a maximum of 100. If there are fewer results found than requested, all will be returned.
     pub count: Option<u32>,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for Asana's compact record of each item.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::AsanaNamedResourceField>,
 }

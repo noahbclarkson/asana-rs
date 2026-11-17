@@ -8,7 +8,7 @@
 /// `POST /records`
 #[derive(Clone, Debug, bon::Builder)]
 pub struct CreateRecord {
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::RecordItemField>,
     /// The record to create.
@@ -44,7 +44,7 @@ pub struct GetRecord {
     /// Globally unique identifier for the record.
     #[builder(start_fn)]
     pub record_gid: crate::ids::RecordItemGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::RecordItemField>,
 }
@@ -75,7 +75,7 @@ pub struct UpdateRecord {
     /// Globally unique identifier for the record.
     #[builder(start_fn)]
     pub record_gid: crate::ids::RecordItemGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::RecordItemField>,
     /// The updated fields for the record.
@@ -141,7 +141,7 @@ pub struct GetRecordsForTable {
     pub modified_since: Option<time::OffsetDateTime>,
     /// Sort order for the records returned. If omitted, records are returned in their default order.
     pub sort_by: Option<GetRecordsForTableSortBy>,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for Asana's compact record of each item.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::RecordItemField>,
 }
@@ -253,7 +253,7 @@ pub struct SearchRecordsForWorkspace {
     pub sort_by: Option<SearchRecordsForWorkspaceSortBy>,
     /// Default `false`.
     pub sort_ascending: Option<bool>,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for Asana's compact record of each item.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::RecordItemField>,
 }

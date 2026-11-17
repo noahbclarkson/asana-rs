@@ -13,7 +13,7 @@ pub struct GetUsersForTeam {
     pub team_gid: crate::ids::TeamGid,
     /// Offset token. An offset to the next page returned by the API. A pagination request will return an offset token, which can be used as an input parameter to the next request. If an offset is not passed in, the API will return the first page of results. *Note: You can only pass in an offset that was returned to you via a previously paginated request.*
     pub offset: Option<crate::endpoint::Offset>,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for Asana's compact record of each item.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::UserField>,
 }
@@ -63,7 +63,7 @@ pub struct GetUsers {
     pub limit: Option<crate::endpoint::PageLimit>,
     /// Offset token. An offset to the next page returned by the API. A pagination request will return an offset token, which can be used as an input parameter to the next request. If an offset is not passed in, the API will return the first page of results. *Note: You can only pass in an offset that was returned to you via a previously paginated request.*
     pub offset: Option<crate::endpoint::Offset>,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for Asana's compact record of each item.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::UserField>,
 }
@@ -123,7 +123,7 @@ pub struct GetUser {
     pub user_gid: crate::ids::UserRef,
     /// The workspace to filter results on.
     pub workspace: Option<crate::ids::WorkspaceGid>,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::UserField>,
 }
@@ -162,7 +162,7 @@ pub struct UpdateUser {
     pub user_gid: crate::ids::UserRef,
     /// The workspace to filter results on.
     pub workspace: Option<crate::ids::WorkspaceGid>,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::UserField>,
     /// The user to update.
@@ -212,7 +212,7 @@ pub struct GetFavoritesForUser {
     pub resource_type: GetFavoritesForUserResourceType,
     /// The workspace in which to get favorites.
     pub workspace: crate::ids::WorkspaceGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for Asana's compact record of each item.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::AsanaNamedResourceField>,
 }
@@ -306,7 +306,7 @@ pub struct GetUsersForWorkspace {
     pub workspace_gid: crate::ids::WorkspaceGid,
     /// Offset token. An offset to the next page returned by the API. A pagination request will return an offset token, which can be used as an input parameter to the next request. If an offset is not passed in, the API will return the first page of results. *Note: You can only pass in an offset that was returned to you via a previously paginated request.*
     pub offset: Option<crate::endpoint::Offset>,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for Asana's compact record of each item.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::UserField>,
 }
@@ -354,7 +354,7 @@ pub struct GetUserForWorkspace {
     /// A string identifying a user. This can either be the string "me", an email, or the gid of a user.
     #[builder(start_fn, into)]
     pub user_gid: crate::ids::UserRef,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::UserField>,
 }
@@ -392,7 +392,7 @@ pub struct UpdateUserForWorkspace {
     /// A string identifying a user. This can either be the string "me", an email, or the gid of a user.
     #[builder(start_fn, into)]
     pub user_gid: crate::ids::UserRef,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::UserField>,
     /// The user to update.

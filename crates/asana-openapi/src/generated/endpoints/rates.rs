@@ -18,7 +18,7 @@ pub struct GetRates {
     pub limit: Option<crate::endpoint::PageLimit>,
     /// Offset token. An offset to the next page returned by the API. A pagination request will return an offset token, which can be used as an input parameter to the next request. If an offset is not passed in, the API will return the first page of results. *Note: You can only pass in an offset that was returned to you via a previously paginated request.*
     pub offset: Option<crate::endpoint::Offset>,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for Asana's compact record of each item.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::RateOrPlaceholderField>,
 }
@@ -70,7 +70,7 @@ impl crate::endpoint::Paginated for GetRates {
 /// `POST /rates`
 #[derive(Clone, Debug, bon::Builder)]
 pub struct CreateRate {
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::RateField>,
     /// The rate to create.
@@ -106,7 +106,7 @@ pub struct GetRate {
     /// Globally unique identifier for the rate.
     #[builder(start_fn)]
     pub rate_gid: crate::ids::RateGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::RateField>,
 }
@@ -137,7 +137,7 @@ pub struct UpdateRate {
     /// Globally unique identifier for the rate.
     #[builder(start_fn)]
     pub rate_gid: crate::ids::RateGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::RateField>,
     /// The updated fields for the rate.

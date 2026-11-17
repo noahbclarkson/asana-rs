@@ -8,7 +8,7 @@
 /// `POST /organization_exports`
 #[derive(Clone, Debug, bon::Builder)]
 pub struct CreateOrganizationExport {
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::OrganizationExportField>,
     /// The organization to export.
@@ -44,7 +44,7 @@ pub struct GetOrganizationExport {
     /// Globally unique identifier for the organization export.
     #[builder(start_fn)]
     pub organization_export_gid: crate::ids::OrganizationExportGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::OrganizationExportField>,
 }

@@ -21,7 +21,7 @@ pub struct GetStoriesForGoal {
     pub resource_subtype: Option<GetStoriesForGoalResourceSubtype>,
     /// Creation-time order: `true` (the default) is oldest first, `false` is newest first. Pair `false` with `limit` to read only the most recent stories. Ordering is applied across the parent's stories; on a parent with an extremely large activity feed the feed may be truncated before it is ordered, so pair `false` with `created_after` to bound what is considered.
     pub sort_ascending: Option<bool>,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for Asana's compact record of each item.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::StoryField>,
 }
@@ -100,7 +100,7 @@ pub struct CreateStoryForGoal {
     /// Globally unique identifier for the goal.
     #[builder(start_fn)]
     pub goal_gid: crate::ids::GoalGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::StoryField>,
     /// The story to create.
@@ -146,7 +146,7 @@ pub struct GetStoriesForRecord {
     pub resource_subtype: Option<GetStoriesForRecordResourceSubtype>,
     /// Creation-time order: `true` (the default) is oldest first, `false` is newest first. Pair `false` with `limit` to read only the most recent stories. Ordering is applied across the parent's stories; on a parent with an extremely large activity feed the feed may be truncated before it is ordered, so pair `false` with `created_after` to bound what is considered.
     pub sort_ascending: Option<bool>,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for Asana's compact record of each item.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::StoryField>,
 }
@@ -225,7 +225,7 @@ pub struct CreateStoryForRecord {
     /// Globally unique identifier for the record.
     #[builder(start_fn)]
     pub record_gid: crate::ids::RecordItemGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::StoryField>,
     /// The story to create.
@@ -261,7 +261,7 @@ pub struct GetStory {
     /// Globally unique identifier for the story.
     #[builder(start_fn)]
     pub story_gid: crate::ids::StoryGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::StoryField>,
 }
@@ -292,7 +292,7 @@ pub struct UpdateStory {
     /// Globally unique identifier for the story.
     #[builder(start_fn)]
     pub story_gid: crate::ids::StoryGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::StoryField>,
     /// The comment story to update.
@@ -360,7 +360,7 @@ pub struct GetStoriesForTask {
     pub resource_subtype: Option<GetStoriesForTaskResourceSubtype>,
     /// Creation-time order: `true` (the default) is oldest first, `false` is newest first. Pair `false` with `limit` to read only the most recent stories. Ordering is applied across the parent's stories; on a parent with an extremely large activity feed the feed may be truncated before it is ordered, so pair `false` with `created_after` to bound what is considered.
     pub sort_ascending: Option<bool>,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for Asana's compact record of each item.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::StoryField>,
 }
@@ -439,7 +439,7 @@ pub struct CreateStoryForTask {
     /// The task to operate on.
     #[builder(start_fn)]
     pub task_gid: crate::ids::TaskGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::StoryField>,
     /// The story to create.

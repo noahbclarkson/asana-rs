@@ -156,6 +156,15 @@ impl Data {
 }
 
 impl Operation<'_> {
+    /// Whether the result is an array of objects (a list, paged or not) rather than one object.
+    pub fn returns_many(&self) -> bool {
+        match &self.response {
+            ResponseShape::Data(data) | ResponseShape::Whole { data, .. } => {
+                matches!(data, Data::Many(_))
+            }
+        }
+    }
+
     /// Whether the descriptor is a paged list: it takes `offset` and returns an array.
     pub fn paginated(&self) -> bool {
         let returns_array = matches!(self.response, ResponseShape::Data(Data::Many(_)));

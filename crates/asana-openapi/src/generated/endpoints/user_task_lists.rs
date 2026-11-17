@@ -11,7 +11,7 @@ pub struct GetUserTaskList {
     /// Globally unique identifier for the user task list.
     #[builder(start_fn)]
     pub user_task_list_gid: crate::ids::UserTaskListGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::UserTaskListField>,
 }
@@ -44,7 +44,7 @@ pub struct GetUserTaskListForUser {
     pub user_gid: crate::ids::UserRef,
     /// The workspace in which to get the user task list.
     pub workspace: crate::ids::WorkspaceGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::UserTaskListField>,
 }

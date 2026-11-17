@@ -21,7 +21,7 @@ pub struct GetProjects {
     /// Filter results by custom type. Provide a custom type GID to return only objects of that custom type (an unknown GID returns `400`). Provide an empty string to return only objects with no custom type assigned. If this parameter is omitted, results are not filtered by custom type.
     #[builder(into)]
     pub custom_type: Option<String>,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for Asana's compact record of each item.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::ProjectField>,
 }
@@ -78,7 +78,7 @@ impl crate::endpoint::Paginated for GetProjects {
 /// `POST /projects`
 #[derive(Clone, Debug, bon::Builder)]
 pub struct CreateProject {
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::ProjectField>,
     /// The project to create.
@@ -114,7 +114,7 @@ pub struct GetProject {
     /// Globally unique identifier for the project.
     #[builder(start_fn)]
     pub project_gid: crate::ids::ProjectGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::ProjectField>,
 }
@@ -145,7 +145,7 @@ pub struct UpdateProject {
     /// Globally unique identifier for the project.
     #[builder(start_fn)]
     pub project_gid: crate::ids::ProjectGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::ProjectField>,
     /// The updated fields for the project.
@@ -203,7 +203,7 @@ pub struct AddCustomFieldSettingForProject {
     /// Globally unique identifier for the project.
     #[builder(start_fn)]
     pub project_gid: crate::ids::ProjectGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::CustomFieldSettingField>,
     /// Information about the custom field setting.
@@ -239,7 +239,7 @@ pub struct AddFollowersForProject {
     /// Globally unique identifier for the project.
     #[builder(start_fn)]
     pub project_gid: crate::ids::ProjectGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::ProjectField>,
     /// Information about the followers being added.
@@ -275,7 +275,7 @@ pub struct AddMembersForProject {
     /// Globally unique identifier for the project.
     #[builder(start_fn)]
     pub project_gid: crate::ids::ProjectGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::ProjectField>,
     /// Information about the members being added.
@@ -311,7 +311,7 @@ pub struct DuplicateProject {
     /// Globally unique identifier for the project.
     #[builder(start_fn)]
     pub project_gid: crate::ids::ProjectGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::JobField>,
     /// Describes the duplicate's name and the elements that will be duplicated.
@@ -377,7 +377,7 @@ pub struct RemoveFollowersForProject {
     /// Globally unique identifier for the project.
     #[builder(start_fn)]
     pub project_gid: crate::ids::ProjectGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::ProjectField>,
     /// Information about the followers being removed.
@@ -413,7 +413,7 @@ pub struct RemoveMembersForProject {
     /// Globally unique identifier for the project.
     #[builder(start_fn)]
     pub project_gid: crate::ids::ProjectGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::ProjectField>,
     /// Information about the members being removed.
@@ -449,7 +449,7 @@ pub struct RollupProject {
     /// Globally unique identifier for the project.
     #[builder(start_fn)]
     pub project_gid: crate::ids::ProjectGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::JobField>,
 }
@@ -480,7 +480,7 @@ pub struct ProjectSaveAsTemplate {
     /// Globally unique identifier for the project.
     #[builder(start_fn)]
     pub project_gid: crate::ids::ProjectGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::JobField>,
     /// Describes the inputs used for creating a project template, such as the resulting project template's name, which team it should be created in.
@@ -516,7 +516,7 @@ pub struct GetTaskCountsForProject {
     /// Globally unique identifier for the project.
     #[builder(start_fn)]
     pub project_gid: crate::ids::ProjectGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::TaskCountField>,
 }
@@ -553,7 +553,7 @@ pub struct GetProjectsForTask {
     pub offset: Option<crate::endpoint::Offset>,
     /// Opt-in, read-only. When `true`, the response also includes projects the task inherits from its ancestor tasks (in addition to its direct projects). Defaults to `false`, in which case only direct projects are returned.
     pub include_inherited_projects: Option<bool>,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for Asana's compact record of each item.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::ProjectField>,
 }
@@ -618,7 +618,7 @@ pub struct GetProjectsForTeam {
     pub offset: Option<crate::endpoint::Offset>,
     /// Only return projects whose `archived` field takes on the value of this parameter.
     pub archived: Option<bool>,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for Asana's compact record of each item.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::ProjectField>,
 }
@@ -672,7 +672,7 @@ pub struct CreateProjectForTeam {
     /// Globally unique identifier for the team.
     #[builder(start_fn)]
     pub team_gid: crate::ids::TeamGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::ProjectField>,
     /// The new project to create.
@@ -714,7 +714,7 @@ pub struct GetProjectsForWorkspace {
     pub offset: Option<crate::endpoint::Offset>,
     /// Only return projects whose `archived` field takes on the value of this parameter.
     pub archived: Option<bool>,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for Asana's compact record of each item.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::ProjectField>,
 }
@@ -768,7 +768,7 @@ pub struct CreateProjectForWorkspace {
     /// Globally unique identifier for the workspace or organization.
     #[builder(start_fn)]
     pub workspace_gid: crate::ids::WorkspaceGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::ProjectField>,
     /// The new project to create.
@@ -874,7 +874,7 @@ pub struct SearchProjectsForWorkspace {
     pub start_on_before: Option<time::Date>,
     /// ISO 8601 date string.
     pub start_on_after: Option<time::Date>,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for Asana's compact record of each item.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::ProjectField>,
 }

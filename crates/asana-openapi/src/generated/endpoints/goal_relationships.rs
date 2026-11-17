@@ -18,7 +18,7 @@ pub struct GetGoalRelationships {
     /// If provided, filter to goal relationships with a given resource_subtype.
     #[builder(into)]
     pub resource_subtype: Option<String>,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for Asana's compact record of each item.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::GoalRelationshipField>,
 }
@@ -72,7 +72,7 @@ pub struct GetGoalRelationship {
     /// Globally unique identifier for the goal relationship.
     #[builder(start_fn)]
     pub goal_relationship_gid: crate::ids::GoalRelationshipGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::GoalRelationshipField>,
 }
@@ -103,7 +103,7 @@ pub struct UpdateGoalRelationship {
     /// Globally unique identifier for the goal relationship.
     #[builder(start_fn)]
     pub goal_relationship_gid: crate::ids::GoalRelationshipGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::GoalRelationshipField>,
     /// The updated fields for the goal relationship.
@@ -139,7 +139,7 @@ pub struct AddSupportingRelationship {
     /// Globally unique identifier for the goal.
     #[builder(start_fn)]
     pub goal_gid: crate::ids::GoalGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::GoalRelationshipField>,
     /// The supporting resource to be added to the goal.

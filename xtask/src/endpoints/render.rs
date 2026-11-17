@@ -39,7 +39,7 @@ pub fn descriptor(operation: &Operation<'_>, types: &Types) -> GenResult<TokenSt
     let query_fields = operation
         .query_params
         .iter()
-        .map(query_field)
+        .map(|param| query_field(param, operation.returns_many()))
         .collect::<Vec<_>>();
     let body_field = match (&operation.body, &types.body) {
         (
@@ -164,7 +164,9 @@ fn path_field(param: &Param) -> TokenStream {
     }
 }
 
-pub fn query_field(param: &Param) -> TokenStream {
+/// A query parameter's field. `many` says whether the operation returns a list, which decides
+/// what an empty `opt_fields` returns.
+pub fn query_field(param: &Param, many: bool) -> TokenStream {
     let field = ident(&param.field);
     let ty = value_type(&param.kind);
     let fallback = match &param.kind {
@@ -173,8 +175,11 @@ pub fn query_field(param: &Param) -> TokenStream {
         _ => format!("The `{}` query parameter.", param.name),
     };
     let mut lines = match &param.kind {
+        ParamKind::OptFields { .. } if many => vec![
+            "The fields to return. Empty asks for Asana's compact record of each item.".to_owned(),
+        ],
         ParamKind::OptFields { .. } => {
-            vec!["The fields to return. Empty asks for Asana's compact record.".to_owned()]
+            vec!["The fields to return. Empty asks for the object's full record.".to_owned()]
         }
         _ => docs::or(param.description.as_deref(), &fallback),
     };

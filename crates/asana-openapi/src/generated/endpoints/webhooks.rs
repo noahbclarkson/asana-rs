@@ -17,7 +17,7 @@ pub struct GetWebhooks {
     /// Only return webhooks for the given resource.
     #[builder(into)]
     pub resource: Option<String>,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for Asana's compact record of each item.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::WebhookField>,
 }
@@ -68,7 +68,7 @@ impl crate::endpoint::Paginated for GetWebhooks {
 /// `POST /webhooks`
 #[derive(Clone, Debug, bon::Builder)]
 pub struct CreateWebhook {
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::WebhookField>,
     /// The webhook workspace and target.
@@ -105,7 +105,7 @@ pub struct GetWebhook {
     /// Globally unique identifier for the webhook.
     #[builder(start_fn)]
     pub webhook_gid: crate::ids::WebhookGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::WebhookField>,
 }
@@ -136,7 +136,7 @@ pub struct UpdateWebhook {
     /// Globally unique identifier for the webhook.
     #[builder(start_fn)]
     pub webhook_gid: crate::ids::WebhookGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::WebhookField>,
     /// The updated filters for the webhook.

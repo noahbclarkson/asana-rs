@@ -69,7 +69,11 @@ pub fn descriptor(
         operation.method.as_str(),
         &operation.route,
     ));
-    let query_fields = operation.query_params.iter().map(render::query_field);
+    let many = operation.returns_many();
+    let query_fields = operation
+        .query_params
+        .iter()
+        .map(|param| render::query_field(param, many));
     let query = render::query_fn(&operation.query_params);
     let output = &types.output;
     let operation_id = &operation.id;

@@ -26,7 +26,7 @@ pub struct GetGoals {
     pub limit: Option<crate::endpoint::PageLimit>,
     /// Offset token. An offset to the next page returned by the API. A pagination request will return an offset token, which can be used as an input parameter to the next request. If an offset is not passed in, the API will return the first page of results. *Note: You can only pass in an offset that was returned to you via a previously paginated request.*
     pub offset: Option<crate::endpoint::Offset>,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for Asana's compact record of each item.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::GoalField>,
 }
@@ -95,7 +95,7 @@ impl crate::endpoint::Paginated for GetGoals {
 /// `POST /goals`
 #[derive(Clone, Debug, bon::Builder)]
 pub struct CreateGoal {
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::GoalField>,
     /// The goal to create.
@@ -131,7 +131,7 @@ pub struct GetGoal {
     /// Globally unique identifier for the goal.
     #[builder(start_fn)]
     pub goal_gid: crate::ids::GoalGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::GoalField>,
 }
@@ -162,7 +162,7 @@ pub struct UpdateGoal {
     /// Globally unique identifier for the goal.
     #[builder(start_fn)]
     pub goal_gid: crate::ids::GoalGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::GoalField>,
     /// The updated fields for the goal.
@@ -247,7 +247,7 @@ pub struct AddFollowers {
     /// Globally unique identifier for the goal.
     #[builder(start_fn)]
     pub goal_gid: crate::ids::GoalGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::GoalField>,
     /// The followers to be added as collaborators.
@@ -283,7 +283,7 @@ pub struct GetParentGoalsForGoal {
     /// Globally unique identifier for the goal.
     #[builder(start_fn)]
     pub goal_gid: crate::ids::GoalGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for Asana's compact record of each item.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::GoalField>,
 }
@@ -341,7 +341,7 @@ pub struct RemoveFollowers {
     /// Globally unique identifier for the goal.
     #[builder(start_fn)]
     pub goal_gid: crate::ids::GoalGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::GoalField>,
     /// The followers to be removed as collaborators.
@@ -377,7 +377,7 @@ pub struct CreateGoalMetric {
     /// Globally unique identifier for the goal.
     #[builder(start_fn)]
     pub goal_gid: crate::ids::GoalGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::GoalField>,
     /// The goal metric to create.
@@ -413,7 +413,7 @@ pub struct UpdateGoalMetric {
     /// Globally unique identifier for the goal.
     #[builder(start_fn)]
     pub goal_gid: crate::ids::GoalGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::GoalField>,
     /// The updated fields for the goal metric.

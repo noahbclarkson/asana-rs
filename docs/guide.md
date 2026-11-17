@@ -131,8 +131,10 @@ operation.
 
 ## Choosing fields
 
-Asana returns a compact record (little more than `gid` and `name`) unless the request names the
-fields it wants in `opt_fields`. `fields!` names them, checked when the code compiles against the
+Unless the request names the fields it wants in `opt_fields`, Asana returns each item of a list
+as a compact record (little more than `gid` and `name`) and a single object (one read, created or
+updated) as its full record. Naming fields widens a list's items and narrows a single object to
+what was named. `fields!` names them, checked when the code compiles against the
 paths Asana's specification lists for that resource, so `fields![Task: nmae]` is a compile error.
 Nested paths work as Asana writes them: `memberships.section.name`.
 

@@ -8,7 +8,7 @@
 /// `POST /custom_fields`
 #[derive(Clone, Debug, bon::Builder)]
 pub struct CreateCustomField {
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::CustomFieldField>,
     /// The custom field object to create.
@@ -44,7 +44,7 @@ pub struct GetCustomField {
     /// Globally unique identifier for the custom field.
     #[builder(start_fn)]
     pub custom_field_gid: crate::ids::CustomFieldGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::CustomFieldField>,
 }
@@ -75,7 +75,7 @@ pub struct UpdateCustomField {
     /// Globally unique identifier for the custom field.
     #[builder(start_fn)]
     pub custom_field_gid: crate::ids::CustomFieldGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::CustomFieldField>,
     /// The custom field object with all updated properties.
@@ -136,7 +136,7 @@ pub struct CreateEnumOptionForCustomField {
     /// Globally unique identifier for the custom field.
     #[builder(start_fn)]
     pub custom_field_gid: crate::ids::CustomFieldGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::EnumOptionField>,
     /// The enum option object to create.
@@ -175,7 +175,7 @@ pub struct InsertEnumOptionForCustomField {
     /// Globally unique identifier for the custom field.
     #[builder(start_fn)]
     pub custom_field_gid: crate::ids::CustomFieldGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::EnumOptionField>,
     /// The enum option object to create.
@@ -217,7 +217,7 @@ pub struct UpdateEnumOption {
     /// Globally unique identifier for the enum option.
     #[builder(start_fn)]
     pub enum_option_gid: crate::ids::EnumOptionGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::EnumOptionField>,
     /// The enum option object to update.
@@ -260,7 +260,7 @@ pub struct GetCustomFieldsForWorkspace {
     pub limit: Option<crate::endpoint::PageLimit>,
     /// Offset token. An offset to the next page returned by the API. A pagination request will return an offset token, which can be used as an input parameter to the next request. If an offset is not passed in, the API will return the first page of results. *Note: You can only pass in an offset that was returned to you via a previously paginated request.*
     pub offset: Option<crate::endpoint::Offset>,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for Asana's compact record of each item.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::CustomFieldField>,
 }

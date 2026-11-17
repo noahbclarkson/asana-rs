@@ -15,7 +15,7 @@ pub struct GetTimeTrackingEntriesForTask {
     pub limit: Option<crate::endpoint::PageLimit>,
     /// Offset token. An offset to the next page returned by the API. A pagination request will return an offset token, which can be used as an input parameter to the next request. If an offset is not passed in, the API will return the first page of results. *Note: You can only pass in an offset that was returned to you via a previously paginated request.*
     pub offset: Option<crate::endpoint::Offset>,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for Asana's compact record of each item.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::TimeTrackingEntryField>,
 }
@@ -68,7 +68,7 @@ pub struct CreateTimeTrackingEntry {
     /// The task to operate on.
     #[builder(start_fn)]
     pub task_gid: crate::ids::TaskGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::TimeTrackingEntryField>,
     /// Information about the time tracking entry.
@@ -127,7 +127,7 @@ pub struct GetTimeTrackingEntries {
     pub limit: Option<crate::endpoint::PageLimit>,
     /// Offset token. An offset to the next page returned by the API. A pagination request will return an offset token, which can be used as an input parameter to the next request. If an offset is not passed in, the API will return the first page of results. *Note: You can only pass in an offset that was returned to you via a previously paginated request.*
     pub offset: Option<crate::endpoint::Offset>,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for Asana's compact record of each item.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::TimeTrackingEntryField>,
 }
@@ -204,7 +204,7 @@ pub struct GetTimeTrackingEntry {
     /// Globally unique identifier for the time tracking entry.
     #[builder(start_fn)]
     pub time_tracking_entry_gid: crate::ids::TimeTrackingEntryGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::TimeTrackingEntryField>,
 }
@@ -235,7 +235,7 @@ pub struct UpdateTimeTrackingEntry {
     /// Globally unique identifier for the time tracking entry.
     #[builder(start_fn)]
     pub time_tracking_entry_gid: crate::ids::TimeTrackingEntryGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::TimeTrackingEntryField>,
     /// The updated fields for the time tracking entry.

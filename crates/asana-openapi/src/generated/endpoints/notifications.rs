@@ -17,7 +17,7 @@ pub struct GetNotificationsForUser {
     pub limit: Option<crate::endpoint::PageLimit>,
     /// Offset token. An offset to the next page returned by the API. A pagination request will return an offset token, which can be used as an input parameter to the next request. If an offset is not passed in, the API will return the first page of results. *Note: You can only pass in an offset that was returned to you via a previously paginated request.*
     pub offset: Option<crate::endpoint::Offset>,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for Asana's compact record of each item.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::NotificationField>,
 }
@@ -73,7 +73,7 @@ pub struct MarkNotificationsReadForUser {
     /// A string identifying a user. This can either be the string "me", an email, or the gid of a user.
     #[builder(start_fn, into)]
     pub user_gid: crate::ids::UserRef,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::MarkNotificationsField>,
     /// The request's `data`.
@@ -112,7 +112,7 @@ pub struct MarkNotificationsUnreadForUser {
     /// A string identifying a user. This can either be the string "me", an email, or the gid of a user.
     #[builder(start_fn, into)]
     pub user_gid: crate::ids::UserRef,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::MarkNotificationsField>,
     /// The request's `data`.

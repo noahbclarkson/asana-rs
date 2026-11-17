@@ -15,7 +15,7 @@ pub struct GetAttachmentsForObject {
     /// Globally unique identifier for the object to fetch attachments from. Must be a GID for a `project`, `project_brief`, or `task`.
     #[builder(into)]
     pub parent: String,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for Asana's compact record of each item.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::AttachmentField>,
 }
@@ -170,7 +170,7 @@ pub struct CreateAttachmentForObject {
     /// Whether to connect the calling app to the attachment so it shows the app's widget.
     /// Only for a link on a task, and only with an OAuth token.
     pub connect_to_app: Option<bool>,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::AttachmentField>,
 }
@@ -234,7 +234,7 @@ pub struct GetAttachment {
     /// Globally unique identifier for the attachment.
     #[builder(start_fn)]
     pub attachment_gid: crate::ids::AttachmentGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::AttachmentField>,
 }

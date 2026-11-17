@@ -8,7 +8,7 @@
 /// `POST /batch`
 #[derive(Clone, Debug, bon::Builder)]
 pub struct CreateBatchRequest {
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for Asana's compact record of each item.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::BatchField>,
     /// The requests to batch together via the Batch API.

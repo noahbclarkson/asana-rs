@@ -17,7 +17,7 @@ pub struct GetStatusesForObject {
     pub parent: String,
     /// Only return statuses that have been created since the given time.
     pub created_since: Option<time::OffsetDateTime>,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for Asana's compact record of each item.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::StatusUpdateField>,
 }
@@ -68,7 +68,7 @@ impl crate::endpoint::Paginated for GetStatusesForObject {
 /// `POST /status_updates`
 #[derive(Clone, Debug, bon::Builder)]
 pub struct CreateStatusForObject {
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::StatusUpdateField>,
     /// The status update to create.
@@ -104,7 +104,7 @@ pub struct GetStatus {
     /// Globally unique identifier for the status update.
     #[builder(start_fn)]
     pub status_update_gid: crate::ids::StatusUpdateGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::StatusUpdateField>,
 }

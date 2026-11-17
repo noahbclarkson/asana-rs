@@ -11,7 +11,7 @@ pub struct GetJob {
     /// Globally unique identifier for the job.
     #[builder(start_fn)]
     pub job_gid: crate::ids::JobGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::JobField>,
 }

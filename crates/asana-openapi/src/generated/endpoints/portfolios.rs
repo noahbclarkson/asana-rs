@@ -20,7 +20,7 @@ pub struct GetPortfolios {
     /// Filter results by custom type. Provide a custom type GID to return only objects of that custom type (an unknown GID returns `400`). Provide an empty string to return only objects with no custom type assigned. If this parameter is omitted, results are not filtered by custom type.
     #[builder(into)]
     pub custom_type: Option<String>,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for Asana's compact record of each item.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::PortfolioField>,
 }
@@ -72,7 +72,7 @@ impl crate::endpoint::Paginated for GetPortfolios {
 /// `POST /portfolios`
 #[derive(Clone, Debug, bon::Builder)]
 pub struct CreatePortfolio {
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::PortfolioField>,
     /// The portfolio to create.
@@ -108,7 +108,7 @@ pub struct GetPortfolio {
     /// Globally unique identifier for the portfolio.
     #[builder(start_fn)]
     pub portfolio_gid: crate::ids::PortfolioGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::PortfolioField>,
 }
@@ -139,7 +139,7 @@ pub struct UpdatePortfolio {
     /// Globally unique identifier for the portfolio.
     #[builder(start_fn)]
     pub portfolio_gid: crate::ids::PortfolioGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::PortfolioField>,
     /// The updated fields for the portfolio.
@@ -251,7 +251,7 @@ pub struct AddMembersForPortfolio {
     /// Globally unique identifier for the portfolio.
     #[builder(start_fn)]
     pub portfolio_gid: crate::ids::PortfolioGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::PortfolioField>,
     /// Information about the members being added.
@@ -287,7 +287,7 @@ pub struct DuplicatePortfolio {
     /// Globally unique identifier for the portfolio.
     #[builder(start_fn)]
     pub portfolio_gid: crate::ids::PortfolioGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::JobField>,
     /// Describes the duplicate's name and the elements that will be duplicated.
@@ -330,7 +330,7 @@ pub struct GetItemsForPortfolio {
     pub limit: Option<crate::endpoint::PageLimit>,
     /// Offset token. An offset to the next page returned by the API. A pagination request will return an offset token, which can be used as an input parameter to the next request. If an offset is not passed in, the API will return the first page of results. *Note: You can only pass in an offset that was returned to you via a previously paginated request.*
     pub offset: Option<crate::endpoint::Offset>,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for Asana's compact record of each item.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::PortfolioItemField>,
 }
@@ -440,7 +440,7 @@ pub struct RemoveMembersForPortfolio {
     /// Globally unique identifier for the portfolio.
     #[builder(start_fn)]
     pub portfolio_gid: crate::ids::PortfolioGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::PortfolioField>,
     /// Information about the members being removed.

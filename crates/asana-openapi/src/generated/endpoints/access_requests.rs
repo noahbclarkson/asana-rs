@@ -14,7 +14,7 @@ pub struct GetAccessRequests {
     /// A string identifying a user. This can either be the string "me", an email, or the gid of a user.
     #[builder(into)]
     pub user: Option<crate::ids::UserRef>,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for Asana's compact record of each item.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::AccessRequestField>,
 }

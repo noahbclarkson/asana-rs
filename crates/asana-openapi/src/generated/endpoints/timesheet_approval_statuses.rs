@@ -24,7 +24,7 @@ pub struct GetTimesheetApprovalStatuses {
     pub limit: Option<crate::endpoint::PageLimit>,
     /// Offset token. An offset to the next page returned by the API. A pagination request will return an offset token, which can be used as an input parameter to the next request. If an offset is not passed in, the API will return the first page of results. *Note: You can only pass in an offset that was returned to you via a previously paginated request.*
     pub offset: Option<crate::endpoint::Offset>,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for Asana's compact record of each item.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::TimesheetApprovalStatusField>,
 }
@@ -79,7 +79,7 @@ impl crate::endpoint::Paginated for GetTimesheetApprovalStatuses {
 /// `POST /timesheet_approval_statuses`
 #[derive(Clone, Debug, bon::Builder)]
 pub struct CreateTimesheetApprovalStatus {
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::TimesheetApprovalStatusField>,
     /// The timesheet approval status to create.
@@ -116,7 +116,7 @@ pub struct GetTimesheetApprovalStatus {
     /// Globally unique identifier for the timesheet approval status.
     #[builder(start_fn)]
     pub timesheet_approval_status_gid: crate::ids::TimesheetApprovalStatusGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::TimesheetApprovalStatusField>,
 }
@@ -151,7 +151,7 @@ pub struct UpdateTimesheetApprovalStatus {
     /// Globally unique identifier for the timesheet approval status.
     #[builder(start_fn)]
     pub timesheet_approval_status_gid: crate::ids::TimesheetApprovalStatusGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::TimesheetApprovalStatusField>,
     /// The fields to update on the timesheet approval status.

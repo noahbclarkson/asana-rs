@@ -16,7 +16,7 @@ pub struct GetTimeTrackingCategories {
     pub limit: Option<crate::endpoint::PageLimit>,
     /// Offset token. An offset to the next page returned by the API. A pagination request will return an offset token, which can be used as an input parameter to the next request. If an offset is not passed in, the API will return the first page of results. *Note: You can only pass in an offset that was returned to you via a previously paginated request.*
     pub offset: Option<crate::endpoint::Offset>,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for Asana's compact record of each item.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::TimeTrackingCategoryField>,
 }
@@ -71,7 +71,7 @@ impl crate::endpoint::Paginated for GetTimeTrackingCategories {
 /// `POST /time_tracking_categories`
 #[derive(Clone, Debug, bon::Builder)]
 pub struct CreateTimeTrackingCategory {
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::TimeTrackingCategoryField>,
     /// Information about the time tracking category.
@@ -108,7 +108,7 @@ pub struct GetTimeTrackingCategory {
     /// Globally unique identifier for the time tracking category.
     #[builder(start_fn)]
     pub time_tracking_category_gid: crate::ids::TimeTrackingCategoryGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::TimeTrackingCategoryField>,
 }
@@ -143,7 +143,7 @@ pub struct UpdateTimeTrackingCategory {
     /// Globally unique identifier for the time tracking category.
     #[builder(start_fn)]
     pub time_tracking_category_gid: crate::ids::TimeTrackingCategoryGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::TimeTrackingCategoryField>,
     /// The updated fields for the time tracking category.
@@ -217,7 +217,7 @@ pub struct GetTimeTrackingEntriesForTimeTrackingCategory {
     pub limit: Option<crate::endpoint::PageLimit>,
     /// Offset token. An offset to the next page returned by the API. A pagination request will return an offset token, which can be used as an input parameter to the next request. If an offset is not passed in, the API will return the first page of results. *Note: You can only pass in an offset that was returned to you via a previously paginated request.*
     pub offset: Option<crate::endpoint::Offset>,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for Asana's compact record of each item.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::TimeTrackingEntryField>,
 }

@@ -8,7 +8,7 @@
 /// `POST /teams`
 #[derive(Clone, Debug, bon::Builder)]
 pub struct CreateTeam {
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::TeamField>,
     /// The team to create.
@@ -44,7 +44,7 @@ pub struct GetTeam {
     /// Globally unique identifier for the team.
     #[builder(start_fn)]
     pub team_gid: crate::ids::TeamGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::TeamField>,
 }
@@ -75,7 +75,7 @@ pub struct UpdateTeam {
     /// Globally unique identifier for the team.
     #[builder(start_fn)]
     pub team_gid: crate::ids::TeamGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::TeamField>,
     /// The team to update.
@@ -111,7 +111,7 @@ pub struct AddUserForTeam {
     /// Globally unique identifier for the team.
     #[builder(start_fn)]
     pub team_gid: crate::ids::TeamGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::TeamMembershipField>,
     /// The user to add to the team.
@@ -180,7 +180,7 @@ pub struct GetTeamsForUser {
     pub offset: Option<crate::endpoint::Offset>,
     /// The workspace or organization to filter teams on.
     pub organization: crate::ids::WorkspaceGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for Asana's compact record of each item.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::TeamField>,
 }
@@ -240,7 +240,7 @@ pub struct GetTeamsForWorkspace {
     pub limit: Option<crate::endpoint::PageLimit>,
     /// Offset token. An offset to the next page returned by the API. A pagination request will return an offset token, which can be used as an input parameter to the next request. If an offset is not passed in, the API will return the first page of results. *Note: You can only pass in an offset that was returned to you via a previously paginated request.*
     pub offset: Option<crate::endpoint::Offset>,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for Asana's compact record of each item.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::TeamField>,
 }

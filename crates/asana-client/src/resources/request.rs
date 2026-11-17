@@ -105,7 +105,8 @@ macro_rules! opt_fields_setter {
     ($($endpoint:ty => $field:ty),+ $(,)?) => { $(
         impl $crate::resources::request::Request<'_, $endpoint> {
             /// Chooses the fields Asana returns (`opt_fields`), for example
-            /// `fields![Task: name, due_on]`. Without it Asana returns its compact record.
+            /// `fields![Task: name, due_on]`. Without it Asana returns its default record: the
+            /// full record of a single object, the compact record of each item of a list.
             pub fn fields(
                 mut self,
                 fields: ::asana_openapi::fields::Fields<$field>,

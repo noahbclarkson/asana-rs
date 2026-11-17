@@ -14,7 +14,7 @@ pub struct GetTaskTemplates {
     pub offset: Option<crate::endpoint::Offset>,
     /// The project to filter task templates on.
     pub project: Option<crate::ids::ProjectGid>,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for Asana's compact record of each item.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::TaskTemplateField>,
 }
@@ -68,7 +68,7 @@ pub struct GetTaskTemplate {
     /// Globally unique identifier for the task template.
     #[builder(start_fn)]
     pub task_template_gid: crate::ids::TaskTemplateGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::TaskTemplateField>,
 }
@@ -121,7 +121,7 @@ pub struct InstantiateTask {
     /// Globally unique identifier for the task template.
     #[builder(start_fn)]
     pub task_template_gid: crate::ids::TaskTemplateGid,
-    /// The fields to return. Empty asks for Asana's compact record.
+    /// The fields to return. Empty asks for the object's full record.
     #[builder(default)]
     pub opt_fields: crate::fields::Fields<crate::fields::JobField>,
     /// Describes the inputs used for instantiating a task - the task's name.

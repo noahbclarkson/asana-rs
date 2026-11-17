@@ -231,3 +231,23 @@ fn a_dotted_path_becomes_one_pascal_case_variant() {
     );
     assert_eq!(render::variant("due_on").to_string(), "DueOn");
 }
+
+#[test]
+fn opt_fields_say_a_single_object_comes_back_in_full_and_a_lists_items_compact() {
+    let spec = spec();
+    let operations = operation::collect(&spec, &families()).unwrap();
+    let doc_of = |id: &str| {
+        let operation = by_id(&operations, id);
+        let param = operation
+            .query_params
+            .iter()
+            .find(|param| matches!(param.kind, ParamKind::OptFields { .. }))
+            .unwrap();
+        render::query_field(param, operation.returns_many()).to_string()
+    };
+    let one = doc_of("getTask");
+    assert!(one.contains("full record"), "{one}");
+    assert!(!one.contains("compact"), "{one}");
+    let many = doc_of("searchTasksForWorkspace");
+    assert!(many.contains("compact record of each item"), "{many}");
+}
