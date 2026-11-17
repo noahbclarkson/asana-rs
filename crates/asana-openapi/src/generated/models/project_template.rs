@@ -18,7 +18,7 @@ pub struct ProjectTemplate {
     /// The description of the project template with formatting as HTML. See rich text.
     pub html_description: Option<String>,
     /// The current owner of the project template, may be null.
-    pub owner: Option<crate::models::User>,
+    pub owner: Option<Box<crate::models::User>>,
     /// True if the project template is public to its team.
     pub public: Option<bool>,
     /// Array of date variables in this project template. Calendar dates must be provided for these variables when instantiating a project.
@@ -26,7 +26,7 @@ pub struct ProjectTemplate {
     /// Array of template roles in this project template. User Ids can be provided for these variables when instantiating a project to assign template tasks to the user.
     pub requested_roles: Option<Vec<crate::models::TemplateRole>>,
     /// The `team` field.
-    pub team: Option<crate::models::Team>,
+    pub team: Option<Box<crate::models::Team>>,
 }
 impl crate::fields::HasFields for ProjectTemplate {
     type Field = crate::fields::ProjectTemplateField;

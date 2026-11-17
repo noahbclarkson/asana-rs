@@ -10,19 +10,19 @@ pub struct Job {
     /// The base type of this resource.
     pub resource_type: Option<String>,
     /// Progress of a subtask date rollup job. Only present on project rollup jobs; the object is empty until the job discovers tasks to reconcile.
-    pub dates_rollup_progress: Option<crate::models::JobDatesRollupProgress>,
+    pub dates_rollup_progress: Option<Box<crate::models::JobDatesRollupProgress>>,
     /// The `new_graph_export` field.
-    pub new_graph_export: Option<crate::models::GraphExport>,
+    pub new_graph_export: Option<Box<crate::models::GraphExport>>,
     /// The `new_portfolio` field.
-    pub new_portfolio: Option<crate::models::Portfolio>,
+    pub new_portfolio: Option<Box<crate::models::Portfolio>>,
     /// The `new_project` field.
-    pub new_project: Option<crate::models::Project>,
+    pub new_project: Option<Box<crate::models::Project>>,
     /// The `new_project_template` field.
-    pub new_project_template: Option<crate::models::ProjectTemplate>,
+    pub new_project_template: Option<Box<crate::models::ProjectTemplate>>,
     /// The `new_resource_export` field.
-    pub new_resource_export: Option<crate::models::ResourceExport>,
+    pub new_resource_export: Option<Box<crate::models::ResourceExport>>,
     /// The `new_task` field.
-    pub new_task: Option<crate::models::Task>,
+    pub new_task: Option<Box<crate::models::Task>>,
     /// The subtype of this resource. Different subtypes retain many of the same fields and behavior, but may render differently in Asana or represent resources with different semantic meaning.
     pub resource_subtype: Option<String>,
     /// The current status of this job.

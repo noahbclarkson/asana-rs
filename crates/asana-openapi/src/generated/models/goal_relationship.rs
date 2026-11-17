@@ -15,9 +15,9 @@ pub struct GoalRelationship {
     /// The subtype of this resource. Different subtypes retain many of the same fields and behavior, but may render differently in Asana or represent resources with different semantic meaning.
     pub resource_subtype: Option<crate::models::GoalRelationshipResourceSubtype>,
     /// The supporting resource that supports the goal. This can be either a project, task, portfolio, or goal.
-    pub supporting_resource: Option<crate::models::Project>,
+    pub supporting_resource: Option<Box<crate::models::Project>>,
     /// The goal that the supporting resource supports.
-    pub supported_goal: Option<crate::models::Goal>,
+    pub supported_goal: Option<Box<crate::models::Goal>>,
 }
 impl crate::fields::HasFields for GoalRelationship {
     type Field = crate::fields::GoalRelationshipField;

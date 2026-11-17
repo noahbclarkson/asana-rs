@@ -12,9 +12,9 @@ pub struct ProjectPortfolioSetting {
     /// When true, the portfolio members gain access to the project.
     pub is_access_control_inherited: Option<bool>,
     /// The portfolio associated with this setting.
-    pub portfolio: Option<crate::models::Portfolio>,
+    pub portfolio: Option<Box<crate::models::Portfolio>>,
     /// The project associated with this setting.
-    pub project: Option<crate::models::Project>,
+    pub project: Option<Box<crate::models::Project>>,
     /// The time at which this project portfolio setting was created.
     #[serde(default, with = "time::serde::rfc3339::option")]
     pub created_at: Option<time::OffsetDateTime>,

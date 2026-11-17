@@ -10,7 +10,7 @@ pub struct Allocation {
     /// The base type of this resource.
     pub resource_type: Option<String>,
     /// The amount of time associated with the allocation, represented as a percentage or number of hours.
-    pub effort: Option<crate::models::AllocationEffort>,
+    pub effort: Option<Box<crate::models::AllocationEffort>>,
     /// The localized day on which the allocation ends.
     #[serde(default, with = "crate::models::serde_helpers::date_option")]
     pub end_date: Option<time::Date>,
@@ -18,11 +18,11 @@ pub struct Allocation {
     #[serde(default, with = "crate::models::serde_helpers::date_option")]
     pub start_date: Option<time::Date>,
     /// The user or placeholder assigned to the allocation.
-    pub assignee: Option<crate::models::User>,
+    pub assignee: Option<Box<crate::models::User>>,
     /// The user who created the allocation.
-    pub created_by: Option<crate::models::User>,
+    pub created_by: Option<Box<crate::models::User>>,
     /// The project the allocation is on.
-    pub parent: Option<crate::models::Project>,
+    pub parent: Option<Box<crate::models::Project>>,
     /// The subtype of the allocation.
     pub resource_subtype: Option<String>,
 }
@@ -90,7 +90,7 @@ pub struct AllocationRequest {
     /// The amount of time associated with the allocation, represented as a percentage or number of hours.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(into)]
-    pub effort: Option<crate::models::Clearable<crate::models::AllocationRequestEffort>>,
+    pub effort: Option<crate::models::Clearable<Box<crate::models::AllocationRequestEffort>>>,
     /// The localized day on which the allocation ends.
     #[serde(
         with = "crate::models::serde_helpers::date_option",

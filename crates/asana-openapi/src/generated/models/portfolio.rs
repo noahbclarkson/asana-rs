@@ -31,19 +31,19 @@ pub struct Portfolio {
     #[serde(default, with = "time::serde::rfc3339::option")]
     pub created_at: Option<time::OffsetDateTime>,
     /// The `created_by` field.
-    pub created_by: Option<crate::models::User>,
+    pub created_by: Option<Box<crate::models::User>>,
     /// The latest `status_update` posted to this portfolio.
-    pub current_status_update: Option<crate::models::StatusUpdate>,
+    pub current_status_update: Option<Box<crate::models::StatusUpdate>>,
     /// Array of custom field definitions that are enabled for the portfolio. These represent which custom fields are available to be used on items within the portfolio, but do not include any values.
     pub custom_field_settings: Option<Vec<crate::models::CustomFieldSetting>>,
     /// Array of custom field values applied directly to the portfolio itself. These represent the values set on the portfolio, not the fields available for items in the portfolio.
     pub custom_fields: Option<Vec<crate::models::CustomField>>,
     /// The `custom_type` field.
-    pub custom_type: Option<crate::models::CustomType>,
+    pub custom_type: Option<Box<crate::models::CustomType>>,
     /// The `members` field.
     pub members: Option<Vec<crate::models::User>>,
     /// The `owner` field.
-    pub owner: Option<crate::models::User>,
+    pub owner: Option<Box<crate::models::User>>,
     /// A url that points directly to the object within Asana.
     pub permalink_url: Option<String>,
     /// The privacy setting of the portfolio. *Note: Administrators in your organization may restrict the values of `privacy_setting`.*
@@ -51,7 +51,7 @@ pub struct Portfolio {
     /// Array of project templates that are in the portfolio
     pub project_templates: Option<Vec<crate::models::ProjectTemplate>>,
     /// *Create-only*. The workspace or organization that the portfolio belongs to.
-    pub workspace: Option<crate::models::Workspace>,
+    pub workspace: Option<Box<crate::models::Workspace>>,
 }
 impl crate::fields::HasFields for Portfolio {
     type Field = crate::fields::PortfolioField;

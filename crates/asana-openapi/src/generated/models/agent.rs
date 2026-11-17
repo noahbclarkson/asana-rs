@@ -18,9 +18,9 @@ pub struct Agent {
     /// A brief description of what the agent does.
     pub description: Option<String>,
     /// A map of the agent's avatar image in various sizes, or null if no photo is set.
-    pub photo: Option<crate::models::AgentPhoto>,
+    pub photo: Option<Box<crate::models::AgentPhoto>>,
     /// The workspace this agent is instantiated within.
-    pub workspace: Option<crate::models::Workspace>,
+    pub workspace: Option<Box<crate::models::Workspace>>,
 }
 impl crate::fields::HasFields for Agent {
     type Field = crate::fields::AgentField;

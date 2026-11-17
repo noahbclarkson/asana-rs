@@ -110,6 +110,26 @@ pub enum Error {
         /// Asana's messages, if the body held any.
         errors: ApiErrors,
     },
+    /// An asynchronous job (instantiating a template, duplicating, exporting) ended `failed`.
+    #[error("Asana job {job} failed")]
+    JobFailed {
+        /// The job.
+        job: asana_openapi::ids::JobGid,
+    },
+    /// The job was still running when the caller's wait ran out. It may still finish.
+    #[error("Asana job {job} had not finished after {waited:?}")]
+    JobTimedOut {
+        /// The job.
+        job: asana_openapi::ids::JobGid,
+        /// How long the caller waited.
+        waited: std::time::Duration,
+    },
+    /// A batch already holds as many actions as Asana accepts in one request.
+    #[error("a batch holds at most {limit} actions")]
+    BatchFull {
+        /// The most actions one batch may hold.
+        limit: usize,
+    },
 }
 
 impl Error {
@@ -130,6 +150,9 @@ impl Error {
             | Self::Encode { .. }
             | Self::InvalidRequest { .. }
             | Self::Transport { .. }
+            | Self::JobFailed { .. }
+            | Self::JobTimedOut { .. }
+            | Self::BatchFull { .. }
             | Self::Auth(_) => return None,
         })
     }

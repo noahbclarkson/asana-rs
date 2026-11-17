@@ -15,7 +15,7 @@ pub struct OrganizationExport {
     /// Download this URL to retrieve the full export of the organization in JSON format. It will be compressed in a gzip (.gz) container.
     pub download_url: Option<String>,
     /// The `organization` field.
-    pub organization: Option<crate::models::Workspace>,
+    pub organization: Option<Box<crate::models::Workspace>>,
     /// The current state of the export.
     pub state: Option<crate::models::OrganizationExportState>,
 }

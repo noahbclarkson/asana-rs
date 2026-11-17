@@ -12,7 +12,7 @@ pub struct Goal {
     /// The name of the goal.
     pub name: Option<String>,
     /// The `owner` field.
-    pub owner: Option<crate::models::User>,
+    pub owner: Option<Box<crate::models::User>>,
     /// The localized day on which this goal is due. This takes a date with format `YYYY-MM-DD`.
     #[serde(default, with = "crate::models::serde_helpers::date_option")]
     pub due_on: Option<time::Date>,
@@ -28,7 +28,7 @@ pub struct Goal {
     #[serde(default, with = "crate::models::serde_helpers::date_option")]
     pub start_on: Option<time::Date>,
     /// The latest `status_update` posted to this goal.
-    pub current_status_update: Option<crate::models::StatusUpdate>,
+    pub current_status_update: Option<Box<crate::models::StatusUpdate>>,
     /// Array of custom field definitions that are enabled for the goal. These represent which custom fields are available to be used on items within the goal, but do not include any values.
     pub custom_field_settings: Option<Vec<crate::models::CustomFieldSetting>>,
     /// Array of custom field values applied directly to the goal itself. These represent the values set on the goal, not the fields available for items in the goal.
@@ -40,7 +40,7 @@ pub struct Goal {
     /// Array of likes for users who have liked this goal.
     pub likes: Option<Vec<crate::models::Like>>,
     /// The `metric` field.
-    pub metric: Option<crate::models::GoalMetric>,
+    pub metric: Option<Box<crate::models::GoalMetric>>,
     /// The number of users who have liked this goal.
     pub num_likes: Option<i64>,
     /// The privacy setting of the goal.
@@ -48,11 +48,11 @@ pub struct Goal {
     /// The current status of this goal. When the goal is open, its status can be `green`, `yellow`, and `red` to reflect "On Track", "At Risk", and "Off Track", respectively.
     pub status: Option<String>,
     /// *Conditional*. This property is only present when the `workspace` provided is an organization.
-    pub team: Option<crate::models::Team>,
+    pub team: Option<Box<crate::models::Team>>,
     /// The `time_period` field.
-    pub time_period: Option<crate::models::TimePeriod>,
+    pub time_period: Option<Box<crate::models::TimePeriod>>,
     /// The `workspace` field.
-    pub workspace: Option<crate::models::Workspace>,
+    pub workspace: Option<Box<crate::models::Workspace>>,
 }
 impl crate::fields::HasFields for Goal {
     type Field = crate::fields::GoalField;

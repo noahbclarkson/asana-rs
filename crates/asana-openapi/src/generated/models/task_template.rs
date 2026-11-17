@@ -15,11 +15,11 @@ pub struct TaskTemplate {
     #[serde(default, with = "time::serde::rfc3339::option")]
     pub created_at: Option<time::OffsetDateTime>,
     /// The user who created this task template.
-    pub created_by: Option<crate::models::User>,
+    pub created_by: Option<Box<crate::models::User>>,
     /// The project that this task template belongs to.
-    pub project: Option<crate::models::Project>,
+    pub project: Option<Box<crate::models::Project>>,
     /// The configuration for the task that will be created from this template.
-    pub template: Option<crate::models::TaskTemplateRecipe>,
+    pub template: Option<Box<crate::models::TaskTemplateRecipe>>,
 }
 impl crate::fields::HasFields for TaskTemplate {
     type Field = crate::fields::TaskTemplateField;

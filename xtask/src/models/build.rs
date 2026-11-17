@@ -101,7 +101,7 @@ impl<'a> Builder<'a> {
         for (name, direction) in reached {
             self.component(&name, direction)?;
         }
-        mark_boxes(&mut self.items);
+        mark_boxes(&mut self.items, self.base);
         Ok(())
     }
 
@@ -135,7 +135,7 @@ impl<'a> Builder<'a> {
             }
             _ => self.ty_of(schema, &ctx)?,
         };
-        mark_boxes(&mut self.items);
+        mark_boxes(&mut self.items, self.base);
         Ok(ty)
     }
 
@@ -826,63 +826,24 @@ fn same_values(left: &[String], right: &[String]) -> bool {
     left == right
 }
 
-/// Boxes every field whose type, directly or through other structs, contains the struct that
-/// holds it; without the box the struct would have no finite size. `Vec` and maps already put
-/// their contents on the heap, and union variants are always boxed, so only plain struct fields
-/// count.
-pub fn mark_boxes(items: &mut BTreeMap<String, Item>) {
-    let edges: BTreeMap<String, BTreeSet<String>> = items
+/// Boxes every field whose type is another generated struct or union, in read and write models
+/// alike. Holding them inline made a model as large as everything it can reach (a `Story` held
+/// tasks, projects, custom fields and users by value and came to 41 KB, enough to overflow a
+/// 2 MiB stack while decoding one), so the rule is unconditional and a reader can predict it:
+/// models are boxed; enums of plain values, GIDs and scalars are not; `Vec` and maps already
+/// keep their items on the heap.
+pub fn mark_boxes(items: &mut BTreeMap<String, Item>, base: Option<&BTreeMap<String, Item>>) {
+    let holds_models = |item: &Item| !matches!(item.kind, ItemKind::Enum { .. });
+    let boxed: BTreeSet<String> = items
         .iter()
-        .filter_map(|(name, item)| match &item.kind {
-            ItemKind::Struct { fields, .. } => Some((
-                name.clone(),
-                fields
-                    .iter()
-                    .filter_map(|field| field.ty.named())
-                    .filter(|target| {
-                        items
-                            .get(*target)
-                            .is_some_and(|item| matches!(item.kind, ItemKind::Struct { .. }))
-                    })
-                    .map(str::to_owned)
-                    .collect(),
-            )),
-            _ => None,
-        })
+        .chain(base.into_iter().flatten())
+        .filter(|(_, item)| holds_models(item))
+        .map(|(name, _)| name.clone())
         .collect();
-    let reaches = |from: &str, to: &str| -> bool {
-        let mut seen = BTreeSet::new();
-        let mut stack = vec![from.to_owned()];
-        while let Some(next) = stack.pop() {
-            if next == to {
-                return true;
-            }
-            if seen.insert(next.clone())
-                && let Some(targets) = edges.get(&next)
-            {
-                stack.extend(targets.iter().cloned());
-            }
-        }
-        false
-    };
-    let mut boxed = Vec::new();
-    for (owner, targets) in &edges {
-        for target in targets {
-            if reaches(target, owner) {
-                boxed.push((owner.clone(), target.clone()));
-            }
-        }
-    }
-    for (owner, target) in boxed {
-        if let Some(Item {
-            kind: ItemKind::Struct { fields, .. },
-            ..
-        }) = items.get_mut(&owner)
-        {
+    for item in items.values_mut() {
+        if let ItemKind::Struct { fields, .. } = &mut item.kind {
             for field in fields.iter_mut() {
-                if field.ty.named() == Some(target.as_str()) {
-                    field.boxed = true;
-                }
+                field.boxed = field.ty.named().is_some_and(|name| boxed.contains(name));
             }
         }
     }

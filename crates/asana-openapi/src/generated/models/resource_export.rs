@@ -154,5 +154,6 @@ pub struct ResourceExportRequestParameter {
     pub fields: Option<Vec<String>>,
     /// The `filters` field.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub filters: Option<crate::models::ResourceExportFilters>,
+    #[builder(into)]
+    pub filters: Option<Box<crate::models::ResourceExportFilters>>,
 }

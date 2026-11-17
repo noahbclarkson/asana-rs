@@ -1,0 +1,25 @@
+# Asana's task documentation lists `memberships` as a create-only field of a new task: an array of
+# `{project, section}` GIDs that creates the task straight into a section of each project. The
+# specification's `TaskCreateRequest` omits it, so a task could only be created into a project
+# and moved into its section by a second request.
+overlay: 1.0.0
+info:
+  title: A new task can be created into sections
+  version: 1.0.0
+actions:
+  - target: $.components.schemas.TaskCreateRequest.allOf[1].properties
+    update:
+      memberships:
+        type: array
+        description: >-
+          *Create-Only* The projects to add the task to, and the section of each to put it in.
+        items:
+          type: object
+          required: [project, section]
+          properties:
+            project:
+              type: string
+              description: The GID of a project.
+            section:
+              type: string
+              description: The GID of a section of that project.

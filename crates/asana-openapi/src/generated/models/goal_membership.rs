@@ -12,11 +12,11 @@ pub struct GoalMembership {
     /// "Describes the membership access level for the goal. This is preferred over role."
     pub access_level: Option<crate::models::GoalMembershipAccessLevel>,
     /// *Deprecated: new integrations should prefer the `parent` field.* A *Goal* is an object in the goal-tracking system that helps your organization drive measurable results.
-    pub goal: Option<crate::models::Goal>,
+    pub goal: Option<Box<crate::models::Goal>>,
     /// The `member` field.
-    pub member: Option<crate::models::Member>,
+    pub member: Option<Box<crate::models::Member>>,
     /// The `parent` field.
-    pub parent: Option<crate::models::Goal>,
+    pub parent: Option<Box<crate::models::Goal>>,
     /// The type of membership.
     pub resource_subtype: Option<String>,
     /// *Deprecated: Describes if the member is a commenter or editor in goal.*
@@ -26,9 +26,9 @@ pub struct GoalMembership {
     /// *Deprecated: new integrations should prefer the `access_level` field.* Describes if the member is editor in goal. This field is deprecated and will always be null.
     pub is_editor: Option<bool>,
     /// *Deprecated: new integrations should prefer the `member` field.* A *user* object represents an account in Asana that can be given access to various workspaces, projects, and tasks.
-    pub user: Option<crate::models::User>,
+    pub user: Option<Box<crate::models::User>>,
     /// *Deprecated:* A *workspace* is the highest-level organizational unit in Asana. All projects and tasks have an associated workspace.
-    pub workspace: Option<crate::models::Workspace>,
+    pub workspace: Option<Box<crate::models::Workspace>>,
 }
 /// A value of `access_level` on `GoalMembership`.
 #[derive(Clone, Debug, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]

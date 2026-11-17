@@ -10,13 +10,13 @@ pub struct TimeTrackingEntry {
     /// The base type of this resource.
     pub resource_type: Option<String>,
     /// The user this entry's logged time is attributed to.
-    pub assignee: Option<crate::models::User>,
+    pub assignee: Option<Box<crate::models::User>>,
     /// The attributable to project specifies which project's budget a time entry should be counted toward, if the task belongs to more than one project. If it only belongs to one project, it should be that project.
-    pub attributable_to: Option<crate::models::Project>,
+    pub attributable_to: Option<Box<crate::models::Project>>,
     /// Full object requires scope: time_tracking_categories:read The categories linked to this time tracking entry.
     pub categories: Option<Vec<crate::models::TimeTrackingCategory>>,
     /// User that created a time tracking entry.
-    pub created_by: Option<crate::models::User>,
+    pub created_by: Option<Box<crate::models::User>>,
     /// Time in minutes tracked by the entry.
     pub duration_minutes: Option<i64>,
     /// The day that this entry is logged on.
@@ -32,7 +32,7 @@ pub struct TimeTrackingEntry {
     /// *Optional*. The description of the entry.
     pub description: Option<String>,
     /// The `task` field.
-    pub task: Option<crate::models::Task>,
+    pub task: Option<Box<crate::models::Task>>,
 }
 impl crate::fields::HasFields for TimeTrackingEntry {
     type Field = crate::fields::TimeTrackingEntryField;

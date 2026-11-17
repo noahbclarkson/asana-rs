@@ -12,9 +12,9 @@ pub struct CustomFieldMembership {
     /// Whether the member has admin, editor, or user access to the custom field.
     pub access_level: Option<crate::models::CustomFieldMembershipAccessLevel>,
     /// Member can be a user or a team.
-    pub member: Option<crate::models::Member>,
+    pub member: Option<Box<crate::models::Member>>,
     /// The custom field the user or team is a member of.
-    pub parent: Option<crate::models::CustomField>,
+    pub parent: Option<Box<crate::models::CustomField>>,
     /// Type of the membership.
     pub resource_subtype: Option<String>,
 }

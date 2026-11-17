@@ -35,7 +35,7 @@ pub struct Team {
     pub member_invite_management_access_level:
         Option<crate::models::TeamMemberInviteManagementAccessLevel>,
     /// The organization/workspace the team belongs to.
-    pub organization: Option<crate::models::Workspace>,
+    pub organization: Option<Box<crate::models::Workspace>>,
     /// A url that points directly to the object within Asana.
     pub permalink_url: Option<String>,
     /// Controls who can create and share content with the team

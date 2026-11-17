@@ -359,6 +359,14 @@ impl EventBatch {
                 limit: limits.max_events,
             });
         }
+        Ok(Self::from_values(raw_events))
+    }
+
+    /// Reads events that arrived some other way than a webhook delivery (the events API's `data`
+    /// array), keeping each one that cannot be read in `unreadable` with its position, exactly as
+    /// a delivery's events are read.
+    #[must_use]
+    pub fn from_values(raw_events: Vec<Value>) -> Self {
         let mut batch = Self {
             events: Vec::with_capacity(raw_events.len()),
             unreadable: Vec::new(),
@@ -371,7 +379,7 @@ impl EventBatch {
                     .push(UnreadableEvent { index, raw, reason }),
             }
         }
-        Ok(batch)
+        batch
     }
 }
 

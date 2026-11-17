@@ -16,9 +16,9 @@ pub struct OooEntry {
     #[serde(default, with = "crate::models::serde_helpers::date_option")]
     pub start_date: Option<time::Date>,
     /// The user who created the OOO entry.
-    pub created_by: Option<crate::models::User>,
+    pub created_by: Option<Box<crate::models::User>>,
     /// The user who is out of office.
-    pub user: Option<crate::models::User>,
+    pub user: Option<Box<crate::models::User>>,
 }
 impl crate::fields::HasFields for OooEntry {
     type Field = crate::fields::OooEntryField;

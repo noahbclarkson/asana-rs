@@ -10,7 +10,7 @@ pub struct CustomFieldTableSetting {
     /// The base type of this resource.
     pub resource_type: Option<String>,
     /// The custom field that is applied to the table.
-    pub custom_field: Option<crate::models::CustomField>,
+    pub custom_field: Option<Box<crate::models::CustomField>>,
     /// `is_important` is used in the Asana web application to determine if this custom field is displayed in the list/grid view of a table.
     pub is_important: Option<bool>,
 }

@@ -12,9 +12,9 @@ pub struct CustomTypeMembership {
     /// Whether the member has admin, editor, user, or viewer access to the custom type.
     pub access_level: Option<crate::models::CustomTypeMembershipAccessLevel>,
     /// Member can be a user or a team.
-    pub member: Option<crate::models::Member>,
+    pub member: Option<Box<crate::models::Member>>,
     /// The custom type the user or team is a member of.
-    pub parent: Option<crate::models::CustomType>,
+    pub parent: Option<Box<crate::models::CustomType>>,
     /// Type of the membership.
     pub resource_subtype: Option<String>,
 }

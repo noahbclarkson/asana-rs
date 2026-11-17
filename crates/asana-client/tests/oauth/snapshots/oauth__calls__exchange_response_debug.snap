@@ -1,0 +1,27 @@
+---
+source: crates/asana-client/tests/oauth/calls.rs
+expression: "format!(\"{tokens:#?}\")"
+---
+TokenResponse {
+    access_token: AccessToken([REDACTED]),
+    refresh_token: Some(
+        RefreshToken([REDACTED]),
+    ),
+    expires_in: Some(
+        3600s,
+    ),
+    token_type: "bearer",
+    user: Some(
+        TokenUser {
+            gid: Some(
+                UserGid(1201234567890999),
+            ),
+            name: Some(
+                "Acme User",
+            ),
+            email: Some(
+                "user@example.com",
+            ),
+        },
+    ),
+}

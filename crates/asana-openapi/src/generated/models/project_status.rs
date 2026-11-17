@@ -18,12 +18,12 @@ pub struct ProjectStatus {
     /// The text content of the status update.
     pub text: Option<String>,
     /// The `author` field.
-    pub author: Option<crate::models::User>,
+    pub author: Option<Box<crate::models::User>>,
     /// The time at which this resource was created.
     #[serde(default, with = "time::serde::rfc3339::option")]
     pub created_at: Option<time::OffsetDateTime>,
     /// The `created_by` field.
-    pub created_by: Option<crate::models::User>,
+    pub created_by: Option<Box<crate::models::User>>,
     /// The time at which this project status was last modified. *Note: This does not currently reflect any changes in associations such as comments that may have been added or removed from the project status.*
     #[serde(default, with = "time::serde::rfc3339::option")]
     pub modified_at: Option<time::OffsetDateTime>,

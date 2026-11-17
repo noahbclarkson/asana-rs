@@ -95,7 +95,8 @@ pub struct BatchRequestAction {
     pub method: Option<crate::models::BatchMethod>,
     /// Pagination (`limit` and `offset`) and output options (`fields` or `expand`) for the action. “Pretty” JSON output is not an available option on individual actions; if you want pretty output, specify that option on the parent request.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub options: Option<crate::models::BatchRequestActionOptions>,
+    #[builder(into)]
+    pub options: Option<Box<crate::models::BatchRequestActionOptions>>,
     /// The path of the desired endpoint relative to the API’s base URL. Query parameters are not accepted here; put them in `data` instead.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(into)]

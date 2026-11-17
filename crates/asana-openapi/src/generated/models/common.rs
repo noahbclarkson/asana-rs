@@ -29,9 +29,9 @@ pub struct AsanaResource {
 #[non_exhaustive]
 pub struct EffectiveTaskMembership {
     /// The `project` field.
-    pub project: Option<crate::models::Project>,
+    pub project: Option<Box<crate::models::Project>>,
     /// The `section` field.
-    pub section: Option<crate::models::Section>,
+    pub section: Option<Box<crate::models::Section>>,
     /// Whether this membership is inherited from an ancestor task (`true`) or is a direct membership (`false`).
     pub is_inherited: Option<bool>,
 }
@@ -42,7 +42,7 @@ pub struct Like {
     /// Globally unique identifier of the object, as a string.
     pub gid: Option<crate::ids::LikeGid>,
     /// The `user` field.
-    pub user: Option<crate::models::User>,
+    pub user: Option<Box<crate::models::User>>,
 }
 /// *Conditional*. This property is only present when a limit query parameter is provided in the request.
 #[derive(Clone, Debug, Default, PartialEq, serde::Deserialize)]

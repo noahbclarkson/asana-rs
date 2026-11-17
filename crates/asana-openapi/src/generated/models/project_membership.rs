@@ -12,15 +12,15 @@ pub struct ProjectMembership {
     /// Whether the member has admin, editor, commenter, or viewer access to the project.
     pub access_level: Option<crate::models::ProjectMembershipAccessLevel>,
     /// Member can be a user or a team.
-    pub member: Option<crate::models::Member>,
+    pub member: Option<Box<crate::models::Member>>,
     /// Opt In. The project the user is a member of.
-    pub parent: Option<crate::models::Project>,
+    pub parent: Option<Box<crate::models::Project>>,
     /// Type of the membership.
     pub resource_subtype: Option<String>,
     /// Opt In. The project the user is a member of.
-    pub project: Option<crate::models::Project>,
+    pub project: Option<Box<crate::models::Project>>,
     /// The `user` field.
-    pub user: Option<crate::models::User>,
+    pub user: Option<Box<crate::models::User>>,
     /// Whether the member has full access or comment-only access to the project.
     pub write_access: Option<crate::models::ProjectMembershipWriteAccess>,
 }

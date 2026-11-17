@@ -14,9 +14,9 @@ pub struct AccessRequest {
     /// The message included in the access request, if any.
     pub message: Option<String>,
     /// The user who made the access request.
-    pub requester: Option<crate::models::User>,
+    pub requester: Option<Box<crate::models::User>>,
     /// The target resource that the requester wants access to.
-    pub target: Option<crate::models::AccessRequestTargetId>,
+    pub target: Option<Box<crate::models::AccessRequestTargetId>>,
 }
 impl crate::fields::HasFields for AccessRequest {
     type Field = crate::fields::AccessRequestField;

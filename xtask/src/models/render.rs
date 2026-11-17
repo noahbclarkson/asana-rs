@@ -222,7 +222,7 @@ impl Renderer<'_> {
             ty = quote!(crate::models::Clearable<#ty>);
         }
         let builder = (direction == Direction::Write
-            && (field.clearable || matches!(field.ty, Ty::String | Ty::UserRef)))
+            && (field.clearable || field.boxed || matches!(field.ty, Ty::String | Ty::UserRef)))
         .then(|| quote!(#[builder(into)]));
         Ok(quote! {
             #docs

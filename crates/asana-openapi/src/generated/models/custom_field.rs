@@ -10,7 +10,7 @@ pub struct CustomField {
     /// The base type of this resource.
     pub resource_type: Option<String>,
     /// *Conditional*. Only relevant for custom fields of type `date`.
-    pub date_value: Option<crate::models::CustomFieldDateValue>,
+    pub date_value: Option<Box<crate::models::CustomFieldDateValue>>,
     /// A string representation for the value of the custom field. Integrations that don't require the underlying type should use this field to read values.
     pub display_value: Option<String>,
     /// *Conditional*. This field applies only to custom field values and is not available for custom field definitions.
@@ -18,7 +18,7 @@ pub struct CustomField {
     /// *Conditional*. Only relevant for custom fields of type `enum` or `multi_enum`.
     pub enum_options: Option<Vec<crate::models::EnumOption>>,
     /// *Conditional*. Only relevant for custom fields of type `enum`.
-    pub enum_value: Option<crate::models::EnumOption>,
+    pub enum_value: Option<Box<crate::models::EnumOption>>,
     /// This field is the unique custom ID string for the custom field.
     pub id_prefix: Option<String>,
     /// The `input_restrictions` field.
@@ -59,7 +59,7 @@ pub struct CustomField {
     /// Only relevant for custom fields of type `Number`. This field dictates the number of places after the decimal to round to, i.e. 0 is integer values, 1 rounds to the nearest tenth, and so on.
     pub precision: Option<i64>,
     /// The `created_by` field.
-    pub created_by: Option<crate::models::User>,
+    pub created_by: Option<Box<crate::models::User>>,
     /// The default access level when inviting new members to the custom field. This isn't applied when the `privacy_setting` is `private`, or the user is a guest.
     pub default_access_level: Option<crate::models::CustomFieldDefaultAccessLevel>,
     /// *Conditional*. Only relevant for custom fields of type `text`.
@@ -1131,14 +1131,14 @@ pub struct CustomFieldCreateRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(into)]
     pub date_value:
-        Option<crate::models::Clearable<crate::models::CustomFieldCreateRequestDateValue>>,
+        Option<crate::models::Clearable<Box<crate::models::CustomFieldCreateRequestDateValue>>>,
     /// *Conditional*. Only relevant for custom fields of type `enum` or `multi_enum`.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub enum_options: Option<Vec<crate::models::EnumOptionInput>>,
     /// *Conditional*. Only relevant for custom fields of type `enum`.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(into)]
-    pub enum_value: Option<crate::models::Clearable<crate::models::EnumOptionInput>>,
+    pub enum_value: Option<crate::models::Clearable<Box<crate::models::EnumOptionInput>>>,
     /// This field is the unique custom ID string for the custom field.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(into)]
@@ -1236,14 +1236,15 @@ pub struct CustomFieldRequest {
     /// *Conditional*. Only relevant for custom fields of type `date`.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(into)]
-    pub date_value: Option<crate::models::Clearable<crate::models::CustomFieldRequestDateValue>>,
+    pub date_value:
+        Option<crate::models::Clearable<Box<crate::models::CustomFieldRequestDateValue>>>,
     /// *Conditional*. Only relevant for custom fields of type `enum` or `multi_enum`.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub enum_options: Option<Vec<crate::models::EnumOptionInput>>,
     /// *Conditional*. Only relevant for custom fields of type `enum`.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(into)]
-    pub enum_value: Option<crate::models::Clearable<crate::models::EnumOptionInput>>,
+    pub enum_value: Option<crate::models::Clearable<Box<crate::models::EnumOptionInput>>>,
     /// This field is the unique custom ID string for the custom field.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(into)]

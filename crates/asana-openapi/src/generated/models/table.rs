@@ -22,7 +22,7 @@ pub struct Table {
     #[serde(default, with = "time::serde::rfc3339::option")]
     pub modified_at: Option<time::OffsetDateTime>,
     /// *Create-only*. The workspace or organization this table is associated with.
-    pub workspace: Option<crate::models::Workspace>,
+    pub workspace: Option<Box<crate::models::Workspace>>,
 }
 impl crate::fields::HasFields for Table {
     type Field = crate::fields::TableField;

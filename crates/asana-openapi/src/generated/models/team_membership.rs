@@ -16,9 +16,9 @@ pub struct TeamMembership {
     /// Describes if the user has limited access to the team.
     pub is_limited_access: Option<bool>,
     /// The `team` field.
-    pub team: Option<crate::models::Team>,
+    pub team: Option<Box<crate::models::Team>>,
     /// The `user` field.
-    pub user: Option<crate::models::User>,
+    pub user: Option<Box<crate::models::User>>,
 }
 impl crate::fields::HasFields for TeamMembership {
     type Field = crate::fields::TeamMembershipField;

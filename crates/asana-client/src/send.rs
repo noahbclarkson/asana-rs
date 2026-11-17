@@ -20,6 +20,7 @@ use crate::error::{DecodeError, Error};
 use crate::multipart;
 use crate::page::Page;
 use crate::retry::{retry_after, retryable_status, safe_to_repeat};
+use crate::transport::RequestTimeout;
 use crate::transport::TransportError;
 
 /// A successful answer, before its body is decoded.
@@ -62,7 +63,23 @@ impl Client {
     /// Any [`Error`]: what Asana answered, a body that could not be read, or a request that never
     /// got an answer, after the retries the [`RetryPolicy`](crate::RetryPolicy) allows.
     pub async fn send<E: Endpoint>(&self, endpoint: E) -> Result<E::Output, Error> {
-        let answer = self.execute(&endpoint).await?;
+        let answer = self.execute(&endpoint, None).await?;
+        decode_output::<E>(&answer.body)
+    }
+
+    /// Sends one operation, asking the transport to allow `timeout` in all for each attempt in
+    /// place of its own default. For the few operations that stay open on purpose, such as
+    /// creating a webhook while Asana calls the receiver.
+    ///
+    /// # Errors
+    ///
+    /// As [`Client::send`].
+    pub async fn send_with_timeout<E: Endpoint>(
+        &self,
+        endpoint: E,
+        timeout: Duration,
+    ) -> Result<E::Output, Error> {
+        let answer = self.execute(&endpoint, Some(timeout)).await?;
         decode_output::<E>(&answer.body)
     }
 
@@ -78,13 +95,17 @@ impl Client {
     }
 
     pub(crate) async fn page_of<E: Paginated>(&self, endpoint: &E) -> Result<Page<E::Item>, Error> {
-        let answer = self.execute(endpoint).await?;
+        let answer = self.execute(endpoint, None).await?;
         let page: PageEnvelope<E::Item> = decode_json(E::OPERATION_ID, &answer.body)?;
         Ok(Page::new(page.data, page.next_page.map(|next| next.offset)))
     }
 
     /// Runs the pipeline for one operation inside its tracing span.
-    async fn execute<E: Endpoint>(&self, endpoint: &E) -> Result<Answer, Error> {
+    async fn execute<E: Endpoint>(
+        &self,
+        endpoint: &E,
+        timeout: Option<Duration>,
+    ) -> Result<Answer, Error> {
         let span = tracing::debug_span!(
             "asana.request",
             operation = E::OPERATION_ID,
@@ -94,7 +115,7 @@ impl Client {
             attempt = Empty,
             wait_ms = Empty,
         );
-        self.attempt_until_done(endpoint, &span)
+        self.attempt_until_done(endpoint, timeout, &span)
             .instrument(span.clone())
             .await
     }
@@ -102,6 +123,7 @@ impl Client {
     async fn attempt_until_done<E: Endpoint>(
         &self,
         endpoint: &E,
+        timeout: Option<Duration>,
         span: &tracing::Span,
     ) -> Result<Answer, Error> {
         let inner = &self.inner;
@@ -120,10 +142,13 @@ impl Client {
                 Ok(token) => token,
                 Err(error) => break Err(Error::Auth(error)),
             };
-            let request = match self.request(&prepared, &token) {
+            let mut request = match self.request(&prepared, &token) {
                 Ok(request) => request,
                 Err(error) => break Err(error),
             };
+            if let Some(timeout) = timeout {
+                request.extensions_mut().insert(RequestTimeout(timeout));
+            }
             state.made += 1;
             span.record("attempt", state.made);
             let result = inner.transport.send(request).await;

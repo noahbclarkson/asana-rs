@@ -11,6 +11,7 @@ pub mod custom_fields;
 pub mod events;
 pub mod jobs;
 pub mod projects;
+pub mod request;
 pub mod sections;
 pub mod stories;
 pub mod tags;
@@ -18,3 +19,5 @@ pub mod tasks;
 pub mod templates;
 pub mod users;
 pub mod workspaces;
+
+pub use request::Request;

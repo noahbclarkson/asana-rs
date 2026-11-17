@@ -10,9 +10,9 @@ pub struct WorkspaceMembership {
     /// The base type of this resource.
     pub resource_type: Option<String>,
     /// The `user` field.
-    pub user: Option<crate::models::User>,
+    pub user: Option<Box<crate::models::User>>,
     /// The `workspace` field.
-    pub workspace: Option<crate::models::Workspace>,
+    pub workspace: Option<Box<crate::models::Workspace>>,
     /// The time at which this resource was created.
     #[serde(default, with = "time::serde::rfc3339::option")]
     pub created_at: Option<time::OffsetDateTime>,
@@ -25,9 +25,9 @@ pub struct WorkspaceMembership {
     /// Reflects if this user has view only license in the workspace.
     pub is_view_only: Option<bool>,
     /// The user's "My tasks" in the workspace.
-    pub user_task_list: Option<crate::models::UserTaskList>,
+    pub user_task_list: Option<Box<crate::models::UserTaskList>>,
     /// *Deprecated:* Use the `/ooo_entries` endpoints instead. Contains keys `start_on` and `end_on` for the vacation dates for the user in this workspace.
-    pub vacation_dates: Option<crate::models::WorkspaceMembershipVacationDates>,
+    pub vacation_dates: Option<Box<crate::models::WorkspaceMembershipVacationDates>>,
 }
 impl crate::fields::HasFields for WorkspaceMembership {
     type Field = crate::fields::WorkspaceMembershipField;

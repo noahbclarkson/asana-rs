@@ -12,7 +12,7 @@ pub struct Webhook {
     /// If true, the webhook will send events - if false it is considered inactive and will not generate events.
     pub active: Option<bool>,
     /// The `resource` field.
-    pub resource: Option<crate::models::AsanaNamedResource>,
+    pub resource: Option<Box<crate::models::AsanaNamedResource>>,
     /// The URL to receive the HTTP POST.
     pub target: Option<String>,
     /// The time at which this resource was created.

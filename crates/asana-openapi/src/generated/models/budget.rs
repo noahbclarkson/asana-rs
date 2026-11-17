@@ -12,13 +12,13 @@ pub struct Budget {
     /// The type of the budget, in "cost" or "time". The value of this property will dictate how the corresponding values for actual, estimate, and total are interpreted.
     pub budget_type: Option<crate::models::BudgetBudgetType>,
     /// The `actual` field.
-    pub actual: Option<crate::models::BudgetActual>,
+    pub actual: Option<Box<crate::models::BudgetActual>>,
     /// The `estimate` field.
-    pub estimate: Option<crate::models::BudgetEstimate>,
+    pub estimate: Option<Box<crate::models::BudgetEstimate>>,
     /// The `parent` field.
-    pub parent: Option<crate::models::Project>,
+    pub parent: Option<Box<crate::models::Project>>,
     /// The `total` field.
-    pub total: Option<crate::models::BudgetTotal>,
+    pub total: Option<Box<crate::models::BudgetTotal>>,
 }
 impl crate::fields::HasFields for Budget {
     type Field = crate::fields::BudgetField;
@@ -76,15 +76,18 @@ pub struct BudgetRequest {
     pub budget_type: Option<crate::models::BudgetBudgetType>,
     /// The `actual` field.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub actual: Option<crate::models::BudgetActualRequest>,
+    #[builder(into)]
+    pub actual: Option<Box<crate::models::BudgetActualRequest>>,
     /// The `estimate` field.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub estimate: Option<crate::models::BudgetEstimateRequest>,
+    #[builder(into)]
+    pub estimate: Option<Box<crate::models::BudgetEstimateRequest>>,
     /// Globally unique ID of the parent object: project. Can only be set on create, immutable thereafter.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(into)]
     pub parent: Option<String>,
     /// The `total` field.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub total: Option<crate::models::BudgetTotalRequest>,
+    #[builder(into)]
+    pub total: Option<Box<crate::models::BudgetTotalRequest>>,
 }

@@ -1,0 +1,20 @@
+# `TaskSetParentRequest` says `parent` is "`null` for no parent" and that `insert_after` and
+# `insert_before` take `null`, but marks none of them `nullable`, so a request could not send
+# `null` to make a subtask a top-level task again. The `insert_after` example is the string
+# "null", which is not a GID; it goes.
+overlay: 1.0.0
+info:
+  title: Set parent takes null
+  version: 1.0.0
+actions:
+  - target: $.components.schemas.TaskSetParentRequest.properties.parent
+    update:
+      nullable: true
+  - target: $.components.schemas.TaskSetParentRequest.properties.insert_after.example
+    remove: true
+  - target: $.components.schemas.TaskSetParentRequest.properties.insert_after
+    update:
+      nullable: true
+  - target: $.components.schemas.TaskSetParentRequest.properties.insert_before
+    update:
+      nullable: true

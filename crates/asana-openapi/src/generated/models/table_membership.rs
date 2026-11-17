@@ -12,9 +12,9 @@ pub struct TableMembership {
     /// The member's access level in the table.
     pub access_level: Option<crate::models::TableMembershipAccessLevel>,
     /// Member can be a user or a team.
-    pub member: Option<crate::models::Member>,
+    pub member: Option<Box<crate::models::Member>>,
     /// The table the user or team is a member of.
-    pub parent: Option<crate::models::Table>,
+    pub parent: Option<Box<crate::models::Table>>,
     /// Type of the membership.
     pub resource_subtype: Option<String>,
 }

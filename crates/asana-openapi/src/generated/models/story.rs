@@ -17,7 +17,7 @@ pub struct Story {
     #[serde(default, with = "time::serde::rfc3339::option")]
     pub created_at: Option<time::OffsetDateTime>,
     /// The `created_by` field.
-    pub created_by: Option<crate::models::User>,
+    pub created_by: Option<Box<crate::models::User>>,
     /// The subtype of this resource. Different subtypes retain many of the same fields and behavior, but may render differently in Asana or represent resources with different semantic meaning.
     pub resource_subtype: Option<String>,
     /// The plain text of the comment to add. Cannot be used with html_text.
@@ -29,17 +29,17 @@ pub struct Story {
     /// The name of the sticker in this story. `null` if there is no sticker.
     pub sticker_name: Option<crate::models::StoryStickerName>,
     /// *Conditional*
-    pub assignee: Option<crate::models::User>,
+    pub assignee: Option<Box<crate::models::User>>,
     /// *Conditional*
-    pub custom_field: Option<crate::models::CustomField>,
+    pub custom_field: Option<Box<crate::models::CustomField>>,
     /// *Conditional*
-    pub dependency: Option<crate::models::Task>,
+    pub dependency: Option<Box<crate::models::Task>>,
     /// *Conditional*
-    pub duplicate_of: Option<crate::models::Task>,
+    pub duplicate_of: Option<Box<crate::models::Task>>,
     /// *Conditional*
-    pub duplicated_from: Option<crate::models::Task>,
+    pub duplicated_from: Option<Box<crate::models::Task>>,
     /// *Conditional*
-    pub follower: Option<crate::models::User>,
+    pub follower: Option<Box<crate::models::User>>,
     /// *Deprecated - please use likes instead* *Conditional*. True if the story is hearted by the authorized user, false if not.
     pub hearted: Option<bool>,
     /// *Deprecated - please use likes instead* *Conditional*. Array of likes for users who have hearted this story.
@@ -55,11 +55,11 @@ pub struct Story {
     /// *Conditional*. The new value of approval status.
     pub new_approval_status: Option<String>,
     /// *Conditional* The new value of a date custom field story.
-    pub new_date_value: Option<crate::models::StoryResponseDates>,
+    pub new_date_value: Option<Box<crate::models::StoryResponseDates>>,
     /// The `new_dates` field.
-    pub new_dates: Option<crate::models::StoryResponseDates>,
+    pub new_dates: Option<Box<crate::models::StoryResponseDates>>,
     /// *Conditional*
-    pub new_enum_value: Option<crate::models::EnumOption>,
+    pub new_enum_value: Option<Box<crate::models::EnumOption>>,
     /// *Conditional*. The new value of a multi-enum custom field story.
     pub new_multi_enum_values: Option<Vec<crate::models::EnumOption>>,
     /// *Conditional* The updated name of the task after a name change.
@@ -72,7 +72,7 @@ pub struct Story {
     /// *Conditional*
     pub new_resource_subtype: Option<String>,
     /// *Conditional*
-    pub new_section: Option<crate::models::Section>,
+    pub new_section: Option<Box<crate::models::Section>>,
     /// *Conditional* The new value of a text-type field after it was updated.
     pub new_text_value: Option<String>,
     /// *Deprecated - please use likes instead* *Conditional*. The number of users who have hearted this story.
@@ -82,11 +82,11 @@ pub struct Story {
     /// *Conditional*. The old value of approval status.
     pub old_approval_status: Option<String>,
     /// *Conditional*. The old value of a date custom field story.
-    pub old_date_value: Option<crate::models::StoryResponseDates>,
+    pub old_date_value: Option<Box<crate::models::StoryResponseDates>>,
     /// The `old_dates` field.
-    pub old_dates: Option<crate::models::StoryResponseDates>,
+    pub old_dates: Option<Box<crate::models::StoryResponseDates>>,
     /// *Conditional*
-    pub old_enum_value: Option<crate::models::EnumOption>,
+    pub old_enum_value: Option<Box<crate::models::EnumOption>>,
     /// *Conditional*. The old value of a multi-enum custom field story.
     pub old_multi_enum_values: Option<Vec<crate::models::EnumOption>>,
     /// *Conditional* The previous name of the task before a name change.
@@ -99,13 +99,13 @@ pub struct Story {
     /// *Conditional*
     pub old_resource_subtype: Option<String>,
     /// *Conditional*
-    pub old_section: Option<crate::models::Section>,
+    pub old_section: Option<Box<crate::models::Section>>,
     /// *Conditional* The previous value of a text-type field before it was updated.
     pub old_text_value: Option<String>,
     /// Full object requires scope: attachments:read *Conditional*. A collection of previews to be displayed in the story.
     pub previews: Option<Vec<crate::models::Preview>>,
     /// *Conditional*
-    pub project: Option<crate::models::Project>,
+    pub project: Option<Box<crate::models::Project>>,
     /// Summary of emoji reactions on this story.
     pub reaction_summary: Option<Vec<crate::models::ReactionSummaryItem>>,
     /// The component of the Asana product the user used to trigger the story.
@@ -113,11 +113,11 @@ pub struct Story {
     /// *Conditional*
     pub story: Option<Box<crate::models::Story>>,
     /// *Conditional*
-    pub tag: Option<crate::models::Tag>,
+    pub tag: Option<Box<crate::models::Tag>>,
     /// The object this story is associated with. Currently may only be a task.
-    pub target: Option<crate::models::Task>,
+    pub target: Option<Box<crate::models::Task>>,
     /// *Conditional*
-    pub task: Option<crate::models::Task>,
+    pub task: Option<Box<crate::models::Task>>,
     /// The `type` field.
     pub r#type: Option<crate::models::StoryType>,
 }

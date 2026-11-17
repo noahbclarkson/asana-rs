@@ -1,0 +1,10 @@
+---
+source: crates/asana-client/tests/oauth/calls.rs
+expression: shown(&request)
+---
+POST https://app.asana.com/-/oauth_token
+content-type: application/x-www-form-urlencoded
+client_id=1201234567890123
+client_secret=[REDACTED]
+grant_type=refresh_token
+refresh_token=[REDACTED]

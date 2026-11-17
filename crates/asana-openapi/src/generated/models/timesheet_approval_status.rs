@@ -21,9 +21,9 @@ pub struct TimesheetApprovalStatus {
     #[serde(default, with = "crate::models::serde_helpers::date_option")]
     pub start_date: Option<time::Date>,
     /// The user whose timesheet this approval status is for.
-    pub user: Option<crate::models::User>,
+    pub user: Option<Box<crate::models::User>>,
     /// The workspace in which the timesheet approval status exists.
-    pub workspace: Option<crate::models::Workspace>,
+    pub workspace: Option<Box<crate::models::Workspace>>,
 }
 impl crate::fields::HasFields for TimesheetApprovalStatus {
     type Field = crate::fields::TimesheetApprovalStatusField;

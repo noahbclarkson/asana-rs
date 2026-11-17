@@ -21,7 +21,7 @@ pub struct Project {
     #[serde(default, with = "time::serde::rfc3339::option")]
     pub created_at: Option<time::OffsetDateTime>,
     /// *Deprecated: new integrations should prefer the `current_status_update` resource.*
-    pub current_status: Option<crate::models::ProjectStatus>,
+    pub current_status: Option<Box<crate::models::ProjectStatus>>,
     /// The latest `status_update` posted to this project.
     pub current_status_update: Option<Box<crate::models::StatusUpdate>>,
     /// Array of custom field definitions that are enabled for the project. These represent which custom fields are available to be used on tasks within the project, but do not include any values.
@@ -66,25 +66,25 @@ pub struct Project {
     #[serde(default, with = "time::serde::rfc3339::option")]
     pub completed_at: Option<time::OffsetDateTime>,
     /// The user that marked this project complete, or null if the project is not completed.
-    pub completed_by: Option<crate::models::User>,
+    pub completed_by: Option<Box<crate::models::User>>,
     /// Opt In. The project template from which this project was created.
-    pub created_from_template: Option<crate::models::ProjectTemplate>,
+    pub created_from_template: Option<Box<crate::models::ProjectTemplate>>,
     /// Array of custom field values applied directly to the project itself. These represent the values set on the project, not the fields available for tasks in the project.
     pub custom_fields: Option<Vec<crate::models::CustomField>>,
     /// The `custom_type` field.
-    pub custom_type: Option<crate::models::CustomType>,
+    pub custom_type: Option<Box<crate::models::CustomType>>,
     /// Array of users following this project. Followers are a subset of members who have opted in to receive "tasks added" notifications for a project.
     pub followers: Option<Vec<crate::models::User>>,
     /// The current owner of the project, may be null.
-    pub owner: Option<crate::models::User>,
+    pub owner: Option<Box<crate::models::User>>,
     /// A url that points directly to the object within Asana.
     pub permalink_url: Option<String>,
     /// Opt In. The project brief associated with this project.
     pub project_brief: Option<Box<crate::models::ProjectBrief>>,
     /// The team that this project is shared with.
-    pub team: Option<crate::models::Team>,
+    pub team: Option<Box<crate::models::Team>>,
     /// *Create-only*. The workspace or organization this project is associated with.
-    pub workspace: Option<crate::models::Workspace>,
+    pub workspace: Option<Box<crate::models::Workspace>>,
 }
 impl crate::fields::HasFields for Project {
     type Field = crate::fields::ProjectField;
@@ -663,7 +663,8 @@ pub struct ProjectDuplicateRequest {
     pub name: Option<String>,
     /// A dictionary of options to auto-shift dates. `task_dates` must be included to use this option.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub schedule_dates: Option<crate::models::ProjectDuplicateRequestScheduleDates>,
+    #[builder(into)]
+    pub schedule_dates: Option<Box<crate::models::ProjectDuplicateRequestScheduleDates>>,
 }
 /// A dictionary of options to auto-shift dates. `task_dates` must be included to use this option.
 #[derive(Clone, Debug, Default, PartialEq, serde::Serialize, bon::Builder)]

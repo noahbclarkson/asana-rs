@@ -17,7 +17,7 @@ pub struct RecordItem {
     #[serde(default, with = "time::serde::rfc3339::option")]
     pub created_at: Option<time::OffsetDateTime>,
     /// The `created_by` field.
-    pub created_by: Option<crate::models::User>,
+    pub created_by: Option<Box<crate::models::User>>,
     /// Array of custom field values applied to the record.
     pub custom_fields: Option<Vec<crate::models::CustomField>>,
     /// The default access level for users who join or are added as members of the record. This isn't applied when the record is private.
@@ -33,9 +33,9 @@ pub struct RecordItem {
     /// A url that points directly to the object within Asana.
     pub permalink_url: Option<String>,
     /// The table that this record belongs to. Omitted if you don't have access to the table, or null if the record has no associated table.
-    pub table: Option<crate::models::Table>,
+    pub table: Option<Box<crate::models::Table>>,
     /// The workspace this record belongs to.
-    pub workspace: Option<crate::models::Workspace>,
+    pub workspace: Option<Box<crate::models::Workspace>>,
 }
 impl crate::fields::HasFields for RecordItem {
     type Field = crate::fields::RecordItemField;

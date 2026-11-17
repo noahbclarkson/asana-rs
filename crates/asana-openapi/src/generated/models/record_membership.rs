@@ -12,9 +12,9 @@ pub struct RecordMembership {
     /// The member's access level in the record.
     pub access_level: Option<crate::models::RecordMembershipAccessLevel>,
     /// Member can be a user or a team.
-    pub member: Option<crate::models::Member>,
+    pub member: Option<Box<crate::models::Member>>,
     /// The record the user or team is a member of.
-    pub parent: Option<crate::models::RecordItem>,
+    pub parent: Option<Box<crate::models::RecordItem>>,
     /// Type of the membership.
     pub resource_subtype: Option<String>,
 }

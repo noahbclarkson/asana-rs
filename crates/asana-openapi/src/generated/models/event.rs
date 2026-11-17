@@ -8,18 +8,18 @@ pub struct Event {
     /// The type of action taken on the **resource** that triggered the event. This can be one of `changed`, `added`, `removed`, `deleted`, or `undeleted` depending on the nature of the event.
     pub action: Option<String>,
     /// Information about the type of change that has occurred. This field is only present when the value of the property `action`, describing the action taken on the **resource**, is `changed`.
-    pub change: Option<crate::models::EventChange>,
+    pub change: Option<Box<crate::models::EventChange>>,
     /// The timestamp when the event occurred.
     #[serde(default, with = "time::serde::rfc3339::option")]
     pub created_at: Option<time::OffsetDateTime>,
     /// For added/removed events, the parent object that resource was added to or removed from. The parent will be `null` for other event types.
-    pub parent: Option<crate::models::AsanaNamedResource>,
+    pub parent: Option<Box<crate::models::AsanaNamedResource>>,
     /// The resource which has triggered the event by being modified in some way.
-    pub resource: Option<crate::models::AsanaNamedResource>,
+    pub resource: Option<Box<crate::models::AsanaNamedResource>>,
     /// *Deprecated: Refer to the resource_type of the resource.* The type of the resource that generated the event.
     pub r#type: Option<String>,
     /// The user who triggered the event.
-    pub user: Option<crate::models::User>,
+    pub user: Option<Box<crate::models::User>>,
 }
 impl crate::fields::HasFields for Event {
     type Field = crate::fields::EventField;

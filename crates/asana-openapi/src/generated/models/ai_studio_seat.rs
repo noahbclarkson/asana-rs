@@ -13,7 +13,7 @@ pub struct AiStudioSeat {
     #[serde(default, with = "time::serde::rfc3339::option")]
     pub assigned_at: Option<time::OffsetDateTime>,
     /// The user who assigned the seat. `null` when assigned by the system.
-    pub assigned_by: Option<crate::models::User>,
+    pub assigned_by: Option<Box<crate::models::User>>,
     /// The user's effective AI Studio license tier. `/seats` returns only paid seats, so the free tier is not included.
     pub license: Option<crate::models::AiStudioSeatLicense>,
     /// When the seat was revoked or expired. `null` for active seats.
@@ -22,7 +22,7 @@ pub struct AiStudioSeat {
     /// The state of the seat.
     pub state: Option<crate::models::AiStudioSeatState>,
     /// The user who holds the seat.
-    pub user: Option<crate::models::User>,
+    pub user: Option<Box<crate::models::User>>,
 }
 /// A value of `license` on `AiStudioSeat`.
 #[derive(Clone, Debug, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]

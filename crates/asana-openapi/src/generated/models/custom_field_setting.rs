@@ -10,13 +10,13 @@ pub struct CustomFieldSetting {
     /// The base type of this resource.
     pub resource_type: Option<String>,
     /// The custom field that is applied to the `parent`.
-    pub custom_field: Option<crate::models::CustomField>,
+    pub custom_field: Option<Box<crate::models::CustomField>>,
     /// `is_important` is used in the Asana web application to determine if this custom field is displayed in the list/grid view of a project or portfolio.
     pub is_important: Option<bool>,
     /// The parent to which the custom field is applied. This can be a project or portfolio and indicates that the tasks or projects that the parent contains may be given custom field values for this custom field.
-    pub parent: Option<crate::models::Project>,
+    pub parent: Option<Box<crate::models::Project>>,
     /// *Deprecated: new integrations should prefer the `parent` field.* The id of the project that this custom field settings refers to.
-    pub project: Option<crate::models::Project>,
+    pub project: Option<Box<crate::models::Project>>,
 }
 impl crate::fields::HasFields for CustomFieldSetting {
     type Field = crate::fields::CustomFieldSettingField;
@@ -27,7 +27,8 @@ impl crate::fields::HasFields for CustomFieldSetting {
 pub struct AddCustomFieldSettingRequest {
     /// The `custom_field` field.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub custom_field: Option<crate::models::AddCustomFieldSettingRequestCustomField>,
+    #[builder(into)]
+    pub custom_field: Option<Box<crate::models::AddCustomFieldSettingRequestCustomField>>,
     /// A gid of a Custom Field Setting on this container, after which the new Custom Field Setting will be added. `insert_before` and `insert_after` parameters cannot both be specified.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(into)]

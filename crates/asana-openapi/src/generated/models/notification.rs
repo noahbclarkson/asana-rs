@@ -13,13 +13,13 @@ pub struct Notification {
     #[serde(default, with = "time::serde::rfc3339::option")]
     pub created_at: Option<time::OffsetDateTime>,
     /// The computed actor responsible for the underlying activity, or `null` when no actor is available.
-    pub created_by: Option<crate::models::AsanaNamedResource>,
+    pub created_by: Option<Box<crate::models::AsanaNamedResource>>,
     /// Whether the notification is effectively read in the user's Inbox.
     pub is_read: Option<bool>,
     /// The notification's Priority classification.
     pub priority_classification: Option<crate::models::NotificationPriorityClassification>,
     /// The Story that produced the notification. This is `null` when the activity is not exposed through the Stories API.
-    pub story: Option<crate::models::Story>,
+    pub story: Option<Box<crate::models::Story>>,
     /// The stable public subtype of the Story that produced the notification.
     pub story_resource_subtype: Option<String>,
     /// Work referenced by the notification. Each entry is a compact representation of the underlying Asana resource.

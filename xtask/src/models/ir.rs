@@ -57,7 +57,7 @@ pub struct Field {
     pub doc: String,
     /// In a request, whether `null` may be sent to clear it.
     pub clearable: bool,
-    /// Whether the type is boxed, because it contains the struct that holds it.
+    /// Whether the type is boxed: every generated struct or union is, wherever a field holds one.
     pub boxed: bool,
 }
 

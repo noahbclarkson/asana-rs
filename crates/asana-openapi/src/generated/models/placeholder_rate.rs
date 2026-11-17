@@ -10,14 +10,14 @@ pub struct PlaceholderRate {
     /// The base type of this resource.
     pub resource_type: Option<String>,
     /// The `created_by` field.
-    pub created_by: Option<crate::models::User>,
+    pub created_by: Option<Box<crate::models::User>>,
     /// The currency code of the rate, set at the domain level.
     pub currency_code: Option<String>,
     /// The `parent` field.
-    pub parent: Option<crate::models::Project>,
+    pub parent: Option<Box<crate::models::Project>>,
     /// The monetary value of the rate.
     #[serde(default, with = "rust_decimal::serde::arbitrary_precision_option")]
     pub rate: Option<rust_decimal::Decimal>,
     /// The `resource` field.
-    pub resource: Option<crate::models::Placeholder>,
+    pub resource: Option<Box<crate::models::Placeholder>>,
 }

@@ -10,7 +10,7 @@ pub struct Task {
     /// The base type of this resource.
     pub resource_type: Option<String>,
     /// Opt In. A *user* object represents an account in Asana that can be given access to various workspaces, projects, and tasks.
-    pub created_by: Option<crate::models::User>,
+    pub created_by: Option<Box<crate::models::User>>,
     /// Name of the task. This is generally a short sentence fragment that fits on a line in the UI for maximum readability.
     pub name: Option<String>,
     /// The subtype of this resource. Different subtypes retain many of the same fields and behavior, but may render differently in Asana or represent resources with different semantic meaning.
@@ -21,7 +21,7 @@ pub struct Task {
     /// *Conditional* Reflects the approval status of this task. This field is kept in sync with `completed`, meaning `pending` translates to false while `approved`, `rejected`, and `changes_requested` translate to true.
     pub approval_status: Option<crate::models::TaskApprovalStatus>,
     /// The user who assigned the task. This field is only returned when requesting it via opt_fields, and will be null if the task has no specific assigner (e.g., tasks created without an explicit assigner).
-    pub assigned_by: Option<crate::models::User>,
+    pub assigned_by: Option<Box<crate::models::User>>,
     /// *Deprecated* Scheduling status of this task for the user it is assigned to. This field can only be set if the assignee is non-null.
     pub assignee_status: Option<crate::models::TaskAssigneeStatus>,
     /// True if the task is currently marked complete, false if not.
@@ -30,7 +30,7 @@ pub struct Task {
     #[serde(default, with = "time::serde::rfc3339::option")]
     pub completed_at: Option<time::OffsetDateTime>,
     /// The `completed_by` field.
-    pub completed_by: Option<crate::models::User>,
+    pub completed_by: Option<Box<crate::models::User>>,
     /// The time at which this resource was created.
     #[serde(default, with = "time::serde::rfc3339::option")]
     pub created_at: Option<time::OffsetDateTime>,
@@ -45,7 +45,7 @@ pub struct Task {
     #[serde(default, with = "crate::models::serde_helpers::date_option")]
     pub due_on: Option<time::Date>,
     /// *OAuth Required*. *Conditional*.
-    pub external: Option<crate::models::TaskExternal>,
+    pub external: Option<Box<crate::models::TaskExternal>>,
     /// Opt In. True when one or more descendant subtasks have dates outside the task's own date range.
     pub has_subtasks_date_mismatch: Option<bool>,
     /// *Deprecated - please use liked instead* True if the task is hearted by the authorized user, false if not.
@@ -80,15 +80,15 @@ pub struct Task {
     #[serde(default, with = "crate::models::serde_helpers::date_option")]
     pub start_on: Option<time::Date>,
     /// The `assignee` field.
-    pub assignee: Option<crate::models::User>,
+    pub assignee: Option<Box<crate::models::User>>,
     /// The *assignee section* is a subdivision of a project that groups tasks together in the assignee's "My tasks" list.
-    pub assignee_section: Option<crate::models::Section>,
+    pub assignee_section: Option<Box<crate::models::Section>>,
     /// Array of custom field values applied to the task. These represent the custom field values recorded on this project for a particular custom field.
     pub custom_fields: Option<Vec<crate::models::CustomField>>,
     /// The `custom_type` field.
-    pub custom_type: Option<crate::models::CustomType>,
+    pub custom_type: Option<Box<crate::models::CustomType>>,
     /// The `custom_type_status_option` field.
-    pub custom_type_status_option: Option<crate::models::CustomTypeStatusOption>,
+    pub custom_type_status_option: Option<Box<crate::models::CustomTypeStatusOption>>,
     /// Full object requires scope: projects:read, project_sections:read Opt-in, read-only. The union of direct and inherited memberships for this task.
     pub effective_memberships: Option<Vec<crate::models::EffectiveTaskMembership>>,
     /// Array of users following this task.
@@ -102,7 +102,7 @@ pub struct Task {
     /// Array of tags associated with this task. In order to change tags on an existing task use `addTag` and `removeTag`.
     pub tags: Option<Vec<crate::models::Tag>>,
     /// *Create-only*. The workspace this task is associated with.
-    pub workspace: Option<crate::models::Workspace>,
+    pub workspace: Option<Box<crate::models::Workspace>>,
 }
 impl crate::fields::HasFields for Task {
     type Field = crate::fields::TaskField;
@@ -229,9 +229,9 @@ pub struct TaskExternal {
 #[non_exhaustive]
 pub struct TaskMembership {
     /// The `project` field.
-    pub project: Option<crate::models::Project>,
+    pub project: Option<Box<crate::models::Project>>,
     /// The `section` field.
-    pub section: Option<crate::models::Section>,
+    pub section: Option<Box<crate::models::Section>>,
 }
 /// A value of `resource_subtype` on `Task`.
 #[derive(Clone, Debug, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
@@ -441,7 +441,8 @@ pub struct TaskCreateRequest {
     pub due_on: Option<crate::models::Clearable<time::Date>>,
     /// *OAuth Required*. *Conditional*.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub external: Option<crate::models::TaskCreateRequestExternal>,
+    #[builder(into)]
+    pub external: Option<Box<crate::models::TaskCreateRequestExternal>>,
     /// Opt In. The notes of the text with formatting as HTML.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(into)]
@@ -449,6 +450,9 @@ pub struct TaskCreateRequest {
     /// True if the task is liked by the authorized user, false if not.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub liked: Option<bool>,
+    /// *Create-Only* The projects to add the task to, and the section of each to put it in.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub memberships: Option<Vec<crate::models::TaskCreateRequestMemberships>>,
     /// Free-form textual information associated with the task (i.e. its description).
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(into)]
@@ -520,6 +524,17 @@ pub struct TaskCreateRequestExternal {
     #[builder(into)]
     pub data: Option<String>,
 }
+/// *Create-Only* The projects to add the task to, and the section of each to put it in.
+#[derive(Clone, Debug, Default, PartialEq, serde::Serialize, bon::Builder)]
+#[non_exhaustive]
+pub struct TaskCreateRequestMemberships {
+    /// The GID of a project.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub project: Option<crate::ids::ProjectGid>,
+    /// The GID of a section of that project.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub section: Option<crate::ids::SectionGid>,
+}
 /// The body of a request, `TaskDuplicateRequest` in Asana's specification.
 #[derive(Clone, Debug, Default, PartialEq, serde::Serialize, bon::Builder)]
 #[non_exhaustive]
@@ -564,15 +579,15 @@ pub struct TaskSetParentRequest {
     /// A subtask of the parent to insert the task after, or `null` to insert at the beginning of the list.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(into)]
-    pub insert_after: Option<String>,
+    pub insert_after: Option<crate::models::Clearable<String>>,
     /// A subtask of the parent to insert the task before, or `null` to insert at the end of the list.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(into)]
-    pub insert_before: Option<String>,
+    pub insert_before: Option<crate::models::Clearable<String>>,
     /// The new parent of the task, or `null` for no parent.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(into)]
-    pub parent: Option<String>,
+    pub parent: Option<crate::models::Clearable<String>>,
 }
 /// A story represents an activity associated with an object in the Asana system.
 #[derive(Clone, Debug, Default, PartialEq, serde::Serialize, bon::Builder)]
@@ -633,7 +648,8 @@ pub struct TaskUpdateRequest {
     pub due_on: Option<crate::models::Clearable<time::Date>>,
     /// *OAuth Required*. *Conditional*.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub external: Option<crate::models::TaskUpdateRequestExternal>,
+    #[builder(into)]
+    pub external: Option<Box<crate::models::TaskUpdateRequestExternal>>,
     /// Opt In. The notes of the text with formatting as HTML.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(into)]

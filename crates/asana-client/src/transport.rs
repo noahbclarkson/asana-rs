@@ -136,6 +136,15 @@ impl TransportError {
     }
 }
 
+/// How long one request may take in all, set by the client as an extension on the
+/// `http::Request` it hands a [`Transport`] when an operation needs longer (or shorter) than the
+/// transport's own default: creating a webhook stays open while Asana calls the receiver.
+///
+/// A transport honours it if it can; [`ReqwestTransport`] does. One that ignores it must itself
+/// allow at least 60 seconds for webhook creation to work.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct RequestTimeout(pub std::time::Duration);
+
 /// A [`Transport`] over a [`reqwest::Client`].
 ///
 /// [`ReqwestTransport::new`] wraps a client the caller built, so its TLS, proxy and redirect
@@ -198,7 +207,11 @@ impl ReqwestTransport {
         &self,
         request: http::Request<Bytes>,
     ) -> Result<http::Response<Bytes>, TransportError> {
-        let request = reqwest::Request::try_from(request).map_err(classify)?;
+        let timeout = request.extensions().get::<RequestTimeout>().copied();
+        let mut request = reqwest::Request::try_from(request).map_err(classify)?;
+        if let Some(RequestTimeout(timeout)) = timeout {
+            *request.timeout_mut() = Some(timeout);
+        }
         let mut response = self.client.execute(request).await.map_err(classify)?;
         if response
             .content_length()

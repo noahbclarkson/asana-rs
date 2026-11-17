@@ -12,9 +12,9 @@ pub struct UserTaskList {
     /// The name of the user task list.
     pub name: Option<String>,
     /// The owner of the user task list, i.e. the person whose My Tasks is represented by this resource.
-    pub owner: Option<crate::models::User>,
+    pub owner: Option<Box<crate::models::User>>,
     /// The workspace in which the user task list is located.
-    pub workspace: Option<crate::models::Workspace>,
+    pub workspace: Option<Box<crate::models::Workspace>>,
 }
 impl crate::fields::HasFields for UserTaskList {
     type Field = crate::fields::UserTaskListField;

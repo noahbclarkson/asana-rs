@@ -15,7 +15,7 @@ pub struct Section {
     #[serde(default, with = "time::serde::rfc3339::option")]
     pub created_at: Option<time::OffsetDateTime>,
     /// The `project` field.
-    pub project: Option<crate::models::Project>,
+    pub project: Option<Box<crate::models::Project>>,
     /// *Deprecated - please use project instead*
     pub projects: Option<Vec<crate::models::Project>>,
 }

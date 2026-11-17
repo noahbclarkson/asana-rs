@@ -12,9 +12,9 @@ pub struct PortfolioMembership {
     /// Whether the member has admin, editor, or viewer access to the portfolio. Portfolios do not support commenter access yet.
     pub access_level: Option<crate::models::PortfolioMembershipAccessLevel>,
     /// Member can be a user or a team.
-    pub member: Option<crate::models::Member>,
+    pub member: Option<Box<crate::models::Member>>,
     /// The portfolio the user is a member of.
-    pub parent: Option<crate::models::Portfolio>,
+    pub parent: Option<Box<crate::models::Portfolio>>,
     /// Type of the membership.
     pub resource_subtype: Option<String>,
 }

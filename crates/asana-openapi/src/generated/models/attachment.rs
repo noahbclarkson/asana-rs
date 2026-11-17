@@ -23,7 +23,7 @@ pub struct Attachment {
     /// The service hosting the attachment. Valid values are `asana`, `dropbox`, `gdrive`, `onedrive`, `box`, `vimeo`, and `external`.
     pub host: Option<String>,
     /// The task this attachment is attached to.
-    pub parent: Option<crate::models::Task>,
+    pub parent: Option<Box<crate::models::Task>>,
     /// A stable URL for accessing the attachment through the Asana web application. This URL redirects to the file download location (e.g., an S3 link) if the user is authenticated and authorized to view the parent object (e.g., a task).
     pub permanent_url: Option<String>,
     /// The size of the attachment in bytes. Only present when the `resource_subtype` is `asana`.

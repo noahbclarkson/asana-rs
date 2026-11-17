@@ -12,9 +12,9 @@ pub struct DeprecatedPortfolioMembership {
     /// Whether the member has admin, editor, or viewer access to the portfolio. Portfolios do not support commenter access yet.
     pub access_level: Option<crate::models::DeprecatedPortfolioMembershipAccessLevel>,
     /// Opt In. The portfolio the user is a member of.
-    pub portfolio: Option<crate::models::Portfolio>,
+    pub portfolio: Option<Box<crate::models::Portfolio>>,
     /// The `user` field.
-    pub user: Option<crate::models::User>,
+    pub user: Option<Box<crate::models::User>>,
 }
 impl crate::fields::HasFields for DeprecatedPortfolioMembership {
     type Field = crate::fields::DeprecatedPortfolioMembershipField;

@@ -14,6 +14,7 @@ pub mod webhooks;
 mod auth;
 mod client;
 mod error;
+mod html;
 mod limits;
 mod multipart;
 mod page;
@@ -23,18 +24,30 @@ mod send;
 mod transport;
 
 pub use asana_openapi as openapi;
+/// Chooses the fields Asana returns, checked when compiled: `fields![Task: name, due_on]`.
+pub use asana_openapi::fields;
 
 pub use auth::{AccessToken, Auth, AuthError, TokenSource};
 pub use client::{
     AsanaChange, BuildError, Client, ClientBuilder, DEFAULT_BASE_URL, DEFAULT_USER_AGENT,
 };
+pub use custom_field_value::{
+    CustomDate, CustomFieldValue, EnumOptionRef, PersonRef, ResourceRef, TaskCustomField,
+    TaskCustomFields, custom_fields_map,
+};
 pub use error::{ApiError, ApiErrors, DecodeError, DecodeErrorKind, Error, SyncToken};
+pub use html::Html;
 pub use limits::Limits;
 pub use page::{Items, Page, Pages};
 pub use require::Require;
+pub use resources::custom_fields::NameMatch;
+pub use resources::jobs::JobHandle;
+pub use resources::workspaces::CustomFieldFilter;
 pub use retry::RetryPolicy;
 pub use send::decode_response;
-pub use transport::{BoxError, ReqwestTransport, Transport, TransportError, TransportErrorKind};
+pub use transport::{
+    BoxError, RequestTimeout, ReqwestTransport, Transport, TransportError, TransportErrorKind,
+};
 
 /// Secret strings, re-exported so callers need not depend on `secrecy` to make an [`Auth`].
 pub use secrecy::{ExposeSecret, SecretString};

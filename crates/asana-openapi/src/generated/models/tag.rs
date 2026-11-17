@@ -23,7 +23,7 @@ pub struct Tag {
     /// A url that points directly to the object within Asana.
     pub permalink_url: Option<String>,
     /// The `workspace` field.
-    pub workspace: Option<crate::models::Workspace>,
+    pub workspace: Option<Box<crate::models::Workspace>>,
 }
 impl crate::fields::HasFields for Tag {
     type Field = crate::fields::TagField;

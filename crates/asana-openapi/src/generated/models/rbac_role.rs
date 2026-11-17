@@ -24,9 +24,9 @@ pub struct RbacRole {
     #[serde(default, with = "time::serde::rfc3339::option")]
     pub modified_at: Option<time::OffsetDateTime>,
     /// The permissions of the role.
-    pub permissions: Option<crate::models::RbacRolePermissions>,
+    pub permissions: Option<Box<crate::models::RbacRolePermissions>>,
     /// *Create-only*. The workspace this role is associated with.
-    pub workspace: Option<crate::models::Workspace>,
+    pub workspace: Option<Box<crate::models::Workspace>>,
 }
 impl crate::fields::HasFields for RbacRole {
     type Field = crate::fields::RbacRoleField;
@@ -306,7 +306,8 @@ pub struct RbacRoleRequest {
     pub base_role_type: Option<crate::models::RbacRoleRequestBaseRoleType>,
     /// The permissions of the role.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub permissions: Option<crate::models::RbacRoleRequestPermissions>,
+    #[builder(into)]
+    pub permissions: Option<Box<crate::models::RbacRoleRequestPermissions>>,
     /// *Create-only*. The GID of the workspace this role is associated with.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub workspace: Option<crate::ids::WorkspaceGid>,
@@ -417,7 +418,8 @@ pub struct RbacRoleUpdateRequest {
     pub base_role_type: Option<crate::models::RbacRoleBaseRoleType>,
     /// The permissions of the role.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub permissions: Option<crate::models::RbacRoleUpdateRequestPermissions>,
+    #[builder(into)]
+    pub permissions: Option<Box<crate::models::RbacRoleUpdateRequestPermissions>>,
 }
 /// The permissions of the role.
 #[derive(Clone, Debug, Default, PartialEq, serde::Serialize, bon::Builder)]

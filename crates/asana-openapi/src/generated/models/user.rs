@@ -14,7 +14,7 @@ pub struct User {
     /// The user's email address.
     pub email: Option<String>,
     /// A map of the user's profile photo in various sizes, or null if no photo is set. Sizes provided are 21, 27, 36, 60, 128, and 1024.
-    pub photo: Option<crate::models::UserPhoto>,
+    pub photo: Option<Box<crate::models::UserPhoto>>,
     /// Array of Custom Fields.
     pub custom_fields: Option<Vec<crate::models::CustomField>>,
     /// Workspaces and organizations this user may access. Note\: The API will only return workspaces and organizations that also contain the authenticated user.

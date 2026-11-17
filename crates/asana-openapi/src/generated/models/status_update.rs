@@ -20,12 +20,12 @@ pub struct StatusUpdate {
     /// The text content of the status update.
     pub text: Option<String>,
     /// The `author` field.
-    pub author: Option<crate::models::User>,
+    pub author: Option<Box<crate::models::User>>,
     /// The time at which this resource was created.
     #[serde(default, with = "time::serde::rfc3339::option")]
     pub created_at: Option<time::OffsetDateTime>,
     /// The `created_by` field.
-    pub created_by: Option<crate::models::User>,
+    pub created_by: Option<Box<crate::models::User>>,
     /// *Deprecated - please use liked instead* True if the status is hearted by the authorized user, false if not.
     pub hearted: Option<bool>,
     /// *Deprecated - please use likes instead* Array of likes for users who have hearted this status.

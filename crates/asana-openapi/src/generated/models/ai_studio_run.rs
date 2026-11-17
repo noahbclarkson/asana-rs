@@ -10,20 +10,20 @@ pub struct AiStudioRun {
     /// The base type of this resource.
     pub resource_type: Option<String>,
     /// The multi-step automation (AutomationWorkflow) the step belonged to when it ran. `null` for standalone rules.
-    pub automation: Option<crate::models::AiStudioRunAutomation>,
+    pub automation: Option<Box<crate::models::AiStudioRunAutomation>>,
     /// Whether the credits were drawn from a paid or free balance.
     pub credit_source: Option<crate::models::AiStudioRunCreditSource>,
     /// The number of credits consumed by the run.
     #[serde(default, with = "rust_decimal::serde::arbitrary_precision_option")]
     pub credits_used: Option<rust_decimal::Decimal>,
     /// The division the actor belonged to at the time of the run, as a compact reference. `null` when division metering is not enabled for the domain.
-    pub division: Option<crate::models::AiStudioRunDivision>,
+    pub division: Option<Box<crate::models::AiStudioRunDivision>>,
     /// The LLM model used for the run.
     pub model: Option<String>,
     /// The rule (AutomationStep) that ran, as a compact reference. Non-null for both standalone rules and multi-step automation steps as long as the step still exists.
-    pub rule: Option<crate::models::AiStudioRunRule>,
+    pub rule: Option<Box<crate::models::AiStudioRunRule>>,
     /// The user who owns the rule.
-    pub rule_owner: Option<crate::models::User>,
+    pub rule_owner: Option<Box<crate::models::User>>,
     /// When the run finished. `null` for runs that did not complete (e.g. cancelled).
     #[serde(default, with = "time::serde::rfc3339::option")]
     pub run_completed_at: Option<time::OffsetDateTime>,
@@ -33,9 +33,9 @@ pub struct AiStudioRun {
     /// The outcome of the run.
     pub status: Option<crate::models::AiStudioRunStatus>,
     /// The user the run executed as, and to whom the credits are attributed. Usually the same as `rule_owner`, but can differ for chained or AI-teammate-triggered runs.
-    pub triggered_by: Option<crate::models::User>,
+    pub triggered_by: Option<Box<crate::models::User>>,
     /// The object the rule lives in (its container) — a project or portfolio — as a compact reference. `null` if the container is unavailable.
-    pub triggering_container: Option<crate::models::Project>,
+    pub triggering_container: Option<Box<crate::models::Project>>,
 }
 /// The multi-step automation (AutomationWorkflow) the step belonged to when it ran. `null` for standalone rules.
 #[derive(Clone, Debug, Default, PartialEq, serde::Deserialize)]

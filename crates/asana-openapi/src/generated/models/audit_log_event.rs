@@ -8,20 +8,20 @@ pub struct AuditLogEvent {
     /// Globally unique identifier of the `AuditLogEvent`, as a string.
     pub gid: Option<crate::ids::AuditLogEventGid>,
     /// The `actor` field.
-    pub actor: Option<crate::models::AuditLogEventActor>,
+    pub actor: Option<Box<crate::models::AuditLogEventActor>>,
     /// The `context` field.
-    pub context: Option<crate::models::AuditLogEventContext>,
+    pub context: Option<Box<crate::models::AuditLogEventContext>>,
     /// The time the event was created.
     #[serde(default, with = "time::serde::rfc3339::option")]
     pub created_at: Option<time::OffsetDateTime>,
     /// The `details` field.
-    pub details: Option<crate::models::AuditLogEventDetails>,
+    pub details: Option<Box<crate::models::AuditLogEventDetails>>,
     /// The category that this `event_type` belongs to.
     pub event_category: Option<String>,
     /// The type of the event.
     pub event_type: Option<String>,
     /// The `resource` field.
-    pub resource: Option<crate::models::AuditLogEventResource>,
+    pub resource: Option<Box<crate::models::AuditLogEventResource>>,
 }
 /// The entity that triggered the event. Will typically be a user.
 #[derive(Clone, Debug, Default, PartialEq, serde::Deserialize)]

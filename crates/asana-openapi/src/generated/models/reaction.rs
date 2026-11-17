@@ -10,5 +10,5 @@ pub struct Reaction {
     /// The emoji string used in the reaction.
     pub emoji: Option<String>,
     /// The `user` field.
-    pub user: Option<crate::models::User>,
+    pub user: Option<Box<crate::models::User>>,
 }

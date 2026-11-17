@@ -5,11 +5,12 @@
 use std::collections::BTreeMap;
 use std::str::FromStr;
 
-use asana_openapi::ids::{CustomFieldGid, Gid, TaskGid, UserRef};
+use asana_openapi::ids::{CustomFieldGid, Gid, ProjectGid, SectionGid, TaskGid, UserRef};
 use asana_openapi::models::{
     Clearable, CustomField, CustomFieldResourceSubtype, Membership, PortfolioItem, Project,
-    ProjectColor, RateOrPlaceholder, Section, Story, Task, TaskCreateRequest, TaskResourceSubtype,
-    TaskUpdateRequest, User, Webhook,
+    ProjectColor, RateOrPlaceholder, Section, Story, Task, TaskCreateRequest,
+    TaskCreateRequestMemberships, TaskResourceSubtype, TaskSetParentRequest, TaskUpdateRequest,
+    User, Webhook,
 };
 use rust_decimal::Decimal;
 use serde_json::json;
@@ -435,5 +436,31 @@ fn a_request_leaves_out_what_was_not_set_and_sends_null_to_clear() {
     assert_eq!(
         serde_json::to_value(&clear).unwrap(),
         json!({"due_on": null, "due_at": null, "start_at": "2026-11-30T09:00:00Z"})
+    );
+}
+
+#[test]
+fn a_task_is_created_into_a_section_and_un_parented_with_null() {
+    let membership = TaskCreateRequestMemberships::builder()
+        .project(ProjectGid::parse("1201234567890200").unwrap())
+        .section(SectionGid::parse("1201234567890300").unwrap())
+        .build();
+    let create = TaskCreateRequest::builder()
+        .name("Filed straight into a section")
+        .memberships(vec![membership])
+        .build();
+    assert_eq!(
+        serde_json::to_value(&create).unwrap(),
+        json!({
+            "name": "Filed straight into a section",
+            "memberships": [{"project": "1201234567890200", "section": "1201234567890300"}]
+        })
+    );
+    let unparent = TaskSetParentRequest::builder()
+        .parent(Clearable::Clear)
+        .build();
+    assert_eq!(
+        serde_json::to_value(&unparent).unwrap(),
+        json!({"parent": null})
     );
 }
