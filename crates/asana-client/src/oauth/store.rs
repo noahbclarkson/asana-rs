@@ -3,10 +3,16 @@
 //!
 //! Storage is the caller's: a database row, a secrets manager, a file. [`TokenStore`] is the small
 //! contract [`RefreshingTokenSource`](super::RefreshingTokenSource) needs from it. Saving is a
-//! compare-and-swap on the refresh token, so when two processes refresh the same person's tokens at
-//! once, the one that loses reads back the winner's tokens instead of overwriting them. Asana does
-//! not document rotating refresh tokens, but if it ever sends a new one, overwriting it with a
-//! stale one would leave the person disconnected.
+//! compare-and-swap on the refresh token. It guards the refresh token: when the stored one is no
+//! longer the one refreshed from (the person connected again, or Asana rotated it), nothing is
+//! overwritten and the source reads back what is stored. Asana does not document rotating refresh
+//! tokens, but if it ever sends a new one, overwriting it with a stale one would leave the person
+//! disconnected.
+//!
+//! It is not a lock between processes. Asana's refresh token stays the same across refreshes, so
+//! when two processes refresh the same person's tokens at once, both swaps find the refresh token
+//! unchanged and both save; the last to save wins. That is harmless, because both access tokens
+//! are valid until they expire, but each process made its own refresh.
 
 use std::fmt;
 use std::sync::{Arc, Mutex, PoisonError};
@@ -51,8 +57,9 @@ impl StoredTokens {
 pub enum Replaced {
     /// The stored refresh token was the expected one, and the new tokens are now stored.
     Saved,
-    /// The stored refresh token was not the expected one (another process refreshed first, or the
-    /// person reconnected), and nothing was written.
+    /// The stored refresh token was not the expected one (the person reconnected, or another
+    /// process stored a rotated refresh token first), and nothing was written. Another process's
+    /// refresh that kept the same refresh token is not a conflict.
     Conflict,
 }
 

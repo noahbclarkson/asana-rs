@@ -297,3 +297,48 @@ async fn an_unreachable_token_endpoint_is_unavailable_and_shows_no_secret() {
     assert!(source.access_token().await.is_err());
     assert_eq!(transport.count(), 2);
 }
+
+/// A store in which another process saves its own refresh, with the same refresh token, just
+/// before this one does.
+struct SameRefreshToken {
+    inner: InMemoryTokenStore,
+}
+
+impl TokenStore for SameRefreshToken {
+    fn load(&self) -> BoxFuture<'_, Result<Option<StoredTokens>, BoxError>> {
+        self.inner.load()
+    }
+
+    fn replace<'a>(
+        &'a self,
+        expected: &'a RefreshToken,
+        tokens: &'a StoredTokens,
+    ) -> BoxFuture<'a, Result<Replaced, BoxError>> {
+        self.inner.set(Some(StoredTokens::new(
+            AccessToken::new(WINNER_ACCESS),
+            RefreshToken::new(REFRESH),
+            START + time::Duration::hours(2),
+        )));
+        self.inner.replace(expected, tokens)
+    }
+}
+
+#[tokio::test(start_paused = true)]
+async fn a_concurrent_refresh_with_the_same_refresh_token_is_not_a_conflict_and_the_last_save_wins()
+{
+    let transport = Scripted::replies(vec![Ok(reply(200, &refresh_answer()))]);
+    let clock = TestClock::at(START + time::Duration::hours(1));
+    let store = Arc::new(SameRefreshToken {
+        inner: InMemoryTokenStore::new(stored()),
+    });
+    let source =
+        RefreshingTokenSource::new(app(transport.clone()), store.clone()).with_clock(clock.clone());
+
+    // Both processes refreshed; this one saved last, so its token is the one stored and used.
+    assert_eq!(secret(&source.access_token().await.unwrap()), FRESH_ACCESS);
+    assert_eq!(
+        secret(&store.inner.get().unwrap().access_token),
+        FRESH_ACCESS
+    );
+    assert_eq!(transport.count(), 1);
+}

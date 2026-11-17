@@ -4,9 +4,12 @@
 //! refreshes it before Asana would refuse it. Asana's access tokens last an hour. Refreshing is
 //! single-flight: the source holds one async lock while it reads the store and refreshes, so ten
 //! tasks that find the token stale at once cause one refresh, and the other nine take its result.
-//! Between processes the [`TokenStore`]'s compare-and-swap does the same job: before refreshing,
-//! the source reads the store in case another process already has, and after losing the swap it
-//! takes the tokens the winner stored.
+//! Between processes there is no lock. Before refreshing, the source reads the store in case
+//! another process already has, which avoids most second refreshes. The [`TokenStore`]'s
+//! compare-and-swap is on the refresh token, which Asana does not change when it refreshes, so
+//! two processes that refresh at the same moment both save and the last one wins; both access
+//! tokens stay valid. The swap is lost, and the source takes what is stored, only when the
+//! refresh token itself changed: the person connected again, or Asana rotated it.
 //!
 //! A dead refresh token (`invalid_grant`) becomes [`AuthError::Revoked`]: the person must connect
 //! again. Before saying so the source reads the store once more, because `invalid_grant` is also

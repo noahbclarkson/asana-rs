@@ -138,8 +138,12 @@ store is a store.
 - It answers from memory while the access token has more than a margin left (five minutes,
   `with_margin` to change it).
 - Otherwise it refreshes under one async lock, so ten tasks that find the token stale at once
-  cause one refresh. Before refreshing it reads the store, in case another process already has;
-  after losing the compare-and-swap it takes the tokens the winner stored.
+  cause one refresh. Before refreshing it reads the store, in case another process already has.
+  Between processes there is no lock: the compare-and-swap is on the refresh token, which Asana
+  does not change on a refresh, so two processes refreshing at the same moment both save and the
+  last one wins. Both access tokens stay valid, so nothing breaks. The swap is lost, and the
+  source takes what is stored, only when the refresh token itself changed (the person connected
+  again, or Asana rotated it).
 - On a `401` the client tells it the token was rejected; the next call refreshes, and the client
   retries the request once.
 - A dead refresh token (`invalid_grant`) is `AuthError::Revoked`, which reaches your code as
