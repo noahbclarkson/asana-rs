@@ -136,3 +136,43 @@ fn a_bad_base_url_or_change_name_is_refused_when_building() {
     assert!(build("not a url", "ok_name").is_err());
     assert!(build(BASE, "bad name").is_err());
 }
+
+#[tokio::test(start_paused = true)]
+async fn a_path_parameter_cannot_walk_the_path() {
+    use asana_client::Error;
+    use asana_client::openapi::endpoints::{GetTaskForCustomId, GetUser};
+    use asana_client::openapi::ids::UserRef;
+
+    let transport = Scripted::new(|_, _| Ok(reply(200, task_body())));
+    let client = client(transport.clone());
+    let workspace = || "1200000000000001".parse().unwrap();
+    for custom_id in ["..", ".", ""] {
+        let error = client
+            .send(GetTaskForCustomId::builder(workspace(), custom_id).build())
+            .await
+            .unwrap_err();
+        assert!(
+            matches!(error, Error::InvalidRequest { .. }),
+            "{custom_id:?}: {error:?}"
+        );
+    }
+    let error = client
+        .send(GetUser::builder(UserRef::Email("..".into())).build())
+        .await
+        .unwrap_err();
+    assert!(matches!(error, Error::InvalidRequest { .. }), "{error:?}");
+    assert_eq!(transport.count(), 0);
+
+    // A dot inside a value is only a character.
+    client
+        .send(GetTaskForCustomId::builder(workspace(), "ACME-1.2").build())
+        .await
+        .unwrap();
+    assert!(
+        transport
+            .request(0)
+            .uri()
+            .path()
+            .ends_with("/tasks/custom_id/ACME-1%2E2")
+    );
+}

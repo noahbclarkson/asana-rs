@@ -125,5 +125,9 @@ These change what code built against an earlier revision of `main` sees or compi
 - `asana-webhooks` and `asana-client`: a time to live too long for the clock (`Duration::MAX`
   for "never forget") in `MemoryDedupe`, `MemoryHandshakeStore`, `SeenTasks` and
   `ManualClock::advance` now runs to the latest time there is instead of panicking.
+- `asana-client`: a request whose path has an empty segment, or one URL parsing reads as `.` or
+  `..` (a `custom_id` or a `UserRef::Email` of `..`, say), is refused with
+  `Error::InvalidRequest` before it is sent. Percent-encoding the dots did not stop this, because
+  URL parsing reads `%2E` as a dot, and the request went one level up the path.
 
 [0.1.0]: https://github.com/noahbclarkson/asana-rs/releases/tag/v0.1.0

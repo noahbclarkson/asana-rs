@@ -96,7 +96,8 @@ pub enum Error {
         /// The serialisation error.
         source: serde_json::Error,
     },
-    /// The request could not be built (a path that does not make a URL).
+    /// The request could not be built: a path that does not make a URL, or a path parameter that
+    /// is empty, `.` or `..` (which would send the request somewhere else). Nothing was sent.
     #[error("the request for {operation} could not be built: {reason}")]
     InvalidRequest {
         /// The operation's `operationId`.

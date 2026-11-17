@@ -138,8 +138,9 @@ impl Helpers {
         let path_segment = self.uses("path_segment").then(|| {
             quote! {
                 /// Percent-encodes a path parameter that is not a GID, so it stays one path segment.
-                /// Everything but ASCII letters, digits, `-`, `_` and `~` is encoded, dots included,
-                /// so `.` and `..` cannot walk the path.
+                /// Everything but ASCII letters, digits, `-`, `_` and `~` is encoded, dots included.
+                /// That alone does not stop `.` and `..`: URL parsing reads `%2E` as a dot. A client
+                /// must refuse a path with such a segment, or an empty one, as `asana-client` does.
                 fn path_segment(text: &str) -> String {
                     const HEX: &[u8; 16] = b"0123456789ABCDEF";
                     let mut encoded = String::with_capacity(text.len());

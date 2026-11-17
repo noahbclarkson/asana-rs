@@ -305,6 +305,12 @@ impl Client {
     /// Builds the URL and body once, before the first attempt.
     fn prepare<E: Endpoint>(&self, endpoint: &E) -> Result<Prepared, Error> {
         let path = endpoint.path();
+        if walks_or_empty(&path) {
+            return Err(Error::InvalidRequest {
+                operation: E::OPERATION_ID,
+                reason: "a path parameter is empty, `.` or `..`",
+            });
+        }
         let separator = if path.starts_with('/') { "" } else { "/" };
         let mut url = url::Url::parse(&format!("{}{separator}{path}", self.inner.base_url))
             .map_err(|_| Error::InvalidRequest {
@@ -477,6 +483,19 @@ struct PageEnvelope<T> {
     data: Vec<T>,
     #[serde(default)]
     next_page: Option<NextPage>,
+}
+
+/// Whether a request path has an empty segment, or one that URL parsing reads as `.` or `..`
+/// (`%2E` included) and would remove, sending the request somewhere other than its operation.
+fn walks_or_empty(path: &str) -> bool {
+    let path = path.split(['?', '#']).next().unwrap_or_default();
+    path.strip_prefix('/')
+        .unwrap_or(path)
+        .split('/')
+        .any(|segment| {
+            let segment = segment.to_ascii_lowercase().replace("%2e", ".");
+            segment.is_empty() || segment == "." || segment == ".."
+        })
 }
 
 /// The `http` crate's method for `method`, or `None` for a name it cannot carry.
