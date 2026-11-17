@@ -123,7 +123,7 @@ async fn work(client: Client, me: UserGid, mut deliveries: mpsc::Receiver<Delive
                 continue;
             }
         };
-        // One entry per task, the newest event winning.
+        // The newest event per task and section, per task and project, and per task's fields.
         for change in resolver.coalesce(fresh) {
             if let Err(error) = act(&client, change).await {
                 eprintln!("acting on a change failed: {error}");

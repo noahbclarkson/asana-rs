@@ -9,8 +9,8 @@ use asana_webhooks::{EventBatch, ManualClock, MemoryDedupe, ResourceGid};
 
 use crate::support::{Scripted, client, reply};
 use crate::{
-    ALICE, BOT, NOW, PROJECT, SECTION_A, SECTION_B, SECTION_C, TASK_A, TASK_B, changed, event,
-    query,
+    ALICE, BOT, NOW, PROJECT, SECTION_A, SECTION_B, SECTION_C, SECTION_D, TASK_A, TASK_B, changed,
+    event, query,
 };
 
 fn task(gid: &str) -> TaskGid {
@@ -112,8 +112,42 @@ async fn repeats_are_dropped_until_the_dedupe_forgets_them() {
     assert_eq!(resolver.accept(&delivery, NOW).await.unwrap().len(), 2);
 }
 
+/// The section a group is about, and whether the task entered it.
+fn section_state(group: &Coalesced) -> (SectionGid, bool) {
+    match group {
+        Coalesced::SectionEntered { section, .. } => (section.clone(), true),
+        Coalesced::SectionLeft { section, .. } => (section.clone(), false),
+        other => panic!("expected a section group, got {other:?}"),
+    }
+}
+
 #[test]
-fn a_move_through_two_sections_coalesces_into_the_newest() {
+fn a_move_within_one_project_reports_the_departure_then_the_arrival() {
+    let resolver = Resolver::builder().build();
+    // Asana sends the arrival first as often as not.
+    let events = vec![entered(TASK_A, SECTION_B, 0), left(TASK_A, SECTION_A, 0)];
+
+    let groups = resolver.coalesce(events);
+
+    let states: Vec<_> = groups.iter().map(section_state).collect();
+    assert_eq!(
+        states,
+        vec![(section(SECTION_A), false), (section(SECTION_B), true)],
+        "{groups:?}"
+    );
+    match &groups[1] {
+        Coalesced::SectionEntered {
+            task: moved, by, ..
+        } => {
+            assert_eq!(moved, &task(TASK_A));
+            assert_eq!(by.as_ref().map(Gid::as_str), Some(ALICE));
+        }
+        other => panic!("expected SectionEntered, got {other:?}"),
+    }
+}
+
+#[test]
+fn a_move_through_a_section_keeps_each_sections_newest_state() {
     let resolver = Resolver::builder().build();
     // A → B, then B → C a few seconds later.
     let events = vec![
@@ -123,35 +157,109 @@ fn a_move_through_two_sections_coalesces_into_the_newest() {
         entered(TASK_A, SECTION_C, 5),
     ];
 
-    let groups = resolver.coalesce(events);
+    let states: Vec<_> = resolver
+        .coalesce(events)
+        .iter()
+        .map(section_state)
+        .collect();
 
-    assert_eq!(groups.len(), 1, "{groups:?}");
-    match &groups[0] {
-        Coalesced::SectionEntered {
-            task: moved,
-            section: to,
-            by,
-            ..
-        } => {
-            assert_eq!(moved, &task(TASK_A));
-            assert_eq!(to, &section(SECTION_C));
-            assert_eq!(by.as_ref().map(Gid::as_str), Some(ALICE));
-        }
-        other => panic!("expected SectionEntered, got {other:?}"),
-    }
+    assert_eq!(
+        states,
+        vec![
+            (section(SECTION_A), false),
+            (section(SECTION_B), false),
+            (section(SECTION_C), true),
+        ]
+    );
 }
 
 #[test]
-fn at_the_same_instant_an_entry_beats_a_departure_whatever_the_order() {
+fn moves_in_two_projects_in_one_delivery_are_all_reported() {
     let resolver = Resolver::builder().build();
-    let events = vec![entered(TASK_A, SECTION_B, 0), left(TASK_A, SECTION_A, 0)];
+    // In one project the task goes from A to B; in another, from C to D, all in one delivery.
+    let events = vec![
+        left(TASK_A, SECTION_A, 0),
+        entered(TASK_A, SECTION_B, 0),
+        left(TASK_A, SECTION_C, 1),
+        entered(TASK_A, SECTION_D, 1),
+    ];
 
-    let groups = resolver.coalesce(events);
+    let states: Vec<_> = resolver
+        .coalesce(events)
+        .iter()
+        .map(section_state)
+        .collect();
+
+    assert_eq!(
+        states,
+        vec![
+            (section(SECTION_A), false),
+            (section(SECTION_B), true),
+            (section(SECTION_C), false),
+            (section(SECTION_D), true),
+        ]
+    );
+}
+
+#[test]
+fn a_task_removed_from_a_section_and_added_back_is_reported_as_entering_it() {
+    let seen = SeenTasks::new(Duration::from_secs(3600));
+    // The watcher or an earlier delivery already reported it in A.
+    assert!(seen.first_sighting(&task(TASK_A), &section(SECTION_A)));
+    let resolver = Resolver::builder().seen(seen.clone()).build();
+
+    let groups = resolver.coalesce(vec![
+        left(TASK_A, SECTION_A, 0),
+        entered(TASK_A, SECTION_A, 5),
+    ]);
 
     assert!(
-        matches!(&groups[..], [Coalesced::SectionEntered { section: to, .. }] if to == &section(SECTION_B)),
+        matches!(&groups[..], [Coalesced::SectionEntered { section: to, .. }] if to == &section(SECTION_A)),
         "{groups:?}"
     );
+    assert!(seen.contains(&task(TASK_A), &section(SECTION_A)));
+    // The same arrival again (from the watcher, say) is not news.
+    assert!(
+        resolver
+            .coalesce(vec![entered(TASK_A, SECTION_A, 6)])
+            .is_empty()
+    );
+}
+
+#[test]
+fn a_shared_seen_set_forgets_every_section_a_multi_homed_task_left() {
+    let seen = SeenTasks::new(Duration::from_secs(3600));
+    let resolver = Resolver::builder().seen(seen.clone()).build();
+    // Reported in A (one project) and C (another).
+    assert_eq!(
+        resolver
+            .coalesce(vec![
+                entered(TASK_A, SECTION_A, 0),
+                entered(TASK_A, SECTION_C, 0)
+            ])
+            .len(),
+        2
+    );
+
+    // One delivery moves it on in both projects.
+    let groups = resolver.coalesce(vec![
+        left(TASK_A, SECTION_A, 10),
+        entered(TASK_A, SECTION_B, 10),
+        left(TASK_A, SECTION_C, 11),
+        entered(TASK_A, SECTION_D, 11),
+    ]);
+    assert_eq!(groups.len(), 4, "{groups:?}");
+    assert!(!seen.contains(&task(TASK_A), &section(SECTION_A)));
+    assert!(!seen.contains(&task(TASK_A), &section(SECTION_C)));
+    assert!(seen.contains(&task(TASK_A), &section(SECTION_B)));
+    assert!(seen.contains(&task(TASK_A), &section(SECTION_D)));
+
+    // So a later return to either old section is reported.
+    let back = resolver.coalesce(vec![
+        entered(TASK_A, SECTION_A, 20),
+        entered(TASK_A, SECTION_C, 20),
+    ]);
+    assert_eq!(back.len(), 2, "{back:?}");
 }
 
 #[test]

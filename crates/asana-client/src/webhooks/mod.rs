@@ -108,7 +108,11 @@
 //!             // `confirm_in_section(&task_now, &section)`.
 //!             let _ = task;
 //!         }
-//!         other => panic!("expected one section entry, got {other:?}"),
+//!         // A move also reports the section the task left.
+//!         Coalesced::SectionLeft { section, .. } => {
+//!             assert_eq!(section.to_string(), "1201234567890401");
+//!         }
+//!         other => panic!("expected the move's two section events, got {other:?}"),
 //!     }
 //! }
 //!

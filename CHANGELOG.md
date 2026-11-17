@@ -60,4 +60,18 @@ The first release. Generated from Asana's OpenAPI document at upstream commit `6
   requests. There is also a guide, an OAuth guide, a webhooks guide and a coverage table under
   `docs/`, and examples in each crate.
 
+### Changed
+
+These change what code built against an earlier revision of `main` sees or compiles against.
+
+- `asana-client`: `Resolver::coalesce` groups section events per task *and section*, not per
+  task. A task in several projects is in several sections at once, and the old grouping kept only
+  the newest of all its section events, so in one delivery with moves in two projects only one
+  move survived, and a shared `SeenTasks` never forgot the sections it left. A move now gives a
+  `SectionLeft` for the old section and a `SectionEntered` for the new one (the departure first
+  at the same instant); a drag through several sections gives a `SectionLeft` for each section
+  passed. A task removed from a section and added back within a delivery is one
+  `SectionEntered`, reported even when a shared `SeenTasks` had seen the earlier arrival. Groups
+  at the same instant now come out departures first.
+
 [0.1.0]: https://github.com/noahbclarkson/asana-rs/releases/tag/v0.1.0

@@ -138,8 +138,8 @@ async fn worker(client: Client, me: UserGid, mut work: mpsc::Receiver<Delivery>)
                 batch.events
             }
         };
-        // One entry per task, the newest event winning: a drag through three sections is one
-        // `SectionEntered` for where it ended up.
+        // The newest event per task and section: a drag through three sections is a
+        // `SectionLeft` for each section it passed and a `SectionEntered` for where it ended up.
         for change in resolver.coalesce(fresh) {
             let Coalesced::SectionEntered { task, section, .. } = change else {
                 continue;

@@ -2,7 +2,9 @@
 //! the few shapes a receiver acts on.
 //!
 //! The resolver holds no policy of its own. It filters (the integration's own writes, stale
-//! events, repeats) and groups (newest per task), and the consumer decides what each group means.
+//! events, repeats) and groups, and the consumer decides what each group means.
+//!
+//! Section events are grouped per task and section; [`Resolver`] says why and what that gives.
 
 use std::collections::HashMap;
 use std::future::{Future, ready};
@@ -42,6 +44,26 @@ impl Dedupe for NoDedupe {
 ///
 /// Build one with [`Resolver::builder`]. It borrows its [`Dedupe`] store, so it is cheap to build
 /// for each batch.
+///
+/// # Section events are grouped per task and section
+///
+/// A section event names the task and the section, never the project the section belongs to, and
+/// a task can be in several projects at once, so a task can be in several sections at once. The
+/// resolver therefore keeps the newest event for each *task and section*, not for each task:
+///
+/// - A move within one project (out of "Doing", into "Done") gives a
+///   [`SectionLeft`](Coalesced::SectionLeft) for the old section and a
+///   [`SectionEntered`](Coalesced::SectionEntered) for the new one. At the same instant the
+///   departure comes first.
+/// - Moves in two projects in one delivery give a pair for each project; nothing is dropped.
+/// - A task that passes through a section within the batch (entered, then left) gives only the
+///   newest state of that section, here a `SectionLeft`.
+/// - A task removed from a section and added back within the batch gives one `SectionEntered`.
+///   With a shared [`SeenTasks`], the return counts as a new arrival: the departure is forgotten
+///   first, so the entry is reported even if the earlier arrival was.
+///
+/// With a shared [`SeenTasks`], every `SectionLeft` the resolver reports forgets that task in that
+/// section, and every `SectionEntered` is reported only when the set has not seen it.
 #[derive(Debug)]
 pub struct Resolver<'d, D = NoDedupe> {
     ignored: Vec<UserGid>,
@@ -183,13 +205,15 @@ impl<D: Dedupe> Resolver<'_, D> {
 }
 
 impl<D> Resolver<'_, D> {
-    /// Groups events into what they mean, the newest event winning for each task, ordered by when
-    /// each group's newest event happened.
+    /// Groups events into what they mean, ordered by when each group's newest event happened (at
+    /// the same instant, departures before arrivals, then in the order they came).
     ///
-    /// - A task's section: of all the task's section events, only the newest is kept, so a move
-    ///   from one section to another (or through several) becomes one
-    ///   [`SectionEntered`](Coalesced::SectionEntered) for where it ended up. At the same instant
-    ///   an entry beats a departure, because a move sends both.
+    /// - A task's place in each section: the newest of entered and left for that task and that
+    ///   section (see [`Resolver`]). A move gives a
+    ///   [`SectionLeft`](Coalesced::SectionLeft) for the old section and a
+    ///   [`SectionEntered`](Coalesced::SectionEntered) for the new one; a task in several
+    ///   projects keeps every project's moves. At the same instant in one section an entry beats
+    ///   a departure.
     /// - A task's membership of each project: the newest of added and removed.
     /// - A task's changed fields: one [`TaskChanged`](Coalesced::TaskChanged) with every field.
     /// - A deleted task: only [`Deleted`](Coalesced::Deleted), unless something happened to it
@@ -198,7 +222,8 @@ impl<D> Resolver<'_, D> {
     /// - Anything else: [`Other`](Coalesced::Other), unchanged.
     ///
     /// With a [`SeenTasks`] set, a section entry already in it is dropped (and a new one is
-    /// recorded), and a section departure removes the task from it.
+    /// recorded), and a section departure removes the task from it. An entry whose section the
+    /// task also left within the batch is a return, so it is forgotten first and reported.
     pub fn coalesce(&self, events: impl IntoIterator<Item = Event>) -> Vec<Coalesced> {
         let mut slots: HashMap<Slot, Entry> = HashMap::new();
         for (index, event) in events.into_iter().enumerate() {
@@ -209,9 +234,16 @@ impl<D> Resolver<'_, D> {
                 index,
             };
             match slots.get_mut(&slot) {
-                Some(existing) => existing.merge(rank, value),
+                Some(existing) => existing.merge(rank, departure, value),
                 None => {
-                    slots.insert(slot, Entry { rank, value });
+                    slots.insert(
+                        slot,
+                        Entry {
+                            rank,
+                            departed: departure,
+                            value,
+                        },
+                    );
                 }
             }
         }
@@ -232,22 +264,28 @@ impl<D> Resolver<'_, D> {
             })
             .map(|(_, entry)| entry)
             .collect();
-        entries.sort_by_key(|entry| (entry.rank.at, entry.rank.index));
+        entries.sort_by_key(|entry| entry.rank);
 
         entries
             .into_iter()
+            .filter(|entry| self.note_seen(entry))
             .map(|entry| entry.value)
-            .filter(|value| self.note_seen(value))
             .collect()
     }
 
     /// Records a section entry or departure in the seen-set; false when the entry was seen before.
-    fn note_seen(&self, value: &Coalesced) -> bool {
+    fn note_seen(&self, entry: &Entry) -> bool {
         let Some(seen) = &self.seen else {
             return true;
         };
-        match value {
-            Coalesced::SectionEntered { task, section, .. } => seen.first_sighting(task, section),
+        match &entry.value {
+            Coalesced::SectionEntered { task, section, .. } => {
+                if entry.departed {
+                    // It left this section within the batch and came back: a new arrival.
+                    seen.forget(task, section);
+                }
+                seen.first_sighting(task, section)
+            }
             Coalesced::SectionLeft { task, section, .. } => {
                 seen.forget(task, section);
                 true
@@ -261,7 +299,8 @@ impl<D> Resolver<'_, D> {
 #[derive(Clone, Debug, PartialEq)]
 #[non_exhaustive]
 pub enum Coalesced {
-    /// The task's newest section event put it in `section`.
+    /// The task's newest event for `section` put it there. A task in several projects can be in
+    /// several sections at once, so this says nothing about its other sections.
     SectionEntered {
         /// The task.
         task: TaskGid,
@@ -272,7 +311,8 @@ pub enum Coalesced {
         /// Who moved it; `None` for the system.
         by: Option<UserGid>,
     },
-    /// The task's newest section event took it out of `section`, without entering another.
+    /// The task's newest event for `section` took it out of it. A move between sections gives
+    /// this for the old section and a [`SectionEntered`](Self::SectionEntered) for the new one.
     SectionLeft {
         /// The task.
         task: TaskGid,
@@ -386,7 +426,8 @@ impl Coalesced {
 /// What a group is keyed by.
 #[derive(Clone, PartialEq, Eq, Hash)]
 enum Slot {
-    Section(TaskGid),
+    /// A task's place in one section: a task in several projects is in several sections.
+    Section(TaskGid, SectionGid),
     Project(TaskGid, ProjectGid),
     Changed(TaskGid),
     Story(StoryGid),
@@ -398,7 +439,7 @@ impl Slot {
     /// The task a task-scoped group belongs to; a deletion's own slot is not one.
     fn task(&self) -> Option<&TaskGid> {
         match self {
-            Self::Section(task) | Self::Project(task, _) | Self::Changed(task) => Some(task),
+            Self::Section(task, _) | Self::Project(task, _) | Self::Changed(task) => Some(task),
             _ => None,
         }
     }
@@ -415,13 +456,16 @@ struct Rank {
 
 struct Entry {
     rank: Rank,
+    /// Whether any event merged into this slot was a departure.
+    departed: bool,
     value: Coalesced,
 }
 
 impl Entry {
     /// Takes in a newer event for the same slot: changed fields accumulate, anything else is
     /// replaced by the newer value.
-    fn merge(&mut self, rank: Rank, value: Coalesced) {
+    fn merge(&mut self, rank: Rank, departure: bool, value: Coalesced) {
+        self.departed |= departure;
         let newer = rank > self.rank;
         match (&mut self.value, value) {
             (
@@ -471,7 +515,7 @@ fn classify(event: Event, index: usize) -> (Slot, bool, Coalesced) {
     let at = event.created_at;
     let by = event.actor().cloned();
     if let Some((task, section)) = event.section_entered() {
-        let slot = Slot::Section(task.clone());
+        let slot = Slot::Section(task.clone(), section.clone());
         return (
             slot,
             false,
@@ -484,7 +528,7 @@ fn classify(event: Event, index: usize) -> (Slot, bool, Coalesced) {
         );
     }
     if let Some((task, section)) = event.section_left() {
-        let slot = Slot::Section(task.clone());
+        let slot = Slot::Section(task.clone(), section.clone());
         return (
             slot,
             true,

@@ -243,9 +243,10 @@ Events are compact (the resource's GID and type, the parent for an `added` or `r
 changed field's name), can arrive minutes late, can repeat when Asana retries, and include your
 own integration's writes. Asana expects integrations to re-read the resource. The `Resolver`
 drops events by your own user, events older than an age limit, and repeats (by `Event::key`,
-through a `Dedupe` store; `MemoryDedupe` in one process), then coalesces what is left into one
-entry per task with the newest event winning: `SectionEntered`, `SectionLeft`, `TaskChanged`,
-`TaskAdded`, `TaskRemoved`, `StoryAdded`, `Deleted`, or `Other`. From
+through a `Dedupe` store; `MemoryDedupe` in one process), then coalesces what is left, the
+newest event winning within each group: `SectionEntered` or `SectionLeft` per task and section,
+`TaskAdded` or `TaskRemoved` per task and project, one `TaskChanged` per task with every changed
+field, `StoryAdded` per story, `Deleted`, or `Other`. From
 `crates/asana-webhooks-axum/examples/receiver.rs`:
 
 ```rust
@@ -276,7 +277,7 @@ async fn work(client: Client, me: UserGid, mut deliveries: mpsc::Receiver<Delive
                 continue;
             }
         };
-        // One entry per task, the newest event winning.
+        // The newest event per task and section, per task and project, and per task's fields.
         for change in resolver.coalesce(fresh) {
             if let Err(error) = act(&client, change).await {
                 eprintln!("acting on a change failed: {error}");
@@ -307,7 +308,19 @@ async fn act(client: &Client, change: Coalesced) -> Result<(), asana_client::Err
 
 A move between sections arrives as an `added` event on the task with the new section as parent,
 and usually a `removed` from the old one. The event does not say which project the section is in,
-and the task may have moved again since, which is why `SectionEntered` is confirmed with
+and a task can be in several projects, so in several sections at once. Coalescing is therefore per
+section, not per task:
+
+| In one delivery | The resolver reports |
+|---|---|
+| A move from "Doing" to "Done" | `SectionLeft` for "Doing", then `SectionEntered` for "Done" |
+| Moves in two projects ("Doing" to "Done" in one, "Backlog" to "Ready" in the other) | Both pairs: two `SectionLeft` and two `SectionEntered` |
+| A drag through "Doing" on the way to "Done" | `SectionLeft` for each section passed, `SectionEntered` for "Done" |
+| Removed from "Doing" and added back | One `SectionEntered` for "Doing" |
+
+With a shared `SeenTasks`, every reported `SectionLeft` forgets that task in that section, and a
+task removed and added back within one delivery counts as a new arrival, so a return is reported.
+The task may have moved again since the events, which is why `SectionEntered` is confirmed with
 `reread` and `confirm_in_section` before acting. Story events can name a story Asana has since
 consolidated away, and typing in a text field can produce several near-identical `changed`
 events; coalescing folds those into one entry. Events that could not be read are kept in

@@ -34,6 +34,7 @@ pub(crate) const TASK_C: &str = "1201234567890125";
 pub(crate) const SECTION_A: &str = "1201234567890401";
 pub(crate) const SECTION_B: &str = "1201234567890402";
 pub(crate) const SECTION_C: &str = "1201234567890403";
+pub(crate) const SECTION_D: &str = "1201234567890404";
 pub(crate) const ALICE: &str = "1201234567890001";
 pub(crate) const BOT: &str = "1201234567890999";
 
