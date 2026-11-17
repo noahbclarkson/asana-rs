@@ -460,13 +460,24 @@ impl EventBatch {
     }
 }
 
-/// Size limits on what a receiver accepts. `Limits::default()` is 256 KiB and 1,000 events.
+/// Size limits on what a receiver accepts. `Limits::default()` is 256 KiB and 10,000 events.
+///
+/// Asana documents no largest delivery. The body cap is what bounds one: the body is read before
+/// its signature can be checked, so the cap is how much an unauthenticated caller can make the
+/// receiver hold. Refusing a real delivery is permanent, though: Asana sends the same batch again
+/// for 24 hours, then deletes the webhook. So the event cap is set where the body cap always binds
+/// first (an event is at least about 100 bytes, so 256 KiB holds under 3,000), and only guards
+/// the parser when the body cap is raised; and the [`Receiver`](crate::Receiver) logs a refused
+/// delivery at error level and one over half the body cap as a warning. Raise
+/// [`max_body_bytes`](Self::max_body_bytes) for webhooks on resources that change in bulk (a
+/// project whose thousands of tasks move at once), and watch for those warnings.
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[non_exhaustive]
 pub struct Limits {
     /// The longest body accepted, in bytes. Default 256 KiB (262,144).
     pub max_body_bytes: usize,
-    /// The most events accepted in one delivery. Default 1,000.
+    /// The most events accepted in one delivery. Default 10,000, more than the default body cap
+    /// can hold.
     pub max_events: usize,
 }
 
@@ -474,7 +485,7 @@ impl Default for Limits {
     fn default() -> Self {
         Self {
             max_body_bytes: 256 * 1024,
-            max_events: 1_000,
+            max_events: 10_000,
         }
     }
 }

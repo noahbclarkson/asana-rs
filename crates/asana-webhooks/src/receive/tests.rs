@@ -230,6 +230,32 @@ fn a_failing_lookup_is_503_so_asana_retries() {
 }
 
 #[test]
+fn with_the_default_limits_the_body_cap_binds_before_the_event_cap() {
+    let (queue, mut work) = mpsc::channel::<Delivery>(4);
+    let receiver = Receiver::new(MemoryHandshakeStore::new(), MemorySecrets::new(), queue);
+    let route = RouteKey::generate();
+    let secret = WebhookSecret::from_bytes(b"s".to_vec());
+    receiver.secrets().insert(&route, secret.clone());
+    // The smallest events Asana sends, as many as the default body cap holds: a bulk move.
+    let event = r#"{"action":"added","created_at":"2026-03-02T09:15:00.000Z","resource":{"gid":"1","resource_type":"task"}}"#;
+    let limits = receiver.current_limits().clone();
+    let count = (limits.max_body_bytes - 16) / (event.len() + 1);
+    let body = format!("{{\"events\":[{}]}}", vec![event; count].join(","));
+    assert!(body.len() <= limits.max_body_bytes);
+    assert!(count < limits.max_events, "{count} events");
+
+    let signature = sign(&secret, body.as_bytes()).to_hex();
+    let reply = block_on(receiver.receive(
+        &route.to_string(),
+        &[("X-Hook-Signature", signature.as_str())],
+        body.as_bytes(),
+    ));
+
+    assert_eq!(reply.status(), 200);
+    assert_eq!(work.try_recv().unwrap().batch.events.len(), count);
+}
+
+#[test]
 fn bodies_too_large_or_too_many_events_are_413() {
     let (queue, mut work) = mpsc::channel::<Delivery>(4);
     let limits = Limits {

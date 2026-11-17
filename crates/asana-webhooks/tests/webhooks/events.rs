@@ -287,7 +287,6 @@ fn a_body_that_is_not_a_batch_fails_whole() {
     );
 
     let mut small = Limits::default();
-    assert_eq!(small.max_events, 1_000);
     small.max_events = 2;
     let error = decode(b"{\"events\":[1,2,3]}", &small).unwrap_err();
     assert_eq!(error, DecodeError::TooManyEvents { count: 3, limit: 2 });

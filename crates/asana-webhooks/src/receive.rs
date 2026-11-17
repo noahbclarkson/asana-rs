@@ -18,7 +18,7 @@
 //! | a delivery on a route the lookup does not know | `404`, which Asana retries |
 //! | a delivery on a route the consumer [retired](RouteSecret::Retired) | `410`: Asana deletes the webhook |
 //! | the lookup fails | `503`, which Asana retries |
-//! | a verified body that is not an event batch | `400` (`413` for too many events) |
+//! | a verified body that is not an event batch | `400` (`413` for more than [`Limits::max_events`]) |
 //! | a heartbeat | `200`, without reaching the sink |
 //! | a batch the sink took | `200` |
 //! | a batch the sink is too [`Busy`] for | `503`, which Asana retries |
@@ -62,7 +62,7 @@ use tokio::sync::mpsc;
 use tracing::Instrument as _;
 use tracing::field::Empty;
 
-use crate::events::{EventBatch, Limits};
+use crate::events::{DecodeError, EventBatch, Limits};
 use crate::handshake::{HandshakeStore, RouteDigest, RouteKey, StoreError};
 use crate::headers::HeaderLookup;
 use crate::inbound::{Inbound, InboundError, classify_with};
@@ -275,7 +275,7 @@ where
 {
     /// A receiver capturing handshakes into `handshakes`, verifying deliveries with the secrets
     /// `secrets` finds, and handing verified batches to `sink`, with the default [`Limits`]
-    /// (256 KiB bodies, 1,000 events).
+    /// (256 KiB bodies, 10,000 events).
     #[must_use]
     pub fn new(handshakes: H, secrets: L, sink: S) -> Self {
         Self {
@@ -364,7 +364,17 @@ where
         span.record("route", tracing::field::debug(&route));
         let inbound = match classify_with(headers, body, &self.limits) {
             Ok(inbound) => inbound,
-            Err(refused) => return Reply::status_only(inbound_status(&refused)),
+            Err(refused) => {
+                if let InboundError::BodyTooLarge { len, limit } = refused {
+                    tracing::error!(
+                        len,
+                        limit,
+                        "a delivery over the body limit was refused; if it is Asana's, it will be \
+                         refused on every retry and the webhook deleted: raise max_body_bytes"
+                    );
+                }
+                return Reply::status_only(inbound_status(&refused));
+            }
         };
         match inbound {
             Inbound::Handshake { secret } => {
@@ -398,9 +408,27 @@ where
                     Ok(verified) => verified,
                     Err(refused) => return Reply::status_only(refused.status_hint()),
                 };
+                if body.len() > self.limits.max_body_bytes / 2 {
+                    tracing::warn!(
+                        len = body.len(),
+                        limit = self.limits.max_body_bytes,
+                        "a verified delivery is over half the body limit; a larger one would be \
+                         refused for good"
+                    );
+                }
                 let batch = match verified.decode_with(&self.limits) {
                     Ok(batch) => batch,
-                    Err(refused) => return Reply::status_only(refused.status_hint()),
+                    Err(refused) => {
+                        if let DecodeError::TooManyEvents { count, limit } = refused {
+                            tracing::error!(
+                                count,
+                                limit,
+                                "a verified delivery over the event limit was refused; Asana will \
+                                 retry it and then delete the webhook: raise max_events"
+                            );
+                        }
+                        return Reply::status_only(refused.status_hint());
+                    }
                 };
                 span.record("events", batch.events.len() + batch.unreadable.len());
                 if !batch.unreadable.is_empty() {

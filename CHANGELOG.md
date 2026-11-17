@@ -149,5 +149,9 @@ These change what code built against an earlier revision of `main` sees or compi
 - `asana-webhooks-axum`: `router` works nested under a prefix with path parameters of its own
   (`/tenants/{tenant}/hooks`); it answered every handshake and delivery `500` there, so webhook
   creation failed. A trailing `/` on its base path is ignored, as in the actix adapter.
+- `asana-webhooks`: `Limits::default().max_events` is 10,000 (was 1,000), above what the default
+  256 KiB body cap can hold, so a real burst of small events is no longer refused `413` for
+  good. The `Receiver` logs a refused over-large delivery at error level and a verified one over
+  half the body cap as a warning, and `Limits` documents the basis for its defaults.
 
 [0.1.0]: https://github.com/noahbclarkson/asana-rs/releases/tag/v0.1.0

@@ -176,12 +176,20 @@ What the `Receiver` answers (its module documentation has the same table):
 | a delivery on a route the `SecretLookup` does not know | `404`, which Asana retries |
 | a delivery on a route the lookup says is retired | `410`: Asana deletes the webhook |
 | the lookup fails | `503`, which Asana retries |
-| a verified body that is not an event batch | `400` (`413` for too many events) |
+| a verified body that is not an event batch | `400` (`413` for over 10,000 events unless set) |
 | a heartbeat | `200`, without reaching the sink |
 | a batch the sink took | `200` |
 | a batch the sink is too busy for | `503`, which Asana retries |
 
 Neither the secret, the signature nor the body is ever logged.
+
+A `413` is not something a retry fixes: Asana sends the same batch again for 24 hours, then
+deletes the webhook. Asana documents no largest delivery, so the body cap (256 KiB by default) is
+the one limit that binds; it is read before the signature is checked, which is why there is one.
+The event cap is set above what the default body cap can hold. The `Receiver` logs a refused
+over-large delivery at error level and a verified one over half the body cap as a warning; raise
+`Limits::max_body_bytes` for webhooks on resources that change in bulk, such as a project whose
+tasks are moved thousands at a time.
 
 ## Heartbeats
 
