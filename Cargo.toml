@@ -33,7 +33,7 @@ futures-util = { version = "0.3", default-features = false, features = ["std"] }
 hex = "0.4"
 hmac = "0.13"
 http = "1"
-rand = "0.9"
+rand = "0.10"
 reqwest = { version = "0.13", default-features = false, features = ["rustls"] }
 rust_decimal = { version = "1.43", default-features = false, features = ["std"] }
 secrecy = "0.10"
