@@ -295,7 +295,9 @@ async fn fetch(
         Err(error) => return Err(error),
     };
     let sync = raw.sync.require("sync")?;
-    let EventBatch { events, unreadable } = EventBatch::from_values(raw.data);
+    let EventBatch {
+        events, unreadable, ..
+    } = EventBatch::from_values(raw.data);
     Ok(EventsPage {
         events,
         unreadable,

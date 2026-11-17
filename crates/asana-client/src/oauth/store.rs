@@ -47,6 +47,7 @@ impl StoredTokens {
 
 /// The outcome of [`TokenStore::replace`].
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[non_exhaustive]
 pub enum Replaced {
     /// The stored refresh token was the expected one, and the new tokens are now stored.
     Saved,

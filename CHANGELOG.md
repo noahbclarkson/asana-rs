@@ -106,5 +106,21 @@ These change what code built against an earlier revision of `main` sees or compi
   `Client::stream`, `Request::stream` and `Request::pages` keep a page size the caller set
   (`limit`) and ask for 100 only when none was set, and `collect_max` keeps its pages within it.
   Before, they always asked for 100.
+- `#[non_exhaustive]` on the public types Asana or this workspace will grow, so that adding a
+  field, an action or a method is not a breaking change. A struct expression of one of the
+  structs no longer compiles outside its crate, a pattern needs `..`, and a `match` on one of the
+  enums needs a catch-all arm.
+  - `asana-webhooks`: the structs `Event`, `Change`, `ChangeValue`, `EventBatch`,
+    `UnreadableEvent`, `ResourceRef` and `EventUser`; the enums `EventAction`, `Inbound`,
+    `HandshakeOutcome` and `RouteSecret`. New constructors: `Event::new(resource, action,
+    created_at)` (then set `user`, `parent` and `change`), `Change::new(field, action)`,
+    `ChangeValue::from_json(raw)`, `EventUser::new(gid)` and `EventBatch::new(events)`;
+    `ResourceRef::from(gid)` already existed. `EventAction`'s documentation says to match a value
+    it does not name with `as_str()`, because a value Asana adds may later get its own variant
+    and stop arriving as `Unknown`.
+  - `asana-client`: the enums `Auth` (build it with its constructors) and `Replaced`.
+  - `asana-openapi`: the struct `Part` (new: `Part::new(name, value)`) and the enums `Method`,
+    `Envelope` and `PartValue`. The client refuses, before sending, a method the `http` crate
+    cannot carry and a multipart part of a kind it cannot write.
 
 [0.1.0]: https://github.com/noahbclarkson/asana-rs/releases/tag/v0.1.0

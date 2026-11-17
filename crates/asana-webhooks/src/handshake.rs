@@ -209,6 +209,7 @@ pub trait HandshakeStore: Send + Sync {
 
 /// How a handshake ended, from the creator's side.
 #[derive(Debug)]
+#[non_exhaustive]
 pub enum HandshakeOutcome {
     /// The secret the receiver captured is the one Asana returned: keep it with the webhook.
     Established(WebhookSecret),

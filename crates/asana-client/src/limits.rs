@@ -63,9 +63,8 @@ impl Admission {
     pub(crate) fn add(&mut self, method: Method, operation: &str) {
         match method {
             Method::Get => self.reads = self.reads.saturating_add(1),
-            Method::Post | Method::Put | Method::Delete => {
-                self.writes = self.writes.saturating_add(1);
-            }
+            // Anything but a read counts as a write, a method Asana adds included.
+            _ => self.writes = self.writes.saturating_add(1),
         }
         if SEARCH_OPERATIONS.contains(&operation) {
             self.searches = self.searches.saturating_add(1);

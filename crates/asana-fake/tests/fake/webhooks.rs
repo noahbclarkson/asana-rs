@@ -58,7 +58,7 @@ impl Receiver {
                     Err(_) => StatusCode::UNAUTHORIZED,
                 }
             }
-            Err(_) => StatusCode::BAD_REQUEST,
+            Ok(_) | Err(_) => StatusCode::BAD_REQUEST,
         };
         http::Response::builder()
             .status(status)

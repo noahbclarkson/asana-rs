@@ -307,7 +307,8 @@ async fn confirm(
                 cleanup,
             })
         }
-        HandshakeOutcome::Rejected => {
+        // Rejected, or an outcome this client does not know: either way not established.
+        _ => {
             let cleanup = clean_up(client, webhook_gid).await;
             Err(WebhookError::Rejected { cleanup })
         }

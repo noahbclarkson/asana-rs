@@ -365,3 +365,38 @@ fn age_is_measured_from_created_at() {
     assert!(!event.is_older_than(std::time::Duration::from_secs(2 * 3600), now));
     assert!(event.age(datetime!(2026-03-02 08:59:00 UTC)).is_negative());
 }
+
+#[test]
+fn events_are_built_with_constructors_and_read_back_as_asana_writes_them() {
+    use asana_webhooks::{
+        Change, ChangeValue, EventAction, EventBatch, EventUser, ResourceGid, ResourceRef,
+    };
+
+    let task = ResourceRef::from(ResourceGid::new("task", "1200000000000001").unwrap());
+    let at = time::macros::datetime!(2026-03-02 09:15 UTC);
+    let mut event = Event::new(task, EventAction::Changed, at);
+    event.user = Some(EventUser::new("1200000000000002".parse().unwrap()));
+    let mut change = Change::new("assignee", EventAction::Changed);
+    change.new_value = Some(ChangeValue::from_json(serde_json::json!({
+        "gid": "1200000000000003",
+        "resource_type": "user"
+    })));
+    event.change = Some(change);
+
+    let json = serde_json::to_string(&event).unwrap();
+    let back: Event = serde_json::from_str(&json).unwrap();
+    assert_eq!(back, event);
+    assert_eq!(
+        back.change
+            .as_ref()
+            .and_then(|change| change.new_value.as_ref())
+            .and_then(|value| value.resource.as_ref())
+            .map(|resource| resource.kind().as_str().to_owned()),
+        Some("user".to_owned())
+    );
+
+    let batch = EventBatch::new(vec![event]);
+    assert_eq!(batch.events.len(), 1);
+    assert!(batch.unreadable.is_empty());
+    assert!(!batch.is_heartbeat());
+}

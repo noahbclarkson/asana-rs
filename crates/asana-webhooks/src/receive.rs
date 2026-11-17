@@ -84,6 +84,7 @@ pub trait SecretLookup: Send + Sync {
 }
 
 /// What a [`SecretLookup`] knows about a route.
+#[non_exhaustive]
 pub enum RouteSecret {
     /// A live webhook: its deliveries are verified with this secret.
     Active(WebhookSecret),

@@ -126,7 +126,7 @@ fn change_from_json(value: &Value) -> Result<Change, UnreadableReason> {
 }
 
 /// Never fails: a value that does not name a resource is simply kept as raw JSON.
-fn change_value_from_json(value: &Value) -> ChangeValue {
+pub(crate) fn change_value_from_json(value: &Value) -> ChangeValue {
     let resource = value.as_object().and_then(|object| {
         let gid = object.get("gid")?.as_str()?;
         let resource_type = object.get("resource_type")?.as_str()?;

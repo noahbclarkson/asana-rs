@@ -334,7 +334,10 @@ impl Client {
                 )
             }
             RequestBody::Multipart(parts) => {
-                let form = multipart::encode(&parts);
+                let form = multipart::encode(&parts).ok_or(Error::InvalidRequest {
+                    operation: E::OPERATION_ID,
+                    reason: "its form holds a part of a kind this client cannot write",
+                })?;
                 let content_type = HeaderValue::try_from(form.content_type).map_err(|_| {
                     Error::InvalidRequest {
                         operation: E::OPERATION_ID,
@@ -348,7 +351,10 @@ impl Client {
         };
         Ok(Prepared {
             operation: E::OPERATION_ID,
-            method: http_method(E::METHOD),
+            method: http_method(E::METHOD).ok_or(Error::InvalidRequest {
+                operation: E::OPERATION_ID,
+                reason: "its method is not a valid HTTP method",
+            })?,
             url: url.into(),
             content_type,
             body,
@@ -421,7 +427,8 @@ fn decode_output<E: Endpoint>(body: &[u8]) -> Result<E::Output, Error> {
         Envelope::Data => {
             decode_json::<DataEnvelope<E::Output>>(E::OPERATION_ID, body).map(|data| data.data)
         }
-        Envelope::Whole => decode_json::<E::Output>(E::OPERATION_ID, body),
+        // `Whole`, and any envelope this client does not know: the body as it is.
+        _ => decode_json::<E::Output>(E::OPERATION_ID, body),
     };
     match decoded {
         Ok(output) => Ok(output),
@@ -438,7 +445,7 @@ fn empty_output<T: DeserializeOwned>(body: &[u8], envelope: Envelope) -> Option<
         match envelope {
             Envelope::Data if value.as_object().is_some_and(serde_json::Map::is_empty) => value,
             Envelope::Data => value.get("data")?.clone(),
-            Envelope::Whole => value,
+            _ => value,
         }
     };
     let empty = inner.is_null() || inner.as_object().is_some_and(serde_json::Map::is_empty);
@@ -472,13 +479,15 @@ struct PageEnvelope<T> {
     next_page: Option<NextPage>,
 }
 
-fn http_method(method: Method) -> http::Method {
-    match method {
+/// The `http` crate's method for `method`, or `None` for a name it cannot carry.
+fn http_method(method: Method) -> Option<http::Method> {
+    Some(match method {
         Method::Get => http::Method::GET,
         Method::Post => http::Method::POST,
         Method::Put => http::Method::PUT,
         Method::Delete => http::Method::DELETE,
-    }
+        other => return http::Method::from_bytes(other.as_str().as_bytes()).ok(),
+    })
 }
 
 fn millis(duration: Duration) -> u64 {

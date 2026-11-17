@@ -101,6 +101,8 @@
 //!                 Err(refused) => Answer::status(refused.status_hint()),
 //!             }
 //!         }
+//!         // `Inbound` may gain kinds of request; one this code does not know is refused.
+//!         Ok(_) => Answer::status(400),
 //!     }
 //! }
 //!

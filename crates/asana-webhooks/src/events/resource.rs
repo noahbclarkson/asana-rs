@@ -301,7 +301,10 @@ from_gid!(
 ///
 /// Events are compact: re-read the resource for anything more, because it may have changed again
 /// since the event.
+///
+/// Build one from its GID with `ResourceRef::from(gid)` and set the rest.
 #[derive(Clone, Debug, PartialEq, Eq)]
+#[non_exhaustive]
 pub struct ResourceRef {
     /// The resource's kind and GID.
     pub gid: ResourceGid,
@@ -338,9 +341,18 @@ impl From<ResourceGid> for ResourceRef {
 
 /// The user who caused an event. Absent (`null`) for changes the system made itself.
 #[derive(Clone, Debug, PartialEq, Eq)]
+#[non_exhaustive]
 pub struct EventUser {
     /// The user's GID.
     pub gid: UserGid,
     /// The user's name, when sent.
     pub name: Option<String>,
+}
+
+impl EventUser {
+    /// The user with this GID, without a name.
+    #[must_use]
+    pub fn new(gid: UserGid) -> Self {
+        Self { gid, name: None }
+    }
 }

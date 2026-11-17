@@ -26,7 +26,13 @@ pub use key::EventKey;
 pub use resource::{EventUser, ResourceGid, ResourceRef, ResourceType};
 
 /// What happened to an event's resource, or (in [`Change::action`]) to one of its fields.
+///
+/// Asana adds actions, so a value this crate does not name yet is kept in
+/// [`Unknown`](Self::Unknown), and a later release may give it a variant of its own. Match such a
+/// value with [`as_str`](Self::as_str), which keeps matching when that happens, rather than with
+/// `Unknown("…")`, which stops.
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[non_exhaustive]
 pub enum EventAction {
     /// `added`: created, or added to the event's `parent`.
     Added,
@@ -95,6 +101,7 @@ impl<'de> Deserialize<'de> for EventAction {
 /// value carries its `enum_value`, `number_value`, …); the raw JSON keeps all of it. A JSON `null`
 /// (a cleared assignee, say) is kept as `raw: null` with no resource.
 #[derive(Clone, Debug, PartialEq)]
+#[non_exhaustive]
 pub struct ChangeValue {
     /// The value as Asana sent it.
     pub raw: Value,
@@ -104,6 +111,7 @@ pub struct ChangeValue {
 
 /// How a `changed` event's resource changed.
 #[derive(Clone, Debug, PartialEq)]
+#[non_exhaustive]
 pub struct Change {
     /// The field that changed, for example `assignee`, `due_on`, `custom_fields` or `name`.
     pub field: String,
@@ -118,11 +126,51 @@ pub struct Change {
     pub removed_value: Option<ChangeValue>,
 }
 
+impl ChangeValue {
+    /// A value as Asana sent it, with the resource it names read from it when it is an object
+    /// with a `gid` and a `resource_type`.
+    #[must_use]
+    pub fn from_json(raw: Value) -> Self {
+        parse::change_value_from_json(&raw)
+    }
+}
+
+impl Change {
+    /// A change of `field` by `action`, with no values; set them on the result.
+    #[must_use]
+    pub fn new(field: impl Into<String>, action: EventAction) -> Self {
+        Self {
+            field: field.into(),
+            action,
+            new_value: None,
+            added_value: None,
+            removed_value: None,
+        }
+    }
+}
+
 /// One change observed by a webhook.
 ///
 /// Implements `Serialize` and `Deserialize` in Asana's own shape, so an event can be queued or
 /// stored as JSON and read back.
+///
+/// Asana adds fields to events, so this is `#[non_exhaustive]`: build one with
+/// [`Event::new`] and set the other fields, or read it from JSON. A struct expression does not
+/// compile outside this crate:
+///
+/// ```compile_fail
+/// # use asana_webhooks::{Event, EventAction, ResourceGid, ResourceRef};
+/// let event = Event {
+///     user: None,
+///     resource: ResourceRef::from(ResourceGid::new("task", "1200000000000001").unwrap()),
+///     parent: None,
+///     action: EventAction::Changed,
+///     change: None,
+///     created_at: time::OffsetDateTime::UNIX_EPOCH,
+/// };
+/// ```
 #[derive(Clone, Debug, PartialEq)]
+#[non_exhaustive]
 pub struct Event {
     /// Who caused it; `None` for changes the system made.
     pub user: Option<EventUser>,
@@ -137,6 +185,22 @@ pub struct Event {
     pub change: Option<Change>,
     /// When it happened. Asana delivers most events within a minute, some much later.
     pub created_at: OffsetDateTime,
+}
+
+impl Event {
+    /// An event: `action` happened to `resource` at `created_at`, with no user (the system), no
+    /// parent and no change; set those on the result.
+    #[must_use]
+    pub fn new(resource: ResourceRef, action: EventAction, created_at: OffsetDateTime) -> Self {
+        Self {
+            user: None,
+            resource,
+            parent: None,
+            action,
+            change: None,
+            created_at,
+        }
+    }
 }
 
 impl Event {
@@ -311,6 +375,7 @@ pub enum UnreadableReason {
 
 /// An event that could not be read, kept so that nothing is dropped silently.
 #[derive(Clone, Debug, PartialEq)]
+#[non_exhaustive]
 pub struct UnreadableEvent {
     /// Its position in the delivery's `events` array.
     pub index: usize,
@@ -320,8 +385,10 @@ pub struct UnreadableEvent {
     pub reason: UnreadableReason,
 }
 
-/// The events of one delivery, in the order Asana sent them.
+/// The events of one delivery, in the order Asana sent them. Build one with
+/// [`EventBatch::new`] or [`EventBatch::from_values`].
 #[derive(Clone, Debug, Default, PartialEq)]
+#[non_exhaustive]
 pub struct EventBatch {
     /// The events that were read.
     pub events: Vec<Event>,
@@ -330,6 +397,16 @@ pub struct EventBatch {
 }
 
 impl EventBatch {
+    /// A batch of events that were all read, for events that arrived some other way than a
+    /// delivery (a queue of stored events, say).
+    #[must_use]
+    pub fn new(events: Vec<Event>) -> Self {
+        Self {
+            events,
+            unreadable: Vec::new(),
+        }
+    }
+
     /// Whether this is a heartbeat: a delivery with no events, sent when the webhook is created and
     /// every eight hours after. Answer it `200` like any other delivery, or Asana deletes the
     /// webhook after 24 hours without a success.

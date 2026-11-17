@@ -333,7 +333,7 @@ fn upload_an_attachment_as_multipart_parts() {
         .iter()
         .map(|part| match &part.value {
             PartValue::Text(text) => (part.name.as_ref(), text.as_str()),
-            PartValue::File { .. } => panic!("a link sends no file"),
+            other => panic!("a link sends only text, not {other:?}"),
         })
         .collect();
     assert_eq!(

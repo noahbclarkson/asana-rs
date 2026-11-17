@@ -18,8 +18,10 @@ use secrecy::{ExposeSecret, SecretString};
 
 use crate::transport::BoxError;
 
-/// The credential the client sends.
+/// The credential the client sends. Build one with [`Auth::personal_access_token`],
+/// [`Auth::service_account`] or [`Auth::oauth`].
 #[derive(Clone)]
+#[non_exhaustive]
 pub enum Auth {
     /// A personal access token: the user's own access.
     PersonalAccessToken(SecretString),

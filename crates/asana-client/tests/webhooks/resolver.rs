@@ -22,10 +22,7 @@ fn section(gid: &str) -> SectionGid {
 }
 
 fn batch(events: Vec<asana_webhooks::Event>) -> EventBatch {
-    EventBatch {
-        events,
-        ..EventBatch::default()
-    }
+    EventBatch::new(events)
 }
 
 fn entered(task: &str, section: &str, seconds: i64) -> asana_webhooks::Event {

@@ -12,6 +12,7 @@ use crate::signing::{Signature, WebhookSecret};
 
 /// A request to a webhook target, classified by its headers.
 #[derive(Debug)]
+#[non_exhaustive]
 pub enum Inbound<'a> {
     /// Asana is creating a webhook: answer with [`handshake_reply`](crate::handshake_reply) at once,
     /// after saving the secret where the creator will find it.

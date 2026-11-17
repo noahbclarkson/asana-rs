@@ -89,7 +89,7 @@
 //!    "resource": {"gid": "1201234567890123", "resource_type": "task"},
 //!    "parent": {"gid": "1201234567890402", "resource_type": "section"}}
 //! ]"#)?;
-//! let batch = EventBatch { events, ..EventBatch::default() };
+//! let batch = EventBatch::new(events);
 //!
 //! let dedupe = MemoryDedupe::new();
 //! let resolver = Resolver::builder()

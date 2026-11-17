@@ -15,8 +15,9 @@ pub(crate) struct Form {
     pub(crate) body: Bytes,
 }
 
-/// Encodes `parts` with a fresh random boundary.
-pub(crate) fn encode(parts: &[Part]) -> Form {
+/// Encodes `parts` with a fresh random boundary, or `None` when a part is of a kind this client
+/// cannot write.
+pub(crate) fn encode(parts: &[Part]) -> Option<Form> {
     let boundary: String = rand::rng()
         .sample_iter(Alphanumeric)
         .take(40)
@@ -25,12 +26,13 @@ pub(crate) fn encode(parts: &[Part]) -> Form {
     encode_with_boundary(parts, &boundary)
 }
 
-fn encode_with_boundary(parts: &[Part], boundary: &str) -> Form {
+fn encode_with_boundary(parts: &[Part], boundary: &str) -> Option<Form> {
     let size: usize = parts
         .iter()
         .map(|part| match &part.value {
             PartValue::Text(text) => text.len(),
             PartValue::File { bytes, .. } => bytes.len(),
+            _ => 0,
         })
         .sum();
     let mut body = BytesMut::with_capacity(size + 256 * (parts.len() + 1));
@@ -57,16 +59,17 @@ fn encode_with_boundary(parts: &[Part], boundary: &str) -> Form {
                 body.put_slice(b"\r\n\r\n");
                 body.put_slice(bytes);
             }
+            _ => return None,
         }
         body.put_slice(b"\r\n");
     }
     body.put_slice(b"--");
     body.put_slice(boundary.as_bytes());
     body.put_slice(b"--\r\n");
-    Form {
+    Some(Form {
         content_type: format!("multipart/form-data; boundary={boundary}"),
         body: body.freeze(),
-    }
+    })
 }
 
 /// Escapes a name for a quoted header parameter as browsers do (WHATWG's form encoding): `"`,
@@ -91,20 +94,17 @@ mod tests {
     #[test]
     fn a_form_has_one_delimited_part_per_field_and_a_closing_boundary() {
         let parts = vec![
-            Part {
-                name: "parent".into(),
-                value: PartValue::Text("1201234567890123".into()),
-            },
-            Part {
-                name: "file".into(),
-                value: PartValue::File {
+            Part::new("parent", PartValue::Text("1201234567890123".into())),
+            Part::new(
+                "file",
+                PartValue::File {
                     file_name: "Acme \"report\".pdf".into(),
                     content_type: "application/pdf\r\nX-Evil: 1".into(),
                     bytes: Bytes::from_static(b"%PDF-1.7\r\n\x00\xff"),
                 },
-            },
+            ),
         ];
-        let form = encode_with_boundary(&parts, "BOUNDARY");
+        let form = encode_with_boundary(&parts, "BOUNDARY").unwrap();
         assert_eq!(form.content_type, "multipart/form-data; boundary=BOUNDARY");
         let expected: &[u8] = b"--BOUNDARY\r\n\
 Content-Disposition: form-data; name=\"parent\"\r\n\r\n\
@@ -119,8 +119,8 @@ Content-Type: application/pdfX-Evil: 1\r\n\r\n\
 
     #[test]
     fn each_form_gets_a_fresh_boundary() {
-        let first = encode(&[]);
-        let second = encode(&[]);
+        let first = encode(&[]).unwrap();
+        let second = encode(&[]).unwrap();
         assert_ne!(first.content_type, second.content_type);
         assert!(first.body.ends_with(b"--\r\n"));
     }

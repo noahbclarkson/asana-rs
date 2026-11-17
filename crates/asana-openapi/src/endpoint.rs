@@ -14,8 +14,20 @@ use serde::{Deserialize, Serialize};
 
 use crate::scopes::Scope;
 
-/// The HTTP methods Asana's API uses.
+/// The HTTP methods Asana's API uses. Asana could add one (`PATCH`, say), so a `match` needs a
+/// catch-all arm; [`as_str`](Self::as_str) names any method.
+///
+/// ```compile_fail
+/// # use asana_openapi::endpoint::Method;
+/// fn is_read(method: Method) -> bool {
+///     match method {
+///         Method::Get => true,
+///         Method::Post | Method::Put | Method::Delete => false,
+///     }
+/// }
+/// ```
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+#[non_exhaustive]
 pub enum Method {
     /// `GET`
     Get,
@@ -41,6 +53,7 @@ impl Method {
 
 /// Where an operation's result sits in the response body.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[non_exhaustive]
 pub enum Envelope {
     /// Under `data`, Asana's usual envelope. A paged list also carries `next_page` beside it.
     Data,
@@ -64,8 +77,9 @@ pub enum RequestBody {
     Multipart(Vec<Part>),
 }
 
-/// One part of a multipart form.
+/// One part of a multipart form. Build one with [`Part::new`].
 #[derive(Clone, Debug)]
+#[non_exhaustive]
 pub struct Part {
     /// The form field's name.
     pub name: Cow<'static, str>,
@@ -73,8 +87,19 @@ pub struct Part {
     pub value: PartValue,
 }
 
+impl Part {
+    /// A field named `name` holding `value`.
+    pub fn new(name: impl Into<Cow<'static, str>>, value: PartValue) -> Self {
+        Self {
+            name: name.into(),
+            value,
+        }
+    }
+}
+
 /// The value of a multipart form field.
 #[derive(Clone)]
+#[non_exhaustive]
 pub enum PartValue {
     /// A plain text field.
     Text(String),

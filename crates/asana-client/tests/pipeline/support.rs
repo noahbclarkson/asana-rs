@@ -256,18 +256,15 @@ impl Endpoint for Upload {
 
     fn body(&self) -> Result<RequestBody, serde_json::Error> {
         Ok(RequestBody::Multipart(vec![
-            Part {
-                name: "parent".into(),
-                value: PartValue::Text(TASK.into()),
-            },
-            Part {
-                name: "file".into(),
-                value: PartValue::File {
+            Part::new("parent", PartValue::Text(TASK.into())),
+            Part::new(
+                "file",
+                PartValue::File {
                     file_name: "acme-plan.pdf".into(),
                     content_type: "application/pdf".into(),
                     bytes: Bytes::from_static(b"%PDF-1.7 made up"),
                 },
-            },
+            ),
         ]))
     }
 }
